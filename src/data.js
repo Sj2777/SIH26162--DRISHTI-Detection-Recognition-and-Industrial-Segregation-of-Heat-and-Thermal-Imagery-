@@ -600,62 +600,6 @@ export const MOCK_HOTSPOTS = [
     emissions_co2_kg_hr: 2840.0,
     emissions_ch4_kg_hr: 420.0,
     unregistered_flag: false
-  },
-  // 14. ISRO INSAT-3DR (74°E Geostationary Imager)
-  // Singrauli Super Thermal Coal Flaring Signature
-  {
-    id: 'INSAT-IN-2026-0504',
-    latitude: 24.1025,
-    longitude: 82.6685,
-    brightness: 338.5, // K (Channel MIR 3.9 μm)
-    bright_t31: 298.0, // K (TIR-1 10.8 μm)
-    frp: 55.4, // MW
-    scan: 4.0, // 4.0 km nadir footprint
-    track: 4.0,
-    acq_date: '2026-09-26',
-    acq_time: '10:30',
-    satellite: 'ISRO INSAT-3DR (74°E GEO Nadir)',
-    confidence: 'high',
-    daynight: 'D',
-    vnf_temp_k: 1180,
-    vnf_radiant_heat_wm2: 415.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 96.0,
-    facility_id: 'FAC-SIN-05',
-    facility_name: 'Singrauli - Vindhyachal Super Thermal Complex',
-    persistence_30d: 30,
-    persistence_90d: 90,
-    emissions_co2_kg_hr: 7510.0,
-    emissions_ch4_kg_hr: 145.0,
-    unregistered_flag: false
-  },
-  // 17. ISRO INSAT-3D (82°E Geostationary Imager)
-  // Simlipal National Park Active Wildfire Front
-  {
-    id: 'INSAT-IN-2026-0512',
-    latitude: 21.8500,
-    longitude: 86.3500,
-    brightness: 352.0, // K
-    bright_t31: 297.5,
-    frp: 86.4, // MW
-    scan: 4.0,
-    track: 4.0,
-    acq_date: '2026-09-26',
-    acq_time: '11:15',
-    satellite: 'ISRO INSAT-3D (82°E GEO Nadir)',
-    confidence: 'high',
-    daynight: 'D',
-    vnf_temp_k: 840,
-    vnf_radiant_heat_wm2: 460.0,
-    landcover: 'Forest',
-    classification: 'WILDFIRE_FOREST',
-    confidence_score: 98.0,
-    persistence_30d: 3,
-    persistence_90d: 4,
-    emissions_co2_kg_hr: 11700.0,
-    emissions_ch4_kg_hr: 780.0,
-    unregistered_flag: false
   }
 ];
 
