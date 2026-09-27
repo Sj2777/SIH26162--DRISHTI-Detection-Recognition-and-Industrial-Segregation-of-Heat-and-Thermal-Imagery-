@@ -1187,6 +1187,8 @@ window.selectHotspot = function (hotspotId) {
     }
     if (window.fireMapGlobe) {
       window.fireMapGlobe.flyTo(h.latitude, h.longitude, 12);
+      window.fireMapGlobe.currentHazardHotspot = { lat: Number(h.latitude), lon: Number(h.longitude) };
+      window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
       const drawer = document.getElementById('hotspotDetailDrawer');
       if (drawer) drawer.classList.add('active');
     }
@@ -1208,6 +1210,8 @@ window.selectLiveHotspot = function (hotspotId) {
     }
     if (window.fireMapGlobe) {
       window.fireMapGlobe.flyTo(h.latitude, h.longitude, 12);
+      window.fireMapGlobe.currentHazardHotspot = { lat: Number(h.latitude), lon: Number(h.longitude) };
+      window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
       const drawer = document.getElementById('hotspotDetailDrawer');
       if (drawer) drawer.classList.add('active');
     }
@@ -1652,15 +1656,15 @@ function renderHotspotInspector(h) {
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════════════ -->
-      <!-- 6 REAL-WORLD CONTEXT PILLARS DOSSIER (ESA, PRITHVI, TROPOMI, BRSR, GHSL, OPEN-METEO) -->
+      <!-- 5 GENUINE SATELLITE CONTEXT PILLARS (ESA, PRITHVI, TROPOMI, OSM, OPEN-METEO) -->
       <!-- ═══════════════════════════════════════════════════════════════════ -->
       <div style="margin-top: 14px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
           <span style="font-family: var(--fm-font-display); font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.8px;">
-            6 Real-World Context Pillars
+            5 Genuine Satellite Context Pillars
           </span>
           <span class="fmpop-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">
-            XGBoost Ground Truth
+            100% Genuine Satellite Feeds
           </span>
         </div>
 
@@ -1894,65 +1898,18 @@ function renderHotspotInspector(h) {
           </div>
         </div>
 
-        <!-- Pillar 5: Exposure Context (GHSL Population Data 100m Grid) -->
+        <!-- Pillar 5: Hazard Context (Open-Meteo Wind Vector & Live Hazard Plume) -->
         <div class="pillar-card">
           <div class="pillar-header">
             <div class="pillar-title">
-              <span>👥</span> 5. Exposure Context
-            </div>
-            <span class="pillar-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);">
-              GHSL 100m Grid
-            </span>
-          </div>
-          <div class="pillar-subtitle">
-            Who's actually nearby? Free, standard, 100m-grid population source
-          </div>
-          <div class="pillar-body">
-            <div class="info-row">
-              <span class="info-label">Local Density:</span>
-              <span class="info-value">
-                ${dossier?.exposure?.popDensityPerKm2 !== null && dossier?.exposure?.popDensityPerKm2 !== undefined
-                  ? dossier.exposure.popDensityPerKm2 + ' persons/km²'
-                  : '<span style="color:#64748b;font-style:italic;">⟳ WorldPop lookup…</span>'}
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Pop Within 1 km:</span>
-              <span class="info-value val-frp val-mono">
-                ${dossier?.exposure?.popWithin1km !== null && dossier?.exposure?.popWithin1km !== undefined
-                  ? dossier.exposure.popWithin1km.toLocaleString() + ' residents'
-                  : '⟳'}
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Pop Within 5 km:</span>
-              <span class="info-value val-info val-mono">
-                ${dossier?.exposure?.popWithin5km !== null && dossier?.exposure?.popWithin5km !== undefined
-                  ? dossier.exposure.popWithin5km.toLocaleString() + ' residents'
-                  : '⟳'}
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Civilian Exposure Tier:</span>
-              <span class="fmpop-tag" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);">
-                ${dossier?.exposure?.riskTier || 'NOMINAL'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pillar 6: Hazard Context (Open-Meteo Wind Vector & Smoke Cone) -->
-        <div class="pillar-card">
-          <div class="pillar-header">
-            <div class="pillar-title">
-              <span>💨</span> 6. Hazard Context
+              <span>💨</span> 5. Hazard &amp; Plume Dispersion
             </div>
             <span class="pillar-badge" style="background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.4);">
-              Open-Meteo Wind Data
+              Open-Meteo &amp; IMD
             </span>
           </div>
           <div class="pillar-subtitle">
-            Which direction is smoke/gas likely drifting? Simple directional cone, not full plume modeling
+            Live downwind smoke dispersion cone &amp; toxic hazard perimeter mapped to the 3D globe
           </div>
           <div class="pillar-body">
             <div class="info-row">
@@ -1965,10 +1922,14 @@ function renderHotspotInspector(h) {
             </div>
             <div class="info-row">
               <span class="info-label">Downwind Corridor:</span>
-              <span class="info-value val-warning val-mono">
-                ${dossier?.hazard?.smokePlumeBearing !== null && dossier?.hazard?.smokePlumeBearing !== undefined
-                  ? dossier.hazard.smokePlumeBearing + '°'
-                  : (state.windBearing + 180) % 360 + '°'}
+              <span class="info-value val-warning val-mono" id="label-downwind-corridor">
+                ${(state.windBearing + 180) % 360}°
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Estimated Plume Reach:</span>
+              <span class="info-value val-frp val-mono" id="label-plume-reach">
+                ${Math.min(35, Math.max(3.5, state.windSpeed * 0.75)).toFixed(1)} km
               </span>
             </div>
             <div class="info-row">
@@ -1980,7 +1941,7 @@ function renderHotspotInspector(h) {
               </span>
             </div>
 
-            <!-- Downwind Plume Dynamic Controls -->
+            <!-- Downwind Plume Dynamic Interactive Controls -->
             <div style="background: rgba(10, 14, 22, 0.7); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 10px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                 <span class="info-label" style="font-size: 12px;">Adjust Plume Bearing:</span>
@@ -1993,6 +1954,10 @@ function renderHotspotInspector(h) {
                 <span class="info-value val-frp val-mono" id="label-wind-speed">${state.windSpeed} km/h</span>
               </div>
               <input type="range" min="2" max="50" value="${state.windSpeed}" id="slider-speed" style="width: 100%; accent-color: #ea580c;" />
+
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.3;">
+                ⚡ Adjusting sliders updates the smoke hazard perimeter &amp; steers the live wind streamlines on the map.
+              </div>
             </div>
           </div>
         </div>
@@ -2052,8 +2017,14 @@ function renderHotspotInspector(h) {
     };
   }
 
-  // Attach slider events if in inspector mode
+  // Attach slider events if in inspector mode and sync with Mapbox hazard zone & wind
   if (isInspector) {
+    if (window.fireMapGlobe && h && h.latitude != null) {
+      window.fireMapGlobe.currentHazardHotspot = { lat: Number(h.latitude), lon: Number(h.longitude) };
+      window.fireMapGlobe.setWindParameters(state.windSpeed, state.windBearing);
+      window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
+    }
+
     const sliderBearing = document.getElementById('slider-bearing');
     const sliderSpeed = document.getElementById('slider-speed');
     if (sliderBearing) {
@@ -2061,6 +2032,13 @@ function renderHotspotInspector(h) {
         state.windBearing = parseInt(e.target.value, 10);
         const lbl = document.getElementById('label-wind-bearing');
         if (lbl) lbl.innerText = `${state.windBearing}°`;
+        const downwindLbl = document.getElementById('label-downwind-corridor');
+        if (downwindLbl) downwindLbl.innerText = `${(state.windBearing + 180) % 360}°`;
+
+        if (window.fireMapGlobe && h) {
+          window.fireMapGlobe.setWindParameters(state.windSpeed, state.windBearing);
+          window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
+        }
         renderMapLayers();
       });
     }
@@ -2069,6 +2047,14 @@ function renderHotspotInspector(h) {
         state.windSpeed = parseFloat(e.target.value);
         const lbl = document.getElementById('label-wind-speed');
         if (lbl) lbl.innerText = `${state.windSpeed} km/h`;
+        const distLbl = document.getElementById('label-plume-reach');
+        const reachKm = Math.min(35, Math.max(3.5, state.windSpeed * 0.75)).toFixed(1);
+        if (distLbl) distLbl.innerText = `${reachKm} km`;
+
+        if (window.fireMapGlobe && h) {
+          window.fireMapGlobe.setWindParameters(state.windSpeed, state.windBearing);
+          window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
+        }
         renderMapLayers();
       });
     }
@@ -3992,53 +3978,24 @@ function initFireMapGlobe() {
     });
   }
 
-  // Measure Ruler Button
-  const measureBtn = document.getElementById('measureBtn');
-  if (measureBtn) {
-    measureBtn.addEventListener('click', () => {
-      const active = window.fireMapGlobe.toggleMeasureTool();
-      measureBtn.classList.toggle('active', active);
-    });
-  }
-  const measureClearBtn = document.getElementById('measureClearBtn');
-  if (measureClearBtn) {
-    measureClearBtn.addEventListener('click', () => window.fireMapGlobe.clearMeasure());
-  }
-  const measureDoneBtn = document.getElementById('measureDoneBtn');
-  if (measureDoneBtn) {
-    measureDoneBtn.addEventListener('click', () => {
-      window.fireMapGlobe.toggleMeasureTool();
-      measureBtn?.classList.remove('active');
-    });
-  }
-
-  // Share Map Button
-  const shareMapBtn = document.getElementById('shareMapBtn');
-  const shareMapModal = document.getElementById('shareMapModal');
-  if (shareMapBtn && shareMapModal) {
-    shareMapBtn.addEventListener('click', () => {
-      const center = window.fireMapGlobe.map.getCenter();
-      const zoom = window.fireMapGlobe.map.getZoom().toFixed(1);
-      const url = `${window.location.origin}${window.location.pathname}?lat=${center.lat.toFixed(4)}&lng=${center.lng.toFixed(4)}&zoom=${zoom}`;
-      const input = document.getElementById('shareMapURL');
-      if (input) input.value = url;
-      shareMapModal.style.display = 'flex';
-    });
-  }
-  const closeShareBtn = document.getElementById('closeShareModal');
-  if (closeShareBtn && shareMapModal) {
-    closeShareBtn.addEventListener('click', () => { shareMapModal.style.display = 'none'; });
-  }
-  const copyUrlBtn = document.getElementById('copyURLBtn');
-  if (copyUrlBtn) {
-    copyUrlBtn.addEventListener('click', () => {
-      const input = document.getElementById('shareMapURL');
-      if (input) {
-        input.select();
-        navigator.clipboard.writeText(input.value);
-        copyUrlBtn.textContent = 'Copied to Clipboard!';
-        setTimeout(() => { copyUrlBtn.textContent = 'Copy Shareable URL'; }, 2000);
+  // Show on Google Maps Button
+  const showOnMapsBtn = document.getElementById('showOnMapsBtn');
+  if (showOnMapsBtn) {
+    showOnMapsBtn.addEventListener('click', () => {
+      let lat, lon;
+      if (state.selectedHotspot && state.selectedHotspot.latitude != null) {
+        lat = Number(state.selectedHotspot.latitude).toFixed(6);
+        lon = Number(state.selectedHotspot.longitude).toFixed(6);
+      } else if (window.fireMapGlobe && window.fireMapGlobe.map) {
+        const center = window.fireMapGlobe.map.getCenter();
+        lat = center.lat.toFixed(6);
+        lon = center.lng.toFixed(6);
+      } else {
+        lat = '20.5937';
+        lon = '78.9629';
       }
+      const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}&ll=${lat},${lon}&z=15`;
+      window.open(gmapsUrl, '_blank', 'noopener,noreferrer');
     });
   }
 

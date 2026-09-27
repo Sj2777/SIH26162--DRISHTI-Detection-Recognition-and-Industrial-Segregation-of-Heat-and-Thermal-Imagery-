@@ -92,14 +92,9 @@
 
       <div class="toolbar-sep" aria-hidden="true"></div>
 
-      <!-- Measure Distance Button -->
-      <button class="toolbar-btn" id="measureBtn" data-tip="Measure Distance" aria-label="Measure Distance">
-        <i class="fa-solid fa-ruler"></i>
-      </button>
-
-      <!-- Share Map Button -->
-      <button class="toolbar-btn" id="shareMapBtn" data-tip="Share Map" aria-label="Share Map">
-        <i class="fa-solid fa-share-from-square"></i>
+      <!-- Show on Google Maps Button -->
+      <button class="toolbar-btn" id="showOnMapsBtn" data-tip="Show on Google Maps" aria-label="Show on Google Maps">
+        <i class="fa-solid fa-map-location-dot"></i>
       </button>
 
       <div class="toolbar-sep" aria-hidden="true"></div>
@@ -234,19 +229,7 @@
       </div>
     </div>
 
-    <!-- Measure Distance Panel -->
-    <div id="measurePanel" class="measure-panel" role="status" aria-label="Distance Measurement">
-      <div class="measure-readout">
-        <span id="measureKm">0.00 km</span>
-        <span style="color:#64748b;font-weight:400;font-size:12px;">/</span>
-        <span id="measureMi" style="color:#94a3b8;font-size:13px;">0.00 mi</span>
-      </div>
-      <div class="measure-hint">Click on globe to measure geodesic distance</div>
-      <div class="measure-actions">
-        <button type="button" class="measure-btn-sm" id="measureClearBtn">Clear</button>
-        <button type="button" class="measure-btn-sm measure-btn-done" id="measureDoneBtn">Done</button>
-      </div>
-    </div>
+
 
     <!-- Map Legend Panel -->
     <div id="legendPanel" class="fm-panel" style="top: 60px; right: 70px; width: 310px;" aria-label="Map Legend">

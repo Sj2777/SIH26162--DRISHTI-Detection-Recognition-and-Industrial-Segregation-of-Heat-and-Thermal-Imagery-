@@ -23,9 +23,11 @@ export class FireMapGlobe {
     this.isGlobeProjection = true;
     this.currentBasemap = 'satellite';
     this.isWindActive = true;
-    this.isMeasuring = false;
-    this.measurePoints = [];
-    this.measureLineFeature = null;
+    this.windSpeedKmh = 14;
+    this.windBearingDeg = 240;
+    this.windParticles = [];
+    this.currentHazardHotspot = null;
+    this.savedTerrain = null;
     this.windAnimationId = null;
     this.satellites = [
       { id: 'sat-noaa20', name: 'NOAA-20 (VIIRS)', color: '#34d399', inclination: 98.7, periodMin: 101, offset: 0.15 },
@@ -59,9 +61,13 @@ export class FireMapGlobe {
 
     this.map.on('style.load', () => {
       this.configureAtmosphere();
+      this.initHazardZoneLayer();
       this.initHotspotLayers();
       this.initSatelliteOrbits();
-      this.initMeasureSource();
+      this.updateHotspots(this.activeHotspots);
+      if (this.currentHazardHotspot) {
+        this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
+      }
     });
 
     this.initWindCanvas();
@@ -166,22 +172,15 @@ export class FireMapGlobe {
       source: 'fire-hotspots',
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': [
-          'match', ['get', 'fire_type'],
-          'THERMAL_ANOMALY_BLOWOUT', '#ef4444',
-          'INDUSTRIAL_FLARE', '#f97316',
-          'COAL_MINE_FIRE', '#eab308',
-          'AGRICULTURAL_STUBBLE', '#84cc16',
-          '#ff4500' // default wildfire
-        ],
+        'circle-color': ['get', 'color'],
         'circle-radius': [
           'interpolate', ['linear'], ['get', 'frp'],
-          0, 8,
-          50, 14,
-          200, 24
+          0, 9,
+          50, 16,
+          200, 26
         ],
-        'circle-opacity': 0.4,
-        'circle-blur': 0.5
+        'circle-opacity': 0.45,
+        'circle-blur': 0.45
       }
     });
 
@@ -192,63 +191,67 @@ export class FireMapGlobe {
       source: 'fire-hotspots',
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': [
-          'match', ['get', 'fire_type'],
-          'THERMAL_ANOMALY_BLOWOUT', '#ef4444',
-          'INDUSTRIAL_FLARE', '#f97316',
-          'COAL_MINE_FIRE', '#eab308',
-          'AGRICULTURAL_STUBBLE', '#84cc16',
-          '#ff4500'
-        ],
+        'circle-color': ['get', 'color'],
         'circle-radius': [
           'interpolate', ['linear'], ['get', 'frp'],
-          0, 4.5,
-          50, 7.5,
-          200, 12
+          0, 5,
+          50, 8,
+          200, 13
         ],
-        'circle-stroke-width': 1.5,
+        'circle-stroke-width': 1.8,
         'circle-stroke-color': '#ffffff'
       }
     });
 
-    // Click cluster to zoom in
-    this.map.on('click', 'clusters', (e) => {
-      const features = this.map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+    // Click cluster: decisively zoom in to break apart points in one smooth animation
+    const handleClusterClick = (e) => {
+      const features = this.map.queryRenderedFeatures(e.point, { layers: ['clusters', 'clusters-glow'] });
+      if (!features || !features.length) return;
       const clusterId = features[0].properties.cluster_id;
+      const coords = features[0].geometry.coordinates;
       this.map.getSource('fire-hotspots').getClusterExpansionZoom(clusterId, (err, zoom) => {
         if (err) return;
-        this.map.easeTo({
-          center: features[0].geometry.coordinates,
-          zoom: zoom + 0.5
+        const targetZoom = Math.max(zoom + 1.8, 12);
+        this.map.flyTo({
+          center: coords,
+          zoom: targetZoom,
+          speed: 1.4,
+          curve: 1.1,
+          essential: true
         });
       });
-    });
+    };
+    this.map.on('click', 'clusters', handleClusterClick);
+    this.map.on('click', 'clusters-glow', handleClusterClick);
 
-    // Click individual hotspot for FireMap popup
-    this.map.on('click', 'unclustered-point', (e) => {
-      if (!e.features || !e.features[0]) return;
-      const f = e.features[0];
+    // Click individual hotspot: smoothly fly to point and open detailed dossier
+    const handlePointClick = (e) => {
+      const features = this.map.queryRenderedFeatures(e.point, { layers: ['unclustered-point', 'unclustered-pulse'] });
+      if (!features || !features.length) return;
+      const f = features[0];
       const p = f.properties;
       const coords = f.geometry.coordinates.slice();
 
-      const isMine = p.fire_type === 'MINE' || (p.facility_name && (p.facility_name.includes('Mine') || p.facility_name.includes('Coal') || p.facility_name.includes('Colliery')));
-      const typeColor = isMine ? '#a855f7' :
-                        p.fire_type === 'INDUSTRIAL_HIGH_ALERT' ? '#ef4444' :
-                        p.fire_type === 'FACTORY' ? '#f97316' :
-                        p.fire_type === 'CROP' ? '#b45309' :
-                        p.fire_type === 'WILDFIRE' ? '#22c55e' :
-                        p.fire_type === 'HEAT_RING' ? '#eab308' : '#64748b';
-      const typeLabel = isMine ? 'MINE (OPEN-CAST)' : (p.fire_type || 'THERMAL HOTSPOT').replace(/_/g, ' ');
-      const title = p.facility_name || (isMine ? 'Open-Cast Coal Mine' : (p.region ? `${p.region} Thermal Detection` : 'Active Thermal Detection'));
-      const operator = p.operator || (isMine ? 'Coal India Limited / Regional Subsidiary' : 'Natural / Rural Area');
+      // Automatically zoom into point
+      this.map.flyTo({
+        center: coords,
+        zoom: Math.max(this.map.getZoom(), 13.5),
+        speed: 1.2,
+        essential: true
+      });
+
+      const typeColor = p.color || '#22c55e';
+      const typeLabel = (p.fire_type || 'THERMAL HOTSPOT').replace(/_/g, ' ');
+      const title = p.facility_name || (typeColor === '#a855f7' ? 'Open-Cast Coal Mine' : `${typeLabel} Detection`);
+      const operator = p.operator || (typeColor === '#a855f7' ? 'Coal India Limited' : 'Natural / Rural Area');
 
       const html = `
         <div style="min-width: 270px; padding: 2px;">
           <div class="fmpop-header">
-            <span class="fmpop-tag" style="background: ${typeColor}20; color: ${typeColor}; border: 1px solid ${typeColor}70;">
+            <span class="fmpop-tag" style="background: ${typeColor}25; color: ${typeColor}; border: 1px solid ${typeColor}80; font-weight: 700;">
               ${typeLabel}
             </span>
-            <span style="font-size: 11px; color: #94a3b8; font-family: var(--fm-font-mono);">${p.satellite || 'VIIRS Suomi-NPP'}</span>
+            <span style="font-size: 11px; color: #94a3b8; font-family: var(--fm-font-mono);">${p.satellite || 'VIIRS NOAA-20'}</span>
           </div>
           <div class="fmpop-title">
             ${title}
@@ -267,7 +270,7 @@ export class FireMapGlobe {
           </div>
           <div class="info-row">
             <span class="info-label">Operator:</span>
-            <span class="info-value" style="color: ${isMine ? '#c084fc' : '#ffffff'}; font-weight: 600;">${operator}</span>
+            <span class="info-value" style="color: ${typeColor}; font-weight: 600;">${operator}</span>
           </div>
           <button class="fmpop-btn" id="fmpop-inspect-btn">
             Inspect Full Dossier &rarr;
@@ -280,53 +283,85 @@ export class FireMapGlobe {
         .setHTML(html)
         .addTo(this.map);
 
+      // Update active hazard plume for this selected hotspot
+      this.currentHazardHotspot = { lat: Number(coords[1]), lon: Number(coords[0]) };
+      this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
+
       setTimeout(() => {
         const btn = document.getElementById('fmpop-inspect-btn');
         if (btn) {
           btn.addEventListener('click', () => {
-            const raw = this.activeHotspots.find(h => h.id === p.id) || p;
+            const raw = this.activeHotspots.find(h => String(h.id) === String(p.id)) || p;
             this.onHotspotInspect(raw);
           });
         }
       }, 50);
 
-      const raw = this.activeHotspots.find(h => h.id === p.id) || p;
+      const raw = this.activeHotspots.find(h => String(h.id) === String(p.id)) || p;
       this.onHotspotSelect(raw);
-    });
+    };
+
+    this.map.on('click', 'unclustered-point', handlePointClick);
+    this.map.on('click', 'unclustered-pulse', handlePointClick);
 
     // Pointer cursors
     this.map.on('mouseenter', 'clusters', () => { this.map.getCanvas().style.cursor = 'pointer'; });
     this.map.on('mouseleave', 'clusters', () => { this.map.getCanvas().style.cursor = ''; });
+    this.map.on('mouseenter', 'clusters-glow', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+    this.map.on('mouseleave', 'clusters-glow', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'unclustered-point', () => { this.map.getCanvas().style.cursor = 'pointer'; });
     this.map.on('mouseleave', 'unclustered-point', () => { this.map.getCanvas().style.cursor = ''; });
+    this.map.on('mouseenter', 'unclustered-pulse', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+    this.map.on('mouseleave', 'unclustered-pulse', () => { this.map.getCanvas().style.cursor = ''; });
   }
 
-  // Update hotspots dataset
+  // Update hotspots dataset with authentic category colors
   updateHotspots(hotspots = []) {
     this.activeHotspots = hotspots;
     const source = this.map && this.map.getSource('fire-hotspots');
     if (!source) return;
 
-    const features = hotspots.map(h => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [Number(h.longitude), Number(h.latitude)]
-      },
-      properties: {
-        id: h.id,
-        latitude: h.latitude,
-        longitude: h.longitude,
-        frp: Number(h.frp || h.brightness || 10),
-        confidence: h.confidence || 'high',
-        satellite: h.satellite || 'VIIRS NOAA-20',
-        fire_type: h.fire_type || 'WILDFIRE',
-        facility_name: h.facility_name || 'Active Thermal Detection',
-        operator: h.operator || 'Natural / Rural Area',
-        acq_date: h.acq_date || h.date || new Date().toISOString().slice(0, 10),
-        acq_time: h.acq_time || '1200'
+    const features = hotspots.map(h => {
+      const typeKey = (h.fire_type || h.classification || 'WILDFIRE').toUpperCase();
+      let color = '#22c55e'; // Default Wildfire green
+      if (typeKey.includes('MINE') || typeKey.includes('COLLIERY')) {
+        color = '#a855f7'; // Purple - Coal Mine / Pit Mine
+      } else if (typeKey.includes('ALERT') || typeKey.includes('ACCIDENT')) {
+        color = '#ef4444'; // Red - Industrial High Alert
+      } else if (typeKey.includes('FACTORY') || typeKey.includes('INDUSTR')) {
+        color = '#f97316'; // Orange - Factory / Refinery Flare
+      } else if (typeKey.includes('CROP') || typeKey.includes('STUBBLE') || typeKey.includes('AGRI')) {
+        color = '#b45309'; // Brown / Amber - Crop Stubble
+      } else if (typeKey.includes('HEAT') || typeKey.includes('RING')) {
+        color = '#eab308'; // Yellow - Heat Ring
+      } else if (typeKey.includes('WILD') || typeKey.includes('FOREST')) {
+        color = '#22c55e'; // Green - Forest Wildfire
+      } else if (h.color) {
+        color = h.color;
       }
-    }));
+
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [Number(h.longitude), Number(h.latitude)]
+        },
+        properties: {
+          id: h.id,
+          latitude: h.latitude,
+          longitude: h.longitude,
+          frp: Number(h.frp || h.brightness || 10),
+          confidence: h.confidence || 'high',
+          satellite: h.satellite || 'VIIRS NOAA-20',
+          fire_type: h.fire_type || (color === '#a855f7' ? 'MINE' : 'WILDFIRE'),
+          color: color,
+          facility_name: h.facility_name || (color === '#a855f7' ? 'Open-Cast Coal Mine' : 'Active Thermal Detection'),
+          operator: h.operator || (color === '#a855f7' ? 'Coal India Limited' : 'Natural / Rural Area'),
+          acq_date: h.acq_date || h.date || new Date().toISOString().slice(0, 10),
+          acq_time: h.acq_time || '1200'
+        }
+      };
+    });
 
     source.setData({
       type: 'FeatureCollection',
@@ -442,24 +477,28 @@ export class FireMapGlobe {
 
     // Streamline particles
     const particleCount = 220;
-    const particles = [];
+    this.windParticles = [];
+    const driftDeg = (Number(this.windBearingDeg) + 180) % 360;
+    const baseAngle = ((driftDeg - 90) * Math.PI) / 180;
+    const baseSpeed = Math.max(0.6, (Number(this.windSpeedKmh) / 12.0) * 2.2);
+
     for (let i = 0; i < particleCount; i++) {
-      particles.push({
+      this.windParticles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
         length: 12 + Math.random() * 18,
-        speed: 1.2 + Math.random() * 2.4,
-        angle: (240 + (Math.random() * 40 - 20)) * Math.PI / 180, // SW-NE monsoon drift
-        alpha: 0.1 + Math.random() * 0.4
+        speed: baseSpeed * (0.8 + Math.random() * 0.4),
+        angle: baseAngle + (Math.random() * 0.35 - 0.175),
+        alpha: 0.12 + Math.random() * 0.45
       });
     }
 
     const animate = () => {
       if (this.isWindActive && canvas.classList.contains('active')) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1.3;
 
-        particles.forEach(p => {
+        this.windParticles.forEach(p => {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           const endX = p.x + Math.cos(p.angle) * p.length;
@@ -484,6 +523,25 @@ export class FireMapGlobe {
     animate();
   }
 
+  setWindParameters(speedKmh, bearingDeg) {
+    this.windSpeedKmh = Number(speedKmh) || 14;
+    this.windBearingDeg = Number(bearingDeg) || 240;
+    const driftDeg = (this.windBearingDeg + 180) % 360;
+    const screenAngle = ((driftDeg - 90) * Math.PI) / 180;
+    const baseSpeed = Math.max(0.6, (this.windSpeedKmh / 12.0) * 2.2);
+
+    if (this.windParticles) {
+      this.windParticles.forEach(p => {
+        p.speed = baseSpeed * (0.8 + Math.random() * 0.4);
+        p.angle = screenAngle + (Math.random() * 0.35 - 0.175);
+      });
+    }
+
+    if (this.currentHazardHotspot) {
+      this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
+    }
+  }
+
   toggleWind() {
     this.isWindActive = !this.isWindActive;
     const canvas = document.getElementById('wind-canvas');
@@ -494,120 +552,135 @@ export class FireMapGlobe {
     return this.isWindActive;
   }
 
-  // 5. Geodesic Distance Measurement Tool
-  initMeasureSource() {
-    if (this.map.getSource('measure-source')) return;
+  // 5. Downwind Hazard Dispersion Plume Layer (Pillar 6 Integration)
+  initHazardZoneLayer() {
+    if (this.map.getSource('hazard-zone-source')) return;
 
-    this.map.addSource('measure-source', {
+    this.map.addSource('hazard-zone-source', {
       type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: []
+      data: { type: 'FeatureCollection', features: [] }
+    });
+
+    this.map.addLayer({
+      id: 'hazard-zone-fill',
+      type: 'fill',
+      source: 'hazard-zone-source',
+      paint: {
+        'fill-color': [
+          'interpolate', ['linear'], ['get', 'speed'],
+          5, 'rgba(234, 179, 8, 0.22)',
+          25, 'rgba(239, 68, 68, 0.30)'
+        ],
+        'fill-opacity': 0.8
       }
     });
 
     this.map.addLayer({
-      id: 'measure-line',
+      id: 'hazard-zone-line',
       type: 'line',
-      source: 'measure-source',
+      source: 'hazard-zone-source',
       paint: {
-        'line-color': '#38bdf8',
-        'line-width': 2.5,
-        'line-dasharray': [2, 2]
+        'line-color': '#ef4444',
+        'line-width': 2.2,
+        'line-dasharray': [3, 2]
       }
     });
 
     this.map.addLayer({
-      id: 'measure-points',
-      type: 'circle',
-      source: 'measure-source',
-      filter: ['==', '$type', 'Point'],
+      id: 'hazard-zone-label',
+      type: 'symbol',
+      source: 'hazard-zone-source',
+      layout: {
+        'text-field': '{label}',
+        'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
+        'text-size': 11,
+        'text-offset': [0, 1.2],
+        'text-anchor': 'top'
+      },
       paint: {
-        'circle-radius': 5,
-        'circle-color': '#ff4500',
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff'
+        'text-color': '#fca5a5',
+        'text-halo-color': '#000000',
+        'text-halo-width': 1.5
       }
     });
-
-    this.map.on('click', (e) => {
-      if (!this.isMeasuring) return;
-      this.addMeasurePoint(e.lngLat);
-    });
   }
 
-  toggleMeasureTool() {
-    this.isMeasuring = !this.isMeasuring;
-    const panel = document.getElementById('measurePanel');
-    if (this.isMeasuring) {
-      if (panel) panel.classList.add('active');
-      this.measurePoints = [];
-      this.updateMeasureGeometry();
-    } else {
-      if (panel) panel.classList.remove('active');
-      this.clearMeasure();
-    }
-    return this.isMeasuring;
-  }
-
-  addMeasurePoint(lngLat) {
-    this.measurePoints.push([lngLat.lng, lngLat.lat]);
-    this.updateMeasureGeometry();
-  }
-
-  clearMeasure() {
-    this.measurePoints = [];
-    this.updateMeasureGeometry();
-    const kmEl = document.getElementById('measureKm');
-    const miEl = document.getElementById('measureMi');
-    if (kmEl) kmEl.textContent = '0.00 km';
-    if (miEl) miEl.textContent = '0.00 mi';
-  }
-
-  updateMeasureGeometry() {
-    const src = this.map && this.map.getSource('measure-source');
+  updateHazardZone(lat, lon, speedKmh = 14, bearingDeg = 240) {
+    const src = this.map && this.map.getSource('hazard-zone-source');
     if (!src) return;
 
-    const features = [];
-    if (this.measurePoints.length >= 2) {
-      features.push({
-        type: 'Feature',
-        geometry: { type: 'LineString', coordinates: this.measurePoints },
-        properties: {}
-      });
+    if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) {
+      src.setData({ type: 'FeatureCollection', features: [] });
+      return;
     }
-    this.measurePoints.forEach(pt => {
-      features.push({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: pt },
-        properties: {}
-      });
+
+    // Downwind drift direction is opposite of meteorological wind direction
+    const driftDeg = (Number(bearingDeg) + 180) % 360;
+
+    // Plume distance in km scaled by wind speed (3.5 km to 35 km)
+    const distKm = Math.min(35, Math.max(3.5, speedKmh * 0.75));
+
+    // Plume expansion angle: higher wind speed -> tighter cone; lower wind -> wider dispersion
+    const halfAngle = Math.max(12, Math.min(38, 45 - (speedKmh * 0.7)));
+
+    // Geodesic destination point calculation helper
+    const R = 6371; // Earth radius in km
+    const toRad = Math.PI / 180;
+    const toDeg = 180 / Math.PI;
+    const lat1 = lat * toRad;
+    const lon1 = lon * toRad;
+
+    const getCoordAt = (bearingAngleDeg, distanceKm) => {
+      const bRad = bearingAngleDeg * toRad;
+      const dRad = distanceKm / R;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dRad) + Math.cos(lat1) * Math.sin(dRad) * Math.cos(bRad));
+      const lon2 = lon1 + Math.atan2(Math.sin(bRad) * Math.sin(dRad) * Math.cos(lat1), Math.cos(dRad) - Math.sin(lat1) * Math.sin(lat2));
+      return [lon2 * toDeg, lat2 * toDeg];
+    };
+
+    // Construct cone arc
+    const arcCoords = [];
+    const steps = 24;
+    const startAngle = driftDeg - halfAngle;
+    const endAngle = driftDeg + halfAngle;
+
+    for (let i = 0; i <= steps; i++) {
+      const a = startAngle + (endAngle - startAngle) * (i / steps);
+      arcCoords.push(getCoordAt(a, distKm));
+    }
+
+    const polygonRing = [
+      [lon, lat],
+      ...arcCoords,
+      [lon, lat]
+    ];
+
+    const feature = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [polygonRing]
+      },
+      properties: {
+        speed: speedKmh,
+        bearing: bearingDeg,
+        distKm: distKm.toFixed(1),
+        label: `🚨 DOWNWIND HAZARD ZONE (${distKm.toFixed(1)} km @ ${speedKmh} km/h)`
+      }
+    };
+
+    src.setData({
+      type: 'FeatureCollection',
+      features: [feature]
     });
-
-    src.setData({ type: 'FeatureCollection', features });
-
-    // Calculate distance
-    let totalDistKm = 0;
-    for (let i = 0; i < this.measurePoints.length - 1; i++) {
-      totalDistKm += this.calcHaversine(this.measurePoints[i], this.measurePoints[i+1]);
-    }
-    const totalDistMi = totalDistKm * 0.621371;
-
-    const kmEl = document.getElementById('measureKm');
-    const miEl = document.getElementById('measureMi');
-    if (kmEl) kmEl.textContent = `${totalDistKm.toFixed(2)} km`;
-    if (miEl) miEl.textContent = `${totalDistMi.toFixed(2)} mi`;
   }
 
-  calcHaversine(pt1, pt2) {
-    const R = 6371; // km
-    const dLat = (pt2[1] - pt1[1]) * Math.PI / 180;
-    const dLon = (pt2[0] - pt1[0]) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(pt1[1] * Math.PI / 180) * Math.cos(pt2[1] * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
+  // Safe measurement stubs for backward-compatibility
+  initMeasureSource() {}
+  toggleMeasureTool() { return false; }
+  addMeasurePoint() {}
+  clearMeasure() {}
+  updateMeasureGeometry() {}
 
   // 6. Basemap & Projection Switcher
   setBasemap(styleKey) {
@@ -622,18 +695,44 @@ export class FireMapGlobe {
       this.map.setStyle(styles[styleKey]);
       this.map.once('style.load', () => {
         this.configureAtmosphere();
+        this.initHazardZoneLayer();
         this.initHotspotLayers();
         this.initSatelliteOrbits();
-        this.initMeasureSource();
         this.updateHotspots(this.activeHotspots);
+        if (this.currentHazardHotspot) {
+          this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
+        }
       });
     }
   }
 
   setProjection(isGlobe) {
     this.isGlobeProjection = isGlobe;
-    this.map.setProjection(isGlobe ? 'globe' : 'mercator');
-    if (isGlobe) this.configureAtmosphere();
+    if (isGlobe) {
+      this.map.setProjection('globe');
+      this.configureAtmosphere();
+      if (this.savedTerrain) {
+        try {
+          this.map.setTerrain(this.savedTerrain);
+        } catch (e) {
+          console.warn('[FireMap] Error restoring terrain:', e);
+        }
+      }
+    } else {
+      // 2D Flat Mercator mode:
+      // Remove 3D DEM terrain mesh so mountains and valleys are completely flat
+      try {
+        const currentTerrain = this.map.getTerrain();
+        if (currentTerrain) {
+          this.savedTerrain = currentTerrain;
+        }
+        this.map.setTerrain(null);
+      } catch (e) {
+        console.warn('[FireMap] Error disabling terrain for 2D mode:', e);
+      }
+      this.map.setProjection('mercator');
+      this.map.easeTo({ pitch: 0, bearing: 0, duration: 600 });
+    }
   }
 
   flyToIndia() {
