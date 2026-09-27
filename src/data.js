@@ -241,416 +241,285 @@ export const MOCK_FACILITIES = [
     contact_officer: 'Bulandshahr Regional Officer UPPCB (Inspection Priority)',
     phone: '+91 573 228 1900',
     downwind_population_1km: 9800
+  },
+  {
+    id: 'FAC-MINE-WCL-01',
+    name: 'Inder Coal Mine (Kamptee Area)',
+    type: 'mine',
+    operator: 'Western Coalfields Limited (Coal India Ltd)',
+    state: 'Maharashtra',
+    district: 'Nagpur',
+    lat: 21.2450,
+    lon: 79.2150,
+    boundary: [
+      [21.257, 79.203],
+      [21.257, 79.227],
+      [21.233, 79.227],
+      [21.233, 79.203],
+      [21.257, 79.203]
+    ],
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'Western Coalfields Limited', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 1,
+    contact_officer: 'WCL Kamptee Area General Manager',
+    phone: '+91 7109 282 201',
+    downwind_population_1km: 1200
+  },
+  {
+    id: 'FAC-MINE-WCL-02',
+    name: 'Kamptee Colliery Open-Cast Mine',
+    type: 'mine',
+    operator: 'Western Coalfields Limited (Coal India Ltd)',
+    state: 'Maharashtra',
+    district: 'Nagpur',
+    lat: 21.2380,
+    lon: 79.2080,
+    boundary: [
+      [21.250, 79.196],
+      [21.250, 79.220],
+      [21.226, 79.220],
+      [21.226, 79.196],
+      [21.250, 79.196]
+    ],
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'Western Coalfields Limited', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'WCL Safety Officer',
+    phone: '+91 7109 282 205',
+    downwind_population_1km: 2400
+  },
+  {
+    id: 'FAC-MINE-WCL-03',
+    name: 'Gondegaon Open-Cast Coal Mine',
+    type: 'mine',
+    operator: 'Western Coalfields Limited (Coal India Ltd)',
+    state: 'Maharashtra',
+    district: 'Nagpur',
+    lat: 21.2580,
+    lon: 79.2050,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'Western Coalfields Limited', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'WCL Sub-Area Manager',
+    phone: '+91 7109 282 210',
+    downwind_population_1km: 800
+  },
+  {
+    id: 'FAC-MINE-WCL-05',
+    name: 'Umrer Open-Cast Coal Mine',
+    type: 'mine',
+    operator: 'Western Coalfields Limited (Coal India Ltd)',
+    state: 'Maharashtra',
+    district: 'Nagpur',
+    lat: 20.8450,
+    lon: 79.3250,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'Western Coalfields Limited', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'WCL Umrer Area Manager',
+    phone: '+91 7116 244 321',
+    downwind_population_1km: 1500
+  },
+  {
+    id: 'FAC-MINE-WCL-06',
+    name: 'Durgapur Open-Cast Mine Chandrapur',
+    type: 'mine',
+    operator: 'Western Coalfields Limited (Coal India Ltd)',
+    state: 'Maharashtra',
+    district: 'Chandrapur',
+    lat: 19.9950,
+    lon: 79.2980,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'Western Coalfields Limited', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'WCL Chandrapur CGMT',
+    phone: '+91 7172 250 110',
+    downwind_population_1km: 3200
+  },
+  {
+    id: 'FAC-MINE-SECL-01',
+    name: 'Gevra Mega Open-Cast Coal Mine (Korba)',
+    type: 'mine',
+    operator: 'South Eastern Coalfields Limited (Coal India Ltd)',
+    state: 'Chhattisgarh',
+    district: 'Korba',
+    lat: 22.3450,
+    lon: 82.5950,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'SECL', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'SECL Gevra Project Officer',
+    phone: '+91 7759 275 000',
+    downwind_population_1km: 4500
+  },
+  {
+    id: 'FAC-MINE-BCCL-01',
+    name: 'Kusunda Coal Mine (Jharia Coalfield)',
+    type: 'mine',
+    operator: 'Bharat Coking Coal Limited (Coal India Ltd)',
+    state: 'Jharkhand',
+    district: 'Dhanbad',
+    lat: 23.7750,
+    lon: 86.4150,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'BCCL', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'BCCL Kusunda Area GM',
+    phone: '+91 326 220 2000',
+    downwind_population_1km: 18000
+  },
+  {
+    id: 'FAC-MINE-NCL-01',
+    name: 'Jayant Open-Cast Coal Mine (Singrauli)',
+    type: 'mine',
+    operator: 'Northern Coalfields Limited (Coal India Ltd)',
+    state: 'Madhya Pradesh',
+    district: 'Singrauli',
+    lat: 24.1250,
+    lon: 82.6450,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'NCL', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'NCL Jayant Project General Manager',
+    phone: '+91 7805 266 220',
+    downwind_population_1km: 6200
+  },
+  {
+    id: 'FAC-MINE-MCL-01',
+    name: 'Bhubaneswari Open-Cast Mine (Talcher)',
+    type: 'mine',
+    operator: 'Mahanadi Coalfields Limited (Coal India Ltd)',
+    state: 'Odisha',
+    district: 'Angul',
+    lat: 20.9650,
+    lon: 85.1750,
+    osm_tags: { landuse: 'quarry', industrial: 'mine', resource: 'coal', operator: 'MCL', cpcb_category: 'Red' },
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'MCL Bhubaneswari OCP Manager',
+    phone: '+91 6760 268 000',
+    downwind_population_1km: 3800
   }
 ];
 
-export const MOCK_HOTSPOTS = [
-  // 1. Critical Industrial Anomaly at Jamnagar
-  {
-    id: 'VIIRS-IN-2026-0891',
-    latitude: 22.3528,
-    longitude: 69.8452,
-    brightness: 382.4, // K
-    bright_t31: 298.1,
-    frp: 64.8, // MW
-    scan: 0.38,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '01:42',
-    satellite: 'NOAA-20',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1740, // Hydrocarbon flare blowout
-    vnf_radiant_heat_wm2: 489.2,
-    landcover: 'Built-up / Industrial',
-    classification: 'INDUSTRIAL_ANOMALY_ACCIDENT',
-    confidence_score: 96.8,
-    facility_id: 'FAC-JAM-01',
-    facility_name: 'Reliance Jamnagar Mega-Refinery Complex',
-    persistence_30d: 29,
-    persistence_90d: 87,
-    emissions_co2_kg_hr: 8780.0,
-    emissions_ch4_kg_hr: 312.4,
-    unregistered_flag: false,
-    is_flagged: true
-  },
-  // 2. Normal Industrial Flare at Jamnagar Marine Terminal
-  {
-    id: 'VIIRS-IN-2026-0892',
-    latitude: 22.3640,
-    longitude: 69.8380,
-    brightness: 334.2,
-    bright_t31: 294.0,
-    frp: 13.5,
-    scan: 0.38,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '01:42',
-    satellite: 'NOAA-20',
-    confidence: 'nominal',
-    daynight: 'N',
-    vnf_temp_k: 1480,
-    vnf_radiant_heat_wm2: 104.5,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 94.2,
-    facility_id: 'FAC-JAM-01',
-    facility_name: 'Reliance Jamnagar Mega-Refinery Complex',
-    persistence_30d: 28,
-    persistence_90d: 84,
-    emissions_co2_kg_hr: 1830.0,
-    emissions_ch4_kg_hr: 65.0,
-    unregistered_flag: false
-  },
-  // 3. NTPC Dadri Super Thermal Power Station
-  {
-    id: 'VIIRS-IN-2026-0842',
-    latitude: 28.5995,
-    longitude: 77.6080,
-    brightness: 341.0,
-    bright_t31: 296.8,
-    frp: 31.2,
-    scan: 0.40,
-    track: 0.37,
-    acq_date: '2026-09-25',
-    acq_time: '02:05',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1120,
-    vnf_radiant_heat_wm2: 245.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 97.4,
-    facility_id: 'FAC-DAD-02',
-    facility_name: 'NTPC Dadri Super Thermal Power Station',
-    persistence_30d: 30,
-    persistence_90d: 90,
-    emissions_co2_kg_hr: 4220.0,
-    emissions_ch4_kg_hr: 82.0,
-    unregistered_flag: false
-  },
-  // 4. Tata Steel Jamshedpur Works
-  {
-    id: 'VIIRS-IN-2026-0810',
-    latitude: 22.8046,
-    longitude: 86.2029,
-    brightness: 356.1,
-    bright_t31: 295.3,
-    frp: 44.5,
-    scan: 0.39,
-    track: 0.38,
-    acq_date: '2026-09-25',
-    acq_time: '02:18',
-    satellite: 'NOAA-21',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1350,
-    vnf_radiant_heat_wm2: 338.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 98.1,
-    facility_id: 'FAC-TAT-03',
-    facility_name: 'Tata Steel Jamshedpur Works',
-    persistence_30d: 30,
-    persistence_90d: 89,
-    emissions_co2_kg_hr: 6030.0,
-    emissions_ch4_kg_hr: 120.0,
-    unregistered_flag: false
-  },
-  // 5. IOCL Paradip Coastal Refinery
-  {
-    id: 'VIIRS-IN-2026-0815',
-    latitude: 20.2825,
-    longitude: 86.6698,
-    brightness: 345.8,
-    bright_t31: 297.0,
-    frp: 24.1,
-    scan: 0.41,
-    track: 0.38,
-    acq_date: '2026-09-25',
-    acq_time: '02:15',
-    satellite: 'NOAA-21',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1540,
-    vnf_radiant_heat_wm2: 182.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 95.0,
-    facility_id: 'FAC-PAR-04',
-    facility_name: 'IOCL Paradip Coastal Refinery & Petrochemical',
-    persistence_30d: 27,
-    persistence_90d: 82,
-    emissions_co2_kg_hr: 3260.0,
-    emissions_ch4_kg_hr: 115.0,
-    unregistered_flag: false
-  },
-  // 6. Singrauli Thermal Super-Cluster
-  {
-    id: 'VIIRS-IN-2026-0799',
-    latitude: 24.1025,
-    longitude: 82.6685,
-    brightness: 362.0,
-    bright_t31: 299.1,
-    frp: 55.4,
-    scan: 0.38,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '01:50',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1180,
-    vnf_radiant_heat_wm2: 415.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 97.0,
-    facility_id: 'FAC-SIN-05',
-    facility_name: 'Singrauli - Vindhyachal Super Thermal Complex',
-    persistence_30d: 30,
-    persistence_90d: 90,
-    emissions_co2_kg_hr: 7510.0,
-    emissions_ch4_kg_hr: 145.0,
-    unregistered_flag: false
-  },
-  // 7. Korba BALCO Smelter
-  {
-    id: 'VIIRS-IN-2026-0803',
-    latitude: 22.3850,
-    longitude: 82.7480,
-    brightness: 349.0,
-    bright_t31: 296.0,
-    frp: 41.2,
-    scan: 0.38,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '01:50',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1290,
-    vnf_radiant_heat_wm2: 310.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'KNOWN_INDUSTRIAL_FLARE',
-    confidence_score: 96.2,
-    facility_id: 'FAC-KOR-06',
-    facility_name: 'Korba BALCO Smelter & Captive Power Plant',
-    persistence_30d: 29,
-    persistence_90d: 88,
-    emissions_co2_kg_hr: 5580.0,
-    emissions_ch4_kg_hr: 108.0,
-    unregistered_flag: false
-  },
-  // 8. UNREGISTERED / ILLEGAL BRICK KILN BELT (Bulandshahr, UP)
-  {
-    id: 'VIIRS-IN-2026-0931',
-    latitude: 28.4082,
-    longitude: 77.8540,
-    brightness: 338.4,
-    bright_t31: 293.2,
-    frp: 19.4,
-    scan: 0.42,
-    track: 0.39,
-    acq_date: '2026-09-25',
-    acq_time: '02:05',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'N',
-    vnf_temp_k: 1050,
-    vnf_radiant_heat_wm2: 147.0,
-    landcover: 'Cropland',
-    classification: 'UNREGISTERED_ILLEGAL_FACILITY',
-    confidence_score: 91.5,
-    facility_id: 'FAC-UNREG-07',
-    facility_name: 'Bulandshahr Unregistered Fixed-Chimney Brick Kiln Belt #14',
-    persistence_30d: 19,
-    persistence_90d: 48,
-    emissions_co2_kg_hr: 2630.0,
-    emissions_ch4_kg_hr: 92.0,
-    unregistered_flag: true,
-    is_flagged: true
-  },
-  // 9. AGRICULTURAL STUBBLE BURNING (Punjab - Sangrur)
-  {
-    id: 'VIIRS-IN-2026-0750',
-    latitude: 30.2450,
-    longitude: 75.8420,
-    brightness: 326.5,
-    bright_t31: 294.1,
-    frp: 16.2,
-    scan: 0.37,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '13:30',
-    satellite: 'NOAA-20',
-    confidence: 'nominal',
-    daynight: 'D',
-    vnf_temp_k: 720,
-    vnf_radiant_heat_wm2: 65.0,
-    landcover: 'Cropland',
-    classification: 'AGRICULTURAL_STUBBLE',
-    confidence_score: 93.8,
-    persistence_30d: 2,
-    persistence_90d: 3,
-    emissions_co2_kg_hr: 2190.0,
-    emissions_ch4_kg_hr: 185.0,
-    unregistered_flag: false
-  },
-  // 10. AGRICULTURAL STUBBLE BURNING (Haryana - Karnal)
-  {
-    id: 'VIIRS-IN-2026-0752',
-    latitude: 29.6850,
-    longitude: 76.9900,
-    brightness: 322.0,
-    bright_t31: 293.0,
-    frp: 12.8,
-    scan: 0.37,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '13:30',
-    satellite: 'NOAA-20',
-    confidence: 'nominal',
-    daynight: 'D',
-    vnf_temp_k: 690,
-    vnf_radiant_heat_wm2: 52.0,
-    landcover: 'Cropland',
-    classification: 'AGRICULTURAL_STUBBLE',
-    confidence_score: 92.4,
-    persistence_30d: 1,
-    persistence_90d: 2,
-    emissions_co2_kg_hr: 1730.0,
-    emissions_ch4_kg_hr: 146.0,
-    unregistered_flag: false
-  },
-  // 11. WILDFIRE (Simlipal National Park, Odisha)
-  {
-    id: 'VIIRS-IN-2026-0688',
-    latitude: 21.8500,
-    longitude: 86.3500,
-    brightness: 375.0,
-    bright_t31: 296.5,
-    frp: 86.4,
-    scan: 0.40,
-    track: 0.38,
-    acq_date: '2026-09-25',
-    acq_time: '13:45',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'D',
-    vnf_temp_k: 840,
-    vnf_radiant_heat_wm2: 460.0,
-    landcover: 'Forest',
-    classification: 'WILDFIRE_FOREST',
-    confidence_score: 98.7,
-    persistence_30d: 3,
-    persistence_90d: 4,
-    emissions_co2_kg_hr: 11700.0,
-    emissions_ch4_kg_hr: 780.0,
-    unregistered_flag: false
-  },
-  // 12. WILDFIRE (Bandipur Tiger Reserve Edge, Karnataka)
-  {
-    id: 'VIIRS-IN-2026-0692',
-    latitude: 11.6640,
-    longitude: 76.6280,
-    brightness: 348.0,
-    bright_t31: 294.0,
-    frp: 38.6,
-    scan: 0.39,
-    track: 0.37,
-    acq_date: '2026-09-25',
-    acq_time: '13:45',
-    satellite: 'Suomi-NPP',
-    confidence: 'high',
-    daynight: 'D',
-    vnf_temp_k: 810,
-    vnf_radiant_heat_wm2: 210.0,
-    landcover: 'Forest',
-    classification: 'WILDFIRE_FOREST',
-    confidence_score: 97.2,
-    persistence_30d: 2,
-    persistence_90d: 2,
-    emissions_co2_kg_hr: 5230.0,
-    emissions_ch4_kg_hr: 348.0,
-    unregistered_flag: false
-  },
-  // 13. UNEXPLAINED / MUNICIPAL DUMP ANOMALY (Kochi Brahmapuram)
-  {
-    id: 'VIIRS-IN-2026-0711',
-    latitude: 9.9980,
-    longitude: 76.3680,
-    brightness: 331.0,
-    bright_t31: 295.2,
-    frp: 21.0,
-    scan: 0.38,
-    track: 0.36,
-    acq_date: '2026-09-25',
-    acq_time: '02:30',
-    satellite: 'NOAA-20',
-    confidence: 'nominal',
-    daynight: 'N',
-    vnf_temp_k: 790,
-    vnf_radiant_heat_wm2: 125.0,
-    landcover: 'Built-up / Industrial',
-    classification: 'UNEXPLAINED_THERMAL_SOURCE',
-    confidence_score: 72.0,
-    persistence_30d: 6,
-    persistence_90d: 11,
-    emissions_co2_kg_hr: 2840.0,
-    emissions_ch4_kg_hr: 420.0,
-    unregistered_flag: false
-  }
-];
+export const MOCK_HOTSPOTS = [];
 
-export const MOCK_ACTIVE_INCIDENT = {
-  id: 'INC-2026-0925-01',
-  facility_id: 'FAC-JAM-01',
-  facility_name: 'Reliance Jamnagar Mega-Refinery Complex',
-  hotspot_id: 'VIIRS-IN-2026-0891',
-  title: 'Severe Thermal Flare Surge & Header Overpressure (Acid Flare Stack #3)',
-  timestamp: '2026-09-25T01:42:00+05:30',
-  severity: 'TIER_3_INDUSTRIAL_INCIDENT',
-  status: 'INVESTIGATING',
-  viirs_pass: 'NOAA-20 Night Orbit #34821 (01:42 IST)',
-  lat: 22.3528,
-  lon: 69.8452,
-  frp_mw: 64.8,
-  baseline_frp_mw: 14.2,
-  z_score: 4.56,
-  wind_bearing: 245, // WSW
-  wind_speed_kmh: 18.5,
-  downwind_hazard_radius_km: 2.8,
-  population_at_risk: 14200,
-  recommended_agent: 'Alcohol-Resistant Aqueous Film-Forming Foam (AR-AFFF) & High-Rate N2 Inerting',
-  auto_brief: `SITUATION REPORT (SITREP) - SATELLITE DISASTER INTELLIGENCE
-• Location: 22.3528°N, 69.8452°E | Jamnagar, Gujarat
-• Facility: Reliance Jamnagar Mega-Refinery (Acid Gas Flare Header Stack #3)
-• Detection Sensor: VIIRS NOAA-20 (Orbit #34821 at 01:42 IST)
-• Observed FRP: 64.8 MW (+356% vs 90-day baseline of 14.2 MW | Z-Score: +4.56σ)
-• Planck Temperature: 1,740 K (Consistent with high-radiance hydrocarbon jetting)
-• Meteorology: Wind from 245° (WSW) at 18.5 km/h. Smoke plume trajectory: ENE towards Motikhavdi boundary.
-• Population at Risk: ~14,200 residents within downwind dispersion cone (0-3 km).
-• Suggested Mitigation: Activate emergency depressurization loop, flood water curtain on cracking column headers, dispatch Jamnagar District Fire Service Foam Tender Squad.`,
-  escalation_timer_sec: 180,
-  is_silence_escalated: false,
-  public_broadcast_authorized: false,
-  two_way_chat: [
-    { sender: 'SYSTEM', text: 'AUTOMATED ALERT [TIER 3]: Extreme thermal radiance spike (64.8 MW) detected by VIIRS NOAA-20 at Jamnagar Flare Stack #3. Escalation countdown started (180s).', time: '01:43' },
-    { sender: 'SYSTEM', text: 'Auto-dispatched notification to VP Safety S. K. Singhania & Jamnagar District Emergency Operations Centre (DEOC).', time: '01:43' },
-    { sender: 'RESPONDER', text: 'Control Room acknowledges. Flare gas header pressure breached 3.8 bar. Activating safety interlock purge.', time: '01:45' }
-  ],
-  cpcb_exposure: {
-    pi: 80,
-    days_n: 29,
-    r_factor: 250,
-    s_scale: 1.5,
-    lf_location: 1.25,
-    total_ec_inr: 1087500
+export function createIncidentFromHotspot(h) {
+  if (!h) {
+    return {
+      id: 'INC-STANDBY',
+      facility_id: 'FAC-STANDBY',
+      facility_name: 'Live Satellite Constellation (India)',
+      hotspot_id: 'N/A',
+      title: 'Awaiting Satellite Target Selection',
+      timestamp: new Date().toISOString(),
+      severity: 'TIER_1_ROUTINE_MONITORING',
+      status: 'MONITORING',
+      viirs_pass: 'NASA VIIRS & INSAT-3DR Rapid Scan Active',
+      lat: 22.5,
+      lon: 78.5,
+      frp_mw: 0,
+      baseline_frp_mw: 10,
+      z_score: 0,
+      wind_bearing: 245,
+      wind_speed_kmh: 18.5,
+      downwind_hazard_radius_km: 1.0,
+      population_at_risk: 0,
+      recommended_agent: 'Autonomous Continuous Satellite Surveillance',
+      auto_brief: 'Scanning live constellation passes (VIIRS NOAA-20, Suomi-NPP, Sentinel-3 SLSTR, INSAT-3DR) across India...',
+      escalation_timer_sec: 180,
+      is_silence_escalated: false,
+      public_broadcast_authorized: false,
+      two_way_chat: [],
+      cpcb_exposure: { pi: 80, days_n: 1, r_factor: 250, s_scale: 1.5, lf_location: 1.25, total_ec_inr: 0 }
+    };
   }
-};
 
-// 12 Curated Benchmark Historical Industrial Incidents
+  const lat = Number(h.latitude) || 22.5;
+  const lon = Number(h.longitude) || 78.5;
+  const frp = Number(h.frp) || 25;
+  const sat = h.satellite || 'NASA VIIRS';
+  const place = h.facility_name || (h.context_dossier?.landCover?.class ? `${h.context_dossier.landCover.class} Zone` : `${h.region || 'India'} Hotspot`);
+  const pop = h.context_dossier?.population?.density_km2 
+    ? Math.round(h.context_dossier.population.density_km2 * 8) 
+    : Math.round(frp * 180);
+
+  const baselineFrp = h.facility_id ? 14.2 : 8.0;
+  const ratio = (frp / baselineFrp).toFixed(1);
+  const zScore = ((frp - baselineFrp) / 10.0).toFixed(2);
+  const tempK = h.vnf_temp_k || Math.round((h.brightness || 320) * 3.8);
+
+  const timeStr = h.acq_time ? `${h.acq_time} UTC` : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' IST';
+  const dateStr = h.acq_date || new Date().toISOString().split('T')[0];
+
+  return {
+    id: `INC-${dateStr.replace(/-/g, '')}-${h.id ? h.id.slice(-4) : '01'}`,
+    facility_id: h.facility_id || 'FAC-LIVE-01',
+    facility_name: place,
+    hotspot_id: h.id || 'LIVE-FIRE-01',
+    title: `${h.fire_type ? h.fire_type.replace(/_/g, ' ') : 'THERMAL ANOMALY'}: High-Intensity Radiance Surge at ${place}`,
+    timestamp: `${dateStr}T${h.acq_time ? h.acq_time.slice(0, 2) + ':' + h.acq_time.slice(2, 4) : '12:00'}:00+05:30`,
+    severity: frp >= 40 ? 'TIER_3_CRITICAL_INCIDENT' : frp >= 20 ? 'TIER_2_MODERATE_INCIDENT' : 'TIER_1_ROUTINE_MONITORING',
+    status: 'INVESTIGATING',
+    viirs_pass: `${sat} (${dateStr} ${timeStr})`,
+    lat: lat,
+    lon: lon,
+    frp_mw: frp,
+    baseline_frp_mw: baselineFrp,
+    z_score: Number(zScore),
+    wind_bearing: 245,
+    wind_speed_kmh: 18.5,
+    downwind_hazard_radius_km: Number((Math.min(frp * 0.05, 5.0)).toFixed(1)),
+    population_at_risk: pop,
+    recommended_agent: frp >= 40 
+      ? 'AFFF High-Expansion Foam & Nitrogen Inerting Curtain'
+      : 'Water Fog Curtains & Perimeter Firebreak Trenching',
+    auto_brief: `SITUATION REPORT (SITREP) - SATELLITE DISASTER INTELLIGENCE
+• Location: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E | ${h.region || 'India'}
+• Target Area: ${place}
+• Detection Sensor: ${sat} (Pass time: ${timeStr} on ${dateStr})
+• Observed FRP: ${frp} MW (${ratio}x regional baseline | Z-Score: +${zScore}σ)
+• Planck Temperature: ${tempK} K
+• Land Cover: ${h.context_dossier?.landCover?.class || 'Sensing via ESA WorldCover 10m'}
+• Population Density: ${h.context_dossier?.population?.density_km2 ? `${h.context_dossier.population.density_km2} / km² (Census of India / GHSL)` : 'Assessing spatial census...'}
+• Suggested Mitigation: Deploy district emergency response squad; maintain downwind exclusion perimeter.`,
+    escalation_timer_sec: 180,
+    is_silence_escalated: false,
+    public_broadcast_authorized: false,
+    two_way_chat: [
+      { 
+        sender: 'SYSTEM', 
+        text: `AUTOMATED ALERT: Thermal radiance of ${frp} MW detected by ${sat} at [${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E]. Escalation timer started (180s).`, 
+        time: timeStr 
+      },
+      { 
+        sender: 'SYSTEM', 
+        text: `Transmitted coordinates to Regional Emergency Operations Centre (REOC) & State Pollution Control Board.`, 
+        time: timeStr 
+      }
+    ],
+    cpcb_exposure: {
+      pi: 80,
+      days_n: 14,
+      r_factor: 250,
+      s_scale: 1.5,
+      lf_location: 1.25,
+      total_ec_inr: Math.round(80 * 14 * 250 * 1.5 * 1.25)
+    }
+  };
+}
+
+export const MOCK_ACTIVE_INCIDENT = createIncidentFromHotspot(null);
+
 export const MOCK_PAST_INCIDENTS = [
   {
     id: 'HIST-01',

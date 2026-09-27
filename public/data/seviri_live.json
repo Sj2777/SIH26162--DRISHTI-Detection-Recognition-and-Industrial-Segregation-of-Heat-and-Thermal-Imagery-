@@ -12,7 +12,7 @@
   },
   "credentials_configured": true,
   "auth_status": true,
-  "last_sync_time": "2026-09-26T11:50:34.629911+00:00",
+  "last_sync_time": "2026-09-27T04:25:10.437241+00:00",
   "target_collection": "EO:EUM:DAT:MSG:HRSEVIRI-IODC",
   "how_to_authenticate": {
     "portal": "https://api.eumetsat.int/api-key",
@@ -22,13 +22,13 @@
   "products_found": 12,
   "products": [
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926114240.110000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927041240.044000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T11:30:10.299000",
-      "sensing_end": "2026-09-26T11:42:40.110000",
-      "size_mb": 0.17,
+      "sensing_start": "2026-09-27T04:00:10.242000",
+      "sensing_end": "2026-09-27T04:12:40.044000",
+      "size_mb": 0.16,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -42,13 +42,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926112740.216000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927035740.160000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T11:15:10.405000",
-      "sensing_end": "2026-09-26T11:27:40.216000",
-      "size_mb": 0.17,
+      "sensing_start": "2026-09-27T03:45:10.357000",
+      "sensing_end": "2026-09-27T03:57:40.160000",
+      "size_mb": 0.16,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -62,13 +62,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926111240.321000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927034240.276000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T11:00:10.510000",
-      "sensing_end": "2026-09-26T11:12:40.321000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T03:30:10.472000",
+      "sensing_end": "2026-09-27T03:42:40.276000",
+      "size_mb": 0.16,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -82,13 +82,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926105739.225000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927032739.190000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T10:45:09.414000",
-      "sensing_end": "2026-09-26T10:57:39.225000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T03:15:09.386000",
+      "sensing_end": "2026-09-27T03:27:39.190000",
+      "size_mb": 0.16,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -102,13 +102,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926104239.331000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927031239.305000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T10:30:09.521000",
-      "sensing_end": "2026-09-26T10:42:39.331000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T03:00:09.502000",
+      "sensing_end": "2026-09-27T03:12:39.305000",
+      "size_mb": 0.15,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -122,13 +122,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926102739.438000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927025739.420000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T10:15:09.629000",
-      "sensing_end": "2026-09-26T10:27:39.438000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T02:45:09.618000",
+      "sensing_end": "2026-09-27T02:57:39.420000",
+      "size_mb": 0.15,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -142,13 +142,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926101239.546000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927024239.537000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T10:00:09.738000",
-      "sensing_end": "2026-09-26T10:12:39.546000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T02:30:09.735000",
+      "sensing_end": "2026-09-27T02:42:39.537000",
+      "size_mb": 0.15,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -162,13 +162,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926095739.655000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927022739.653000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T09:45:09.846000",
-      "sensing_end": "2026-09-26T09:57:39.655000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T02:15:09.850000",
+      "sensing_end": "2026-09-27T02:27:39.653000",
+      "size_mb": 0.15,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -182,13 +182,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926094239.763000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927021239.769000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T09:30:09.955000",
-      "sensing_end": "2026-09-26T09:42:39.763000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T02:00:09.967000",
+      "sensing_end": "2026-09-27T02:12:39.769000",
+      "size_mb": 0.14,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -202,13 +202,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926092739.873000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927015739.886000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T09:15:10.066000",
-      "sensing_end": "2026-09-26T09:27:39.873000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T01:45:10.084000",
+      "sensing_end": "2026-09-27T01:57:39.886000",
+      "size_mb": 0.14,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -222,13 +222,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926091239.984000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927014240.003000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T09:00:10.177000",
-      "sensing_end": "2026-09-26T09:12:39.984000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T01:30:10.200000",
+      "sensing_end": "2026-09-27T01:42:40.003000",
+      "size_mb": 0.14,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",
@@ -242,13 +242,13 @@
       "download_url": null
     },
     {
-      "id": "MSG2-SEVI-MSG15-0100-NA-20260926085740.094000000Z-NA",
+      "id": "MSG2-SEVI-MSG15-0100-NA-20260927012740.118000000Z-NA",
       "satellite": "MSG2",
       "orbit_type": "GEO",
       "slot_longitude": "45.5\u00b0E (IODC)",
-      "sensing_start": "2026-09-26T08:45:10.287000",
-      "sensing_end": "2026-09-26T08:57:40.094000",
-      "size_mb": 0.18,
+      "sensing_start": "2026-09-27T01:15:10.316000",
+      "sensing_end": "2026-09-27T01:27:40.118000",
+      "size_mb": 0.14,
       "instrument": "SEVIRI",
       "channels": [
         "IR3.9 (MIR)",

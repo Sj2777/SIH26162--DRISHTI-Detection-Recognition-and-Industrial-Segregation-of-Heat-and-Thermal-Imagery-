@@ -4,416 +4,651 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/flame.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AGNI-VISION | Industrial Fire &amp; Persistent Thermal Geospatial Intelligence</title>
-    <meta name="description" content="AI-enabled geospatial system integrating NASA FIRMS, VIIRS Nightfire, OSM industrial infrastructure, and Sentinel-2 satellite data to detect, classify, and monitor industrial fires and persistent thermal sources across India." />
-    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <title>FireMap · AGNI-VISION | 3D Global Real-Time Wildfire &amp; Industrial Thermal Intelligence</title>
+    <meta name="description" content="Real-time 3D planetary tracking of wildfires and industrial thermal anomalies with NASA FIRMS, VIIRS, Sentinel-3, Meteosat SEVIRI, Sentinel-5P TROPOMI, Sentinel-2 NBR, and NASA/IBM Prithvi-100M foundation model." />
+
+    <!-- Google Fonts: Lexend & Nunito (FireMap typography) + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Design System Stylesheets -->
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/firemap.css" />
+
     <!-- Application Entry -->
     <script type="module" src="/src/app.js"></script>
   </head>
   <body>
-    <!-- HEADER WRAPPER -->
-    <header class="header-wrapper">
-      <!-- Live Ticker & Satellite Orbit Ribbon -->
-      <div class="ticker-wrap">
-        <div class="ticker-left">
-          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <span class="pulse-dot pulse-dot-red"></span>
-            <span style="color: #ef4444; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.04em;">ALERT FEED</span>
-          </div>
-          <span style="color: var(--border-default);">|</span>
-          <span id="ticker-text" style="color: var(--text-primary); font-weight: 500; font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            VIIRS NOAA-20 Detected Extreme Thermal Surge (64.8 MW | +4.56σ) at Jamnagar Acid Flare Stack #3
+    <!-- =====================================================================
+         1. PRIMARY VIEWPORT: 3D GLOBE (firemap.live)
+         ===================================================================== -->
+    <div id="map"></div>
+
+    <!-- =====================================================================
+         2. TOP-LEFT LOGO & LIVE CLOCK (firemap.live)
+         ===================================================================== -->
+    <div class="top-left-bar">
+      <button class="logo-box" id="logoBtn" aria-label="FireMap - Reset View">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM8.5 14.5A2.5 2.5 0 0 1 11 12C11 10.62 10.5 10 10 9C8.93 6.86 9.78 4.95 12 3C12.5 5.5 14 7.9 16 9.5C18 11.1 19 13 19 15A7 7 0 1 1 5 15C5 13.85 5.43 12.71 6 12A2.5 2.5 0 0 1 8.5 14.5Z" fill="#FF4500"/>
+        </svg>
+        <span class="logo-stack">
+          <span class="logo-text">FireMap</span>
+          <span class="live-clock" id="liveClock">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="live-label">LIVE</span>
+            <span class="live-clock-times">
+              <span class="clock-entry clock-entry-primary">
+                <span class="clock-time" id="clockLocalTime">--:--</span>
+                <span class="clock-zone" id="clockLocalZone">IST</span>
+              </span>
+              <span class="clock-sep" aria-hidden="true">&middot;</span>
+              <span class="clock-entry clock-entry-secondary">
+                <span class="clock-time" id="clockUtcTime">--:--</span>
+                <span class="clock-zone">UTC</span>
+              </span>
+            </span>
           </span>
-          <span style="color: var(--border-default);">|</span>
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--status-info-text); flex-shrink: 0;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
-            <span id="orbit-status" class="font-mono">NOAA-20 Orbit #34821 Synced | Next Pass: Suomi-NPP (28m)</span>
+          <span class="agency-tag">AGNI-VISION &middot; NASA FIRMS &middot; ISRO</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- =====================================================================
+         3. FIXED RIGHT VERTICAL TOOLBAR (firemap.live)
+         ===================================================================== -->
+    <div class="vertical-toolbar" aria-label="Map Toolbar">
+      <!-- Search Button -->
+      <button class="toolbar-btn" id="searchBtn" data-tip="Search Fires &amp; Locations" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+
+      <!-- Locate Me Button -->
+      <button class="toolbar-btn" id="locateMeBtn" data-tip="Locate Me / India Center" aria-label="Locate Me">
+        <i class="fa-solid fa-location-crosshairs"></i>
+      </button>
+
+      <div class="toolbar-sep" aria-hidden="true"></div>
+
+      <!-- Toggle Layers Button -->
+      <button class="toolbar-btn" id="toggleLayersBtn" data-tip="Toggle Layers &amp; Sensors" aria-label="Toggle Layers">
+        <i class="fa-solid fa-layer-group"></i>
+      </button>
+
+      <!-- Change Basemap / 3D Globe Button -->
+      <button class="toolbar-btn" id="basemapBtn" data-tip="Basemap &amp; 3D Globe" aria-label="Change Basemap">
+        <i class="fa-solid fa-map"></i>
+      </button>
+
+      <!-- Wind Layer Toggle Button (active green dot) -->
+      <button class="toolbar-btn has-active-dot" id="windBtn" data-tip="Wind Particle Streamlines" aria-label="Wind" aria-pressed="true">
+        <span class="wind-indicator-dot"></span>
+        <i class="fa-solid fa-wind"></i>
+      </button>
+
+      <div class="toolbar-sep" aria-hidden="true"></div>
+
+      <!-- Measure Distance Button -->
+      <button class="toolbar-btn" id="measureBtn" data-tip="Measure Distance" aria-label="Measure Distance">
+        <i class="fa-solid fa-ruler"></i>
+      </button>
+
+      <!-- Share Map Button -->
+      <button class="toolbar-btn" id="shareMapBtn" data-tip="Share Map" aria-label="Share Map">
+        <i class="fa-solid fa-share-from-square"></i>
+      </button>
+
+      <div class="toolbar-sep" aria-hidden="true"></div>
+
+      <!-- Fire List / Hotspots Feed Button -->
+      <button class="toolbar-btn" id="fireListBtn" data-tip="Fire Feed &amp; Deep Dossier" aria-label="Fire Feed">
+        <i class="fa-solid fa-fire"></i>
+      </button>
+
+      <!-- Legend Button -->
+      <button class="toolbar-btn" id="legendBtn" data-tip="Map Legend" aria-label="Map Legend">
+        <i class="fa-solid fa-list-ul"></i>
+      </button>
+
+      <div class="toolbar-sep" aria-hidden="true"></div>
+
+      <!-- System Modules Hub (All Prototype Tools Preserved) -->
+      <button class="toolbar-btn" id="modulesBtn" data-tip="System Modules Hub (All Tools)" aria-label="Modules Hub" style="color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
+        <i class="fa-solid fa-cubes"></i>
+      </button>
+    </div>
+
+    <!-- =====================================================================
+         4. FLOATING PANELS & DRAWERS
+         ===================================================================== -->
+
+    <!-- Search Panel -->
+    <div id="searchPanel" class="fm-panel search-panel" aria-label="Search Fires">
+      <div class="panel-header">
+        <h3><i class="fa-solid fa-magnifying-glass"></i> Search Active Fires</h3>
+        <button class="close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="panel-content">
+        <div class="search-input-box">
+          <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
+          <input type="text" id="searchInput" placeholder="Search by facility, city, state, or operator..." autocomplete="off">
+        </div>
+        <ul id="searchResults" class="search-results-list"></ul>
+      </div>
+    </div>
+
+    <!-- Layer List Panel -->
+    <div id="layerListPanel" class="fm-panel layer-list-panel" aria-label="Layer List">
+      <div class="panel-header">
+        <h3><i class="fa-solid fa-layer-group"></i> Satellite &amp; Intelligence Layers</h3>
+        <button class="close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="panel-content">
+        <div class="layer-section-title">Constellation Sensors</div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-sat-viirs" checked> VIIRS 375m (NOAA-20 / NPP)</label>
+          <span class="layer-pill-tag">LEO</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-sat-sentinel3" checked> Sentinel-3 SLSTR (1km)</label>
+          <span class="layer-pill-tag">Copernicus</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-sat-seviri" checked> Meteosat SEVIRI (15-min)</label>
+          <span class="layer-pill-tag">EUMETSAT</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-sat-insat" checked> INSAT-3DR Geostationary</label>
+          <span class="layer-pill-tag">ISRO</span>
+        </div>
+
+        <div class="layer-section-title">Deep Context &amp; Analytics</div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-prithvi" checked> NASA/IBM Prithvi-100M ViT</label>
+          <span class="layer-pill-tag" style="color:#a855f7;">AI Model</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-nbr" checked> Sentinel-2 &Delta;NBR Burn Scars</label>
+          <span class="layer-pill-tag">10m</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-tropomi" checked> Sentinel-5P TROPOMI Gases</label>
+          <span class="layer-pill-tag">NO₂/SO₂/CO</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-ghsl" checked> GHSL Settlement Density</label>
+          <span class="layer-pill-tag">Exposure</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-osm" checked> OSM Industrial Perimeters</label>
+          <span class="layer-pill-tag">Ground</span>
+        </div>
+
+        <div class="layer-section-title">Atmospheric Dynamics</div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-sat-tracks" checked> Satellite Orbit Trajectories</label>
+          <span class="layer-pill-tag">Orbits</span>
+        </div>
+        <div class="layer-item">
+          <label><input type="checkbox" id="layer-wind-streamlines" checked> GFS Wind Streamlines</label>
+          <span class="layer-pill-tag">22km</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basemap & 3D Globe Panel -->
+    <div id="basemapPanel" class="fm-panel basemap-panel" aria-label="Basemap Selector">
+      <div class="panel-header">
+        <h3><i class="fa-solid fa-map"></i> Basemap &amp; View</h3>
+        <button class="close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="panel-content">
+        <div class="projection-switch-row">
+          <span style="font-size: 11px; font-weight: 600; color: #cbd5e1;">Projection:</span>
+          <div style="display: flex; gap: 4px;">
+            <button class="proj-btn active" id="btn-proj-globe">3D Globe</button>
+            <button class="proj-btn" id="btn-proj-flat">2D Flat</button>
           </div>
         </div>
 
-        <div class="ticker-right">
-          <button id="btn-seviri-status" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.7rem; height: 24px; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
-            <span>SEVIRI (eumdac)</span>
-          </button>
-          <button id="btn-simulate-pass" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.7rem; height: 24px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
-            <span>Trigger Pass</span>
-          </button>
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--status-success-text); font-weight: 500; font-size: 0.7rem;">
-            <span class="pulse-dot pulse-dot-green"></span>
-            <span>SYSTEM ONLINE</span>
+        <div class="basemap-option selected" data-style="satellite">
+          <i class="fa-solid fa-satellite" style="color: #38bdf8;"></i>
+          <span>Satellite Streets 3D</span>
+        </div>
+        <div class="basemap-option" data-style="dark">
+          <i class="fa-solid fa-moon" style="color: #a855f7;"></i>
+          <span>Tactical Dark Canvas</span>
+        </div>
+        <div class="basemap-option" data-style="firemap">
+          <i class="fa-solid fa-fire" style="color: #f97316;"></i>
+          <span>FireMap.live BaseMap V1</span>
+        </div>
+        <div class="basemap-option" data-style="outdoors">
+          <i class="fa-solid fa-mountain" style="color: #22c55e;"></i>
+          <span>Outdoors Topo Terrain</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Measure Distance Panel -->
+    <div id="measurePanel" class="measure-panel" role="status" aria-label="Distance Measurement">
+      <div class="measure-readout">
+        <span id="measureKm">0.00 km</span>
+        <span style="color:#64748b;font-weight:400;font-size:12px;">/</span>
+        <span id="measureMi" style="color:#94a3b8;font-size:13px;">0.00 mi</span>
+      </div>
+      <div class="measure-hint">Click on globe to measure geodesic distance</div>
+      <div class="measure-actions">
+        <button type="button" class="measure-btn-sm" id="measureClearBtn">Clear</button>
+        <button type="button" class="measure-btn-sm measure-btn-done" id="measureDoneBtn">Done</button>
+      </div>
+    </div>
+
+    <!-- Map Legend Panel -->
+    <div id="legendPanel" class="fm-panel" style="top: 60px; right: 70px; width: 310px;" aria-label="Map Legend">
+      <div class="panel-header">
+        <h3><i class="fa-solid fa-list-ul"></i> Map Legend &amp; Sensors</h3>
+        <button class="close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="panel-content">
+        <div class="layer-section-title">Fire Activity &amp; Status</div>
+        <div style="font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#ff0000;border:1px solid #8b0000;"></span>
+            <span>Thermal Blowout / High Alert (&ge;4.0&sigma;)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#ff4500;border:1px solid #8b0000;"></span>
+            <span>Industrial Flare / Flare Stack</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#ff7f50;border:1px solid #eab308;"></span>
+            <span>Coal Mine / Persistent Thermal</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#84cc16;border:1px solid #4d7c0f;"></span>
+            <span>Agricultural Stubble Burning</span>
+          </div>
+        </div>
+
+        <div class="layer-section-title" style="margin-top:12px;">Satellite Constellations</div>
+        <div style="font-size: 11.5px; display: flex; flex-direction: column; gap: 5px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#34d399;"></span>
+            <span>VIIRS &mdash; NOAA-20, NOAA-21, Suomi NPP (375m)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>
+            <span>SLSTR &mdash; Sentinel-3A, Sentinel-3B (1km)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#c084fc;"></span>
+            <span>SEVIRI &mdash; Meteosat-11 MSG-IODC (15-min Geo)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#38bdf8;"></span>
+            <span>IMAGER &mdash; ISRO INSAT-3DR (15-min Geo)</span>
+          </div>
+        </div>
+
+        <div class="layer-section-title" style="margin-top:12px;">Wind Streamlines</div>
+        <div style="font-size: 11px; color:#94a3b8; line-height: 1.5;">
+          Dynamic particles driven by NOAA Global Forecast System (GFS) 22km wind grid, indicating downwind smoke and gas plume dispersion.
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Map Modal -->
+    <div id="shareMapModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 480px;">
+        <div class="panel-header" style="padding: 0 0 10px 0; margin-bottom: 12px;">
+          <h3><i class="fa-solid fa-share-from-square"></i> Share Current 3D Globe View</h3>
+          <button id="closeShareModal" class="close-btn" style="font-size: 20px;">&times;</button>
+        </div>
+        <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 10px;">
+          Share the exact latitude, longitude, zoom, and active fire layer perspective:
+        </p>
+        <input type="text" id="shareMapURL" readonly style="width: 100%; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--fm-border); border-radius: 6px; color: #fff; font-family: monospace; font-size: 12px;">
+        <button id="copyURLBtn" style="margin-top: 12px; width: 100%; padding: 10px; border: none; border-radius: 6px; background-color: #ff4500; color: #fff; font-weight: 600; cursor: pointer;">
+          Copy Shareable URL
+        </button>
+      </div>
+    </div>
+
+    <!-- Hotspot Detail Drawer & Deep Context Dossier -->
+    <div id="hotspotDetailDrawer" class="hotspot-drawer" aria-label="Hotspot Detail Drawer">
+      <div class="drawer-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-fire-flame-curved" style="color: #ff4500; font-size: 16px;"></i>
+          <h3 style="margin: 0; font-size: 15px; font-family: var(--fm-font-display); color: #fff;" id="drawer-title">
+            Hotspot Intelligence &amp; Context
+          </h3>
+        </div>
+        <button class="close-btn" id="closeDrawerBtn">&times;</button>
+      </div>
+      <div class="drawer-body" id="drawer-content">
+        <div id="hotspot-inspector">
+          <div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 40px 10px;">
+            Select any fire hotspot or thermal cluster on the 3D globe to load the verified 5-pillar context dossier (Prithvi-100M, TROPOMI gases, &Delta;NBR, GHSL population, and OSM industrial operators).
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Main Enterprise Branding Bar -->
-      <div class="branding-bar">
-        <div class="brand-identity">
-          <div class="brand-icon-box">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>
-            </svg>
+    <!-- =====================================================================
+         5. SYSTEM MODULES HUB MODAL (Preserving 100% of Prototype Features)
+         ===================================================================== -->
+    <div id="modulesHubModal" class="modules-hub-modal" aria-label="System Modules Hub">
+      <div class="modules-hub-content">
+        <div class="panel-header">
+          <h3><i class="fa-solid fa-cubes" style="color: #38bdf8;"></i> AGNI-VISION Enterprise Intelligence Modules</h3>
+          <button class="close-btn" id="closeModulesHubBtn">&times;</button>
+        </div>
+        <div class="modules-grid">
+          <!-- 1. National Command Dashboard -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-dashboard', 'National Command Dashboard')">
+            <div class="module-icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
+            <h4>National Command Dashboard</h4>
+            <p>Pan-India thermal telemetry, blowout anomaly distribution, active flare counters, and high-risk alerts.</p>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <h1 class="brand-name">AGNI-VISION</h1>
-            <span class="badge badge-critical" style="font-size: 0.58rem; padding: 1px 5px;">DEFENSE · CPCB</span>
+
+          <!-- 2. 2D Tactical GIS Map -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-map', '2D Tactical GIS Map')">
+            <div class="module-icon-wrap" style="color: #34d399; background: rgba(52, 211, 153, 0.15);"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h4>2D Tactical GIS Map</h4>
+            <p>Leaflet high-zoom 2D tactical view with polygon buffers, plume dispersion overlays, and sector focus.</p>
+          </div>
+
+          <!-- 3. Facility Topology & Showcase -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-showcase', 'Facility Digital Twin')">
+            <div class="module-icon-wrap" style="color: #f97316; background: rgba(249, 115, 22, 0.15);"><i class="fa-solid fa-industry"></i></div>
+            <h4>Facility Topology &amp; Twin</h4>
+            <p>Jamnagar Refinery, Dadri Power Plant, unit flare stacks, and sub-module engineering schematics.</p>
+          </div>
+
+          <!-- 4. Industry Self-Declaration Portal -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-portal', 'Industry Compliance Portal')">
+            <div class="module-icon-wrap" style="color: #a855f7; background: rgba(168, 85, 247, 0.15);"><i class="fa-solid fa-clipboard-check"></i></div>
+            <h4>Industry Compliance Portal</h4>
+            <p>Self-declaration flare logging, statutory maintenance registry, and CPCB audit logs.</p>
+          </div>
+
+          <!-- 5. Thermal Baseline & Anomaly Detector -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-fingerprint', 'Thermal Baseline Engine')">
+            <div class="module-icon-wrap" style="color: #ef4444; background: rgba(239, 68, 68, 0.15);"><i class="fa-solid fa-chart-line"></i></div>
+            <h4>Thermal Baseline &amp; Anomaly</h4>
+            <p>Diurnal and seasonal baseline analysis with statistical sigma anomaly blowout detection (+4.56&sigma;).</p>
+          </div>
+
+          <!-- 6. Edge IoT Telemetry -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-iot', 'Edge IoT SCADA Telemetry')">
+            <div class="module-icon-wrap" style="color: #eab308; background: rgba(234, 179, 8, 0.15);"><i class="fa-solid fa-tower-broadcast"></i></div>
+            <h4>Edge IoT &amp; SCADA Feeds</h4>
+            <p>Real-time pressure, acoustic leak, thermal camera, and LEL sensor stream simulation.</p>
+          </div>
+
+          <!-- 7. Disaster SOPs & Incident Similarity -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-similarity', 'NDMA Disaster SOPs')">
+            <div class="module-icon-wrap" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);"><i class="fa-solid fa-book-medical"></i></div>
+            <h4>Disaster SOPs &amp; Matching</h4>
+            <p>Historical industrial disaster similarity engine and NDMA standardized emergency response protocols.</p>
+          </div>
+
+          <!-- 8. Escalation & SACHET CAP Gateway -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-agentic', 'Automated Escalation Gateway')">
+            <div class="module-icon-wrap" style="color: #ec4899; background: rgba(236, 72, 153, 0.15);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h4>Escalation &amp; SACHET CAP</h4>
+            <p>Automated tier progression, CAP-XML emergency broadcast generator, and commander PIN gate.</p>
+          </div>
+
+          <!-- 9. CPCB & ESG Statutory Penalty Calculator -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-regulatory', 'CPCB Statutory Calculator')">
+            <div class="module-icon-wrap" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.15);"><i class="fa-solid fa-scale-balanced"></i></div>
+            <h4>CPCB &amp; ESG Calculator</h4>
+            <p>Section 15 EPA formula (EC = PI &times; N &times; R &times; S &times; LF), BRSR disclosures, and environmental damage audit.</p>
+          </div>
+
+          <!-- 10. REST API Explorer -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-api', 'REST API Gateway')">
+            <div class="module-icon-wrap" style="color: #64748b; background: rgba(100, 116, 139, 0.15);"><i class="fa-solid fa-code"></i></div>
+            <h4>REST API Explorer</h4>
+            <p>Live REST API documentation and endpoints for FIRMS, SEVIRI, Sentinel-3, Prithvi, and TROPOMI.</p>
           </div>
         </div>
-
-        <!-- Navigation Tabs -->
-        <nav class="nav-tabs-container" id="nav-tabs">
-          <button class="nav-tab-btn" data-tab="tab-dashboard">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>National Dashboard</span>
-          </button>
-          <button class="nav-tab-btn active" data-tab="tab-map">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-            <span>GIS Map</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-showcase">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20"/><path d="M5 20V8l5 4V4l5 4v12"/><path d="M19 20v-8l-4 4"/></svg>
-            <span>Facility Topology</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-portal">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            <span>Industry Portal</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-fingerprint">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <span>Thermal Baseline</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-iot">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span>Edge IoT</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-similarity">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            <span>Disaster SOPs</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-agentic">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>Escalation</span>
-            <span class="tab-badge" id="nav-alert-badge">1</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-regulatory">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>CPCB &amp; ESG</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-replay3d">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-            <span>3D Replay</span>
-          </button>
-          <button class="nav-tab-btn" data-tab="tab-api">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            <span>REST API</span>
-          </button>
-        </nav>
       </div>
-    </header>
+    </div>
 
-    <!-- MAIN CONTENT VIEWPORTS -->
-    <main>
-      <!-- TAB 0: NATIONAL COMMAND DASHBOARD -->
-      <section id="tab-dashboard" class="tab-content" style="padding: 24px; overflow-y: auto;">
-        <div id="dashboard-container"></div>
-      </section>
-
-      <!-- TAB 1: INDIA 2D GIS MAP -->
-      <section id="tab-map" class="tab-content active">
-        <div class="gis-layout">
-          <div class="gis-map-viewport">
-            <!-- Leaflet Container -->
-            <div id="leaflet-map"></div>
-
-            <!-- GIS Basemap & Navigation Toolbar -->
-            <div class="gis-toolbar">
-              <span class="gis-toolbar-label">Basemap</span>
-              <button class="btn btn-primary basemap-btn" data-layer="satellite">Satellite Hybrid</button>
-              <button class="btn btn-outline basemap-btn" data-layer="topo">Topo Terrain</button>
-              <button class="btn btn-outline basemap-btn" data-layer="osm">Streets (OSM)</button>
-              <button class="btn btn-outline basemap-btn" data-layer="dark">Tactical Dark</button>
-              
-              <div class="gis-toolbar-divider"></div>
-
-              <span class="gis-toolbar-label">Sector Focus</span>
-              <button class="btn btn-outline jump-btn" id="btn-top-anomaly" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.5); font-weight: 600;">
-                <span class="pulse-dot pulse-dot-red" style="width: 5px; height: 5px;"></span>
-                <span>🚩 Flagged Blowout</span>
-              </button>
-              <button class="btn btn-outline jump-btn" id="btn-top-live" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
-                <span class="pulse-dot pulse-dot-green" style="width: 5px; height: 5px;"></span>
-                <span>🔥 Top Live Fire</span>
-              </button>
-              <button class="btn btn-outline jump-btn" id="btn-insat-pass" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
-                <span>🛰️ INSAT-3DR Geo</span>
-              </button>
-              <button class="btn btn-outline jump-btn" data-lat="22.3528" data-lon="69.8452" data-zoom="13">Jamnagar Refinery</button>
-              <button class="btn btn-outline jump-btn" data-lat="28.5995" data-lon="77.6080" data-zoom="13">Dadri Power Plant</button>
-              <button class="btn btn-outline jump-btn" data-lat="28.4082" data-lon="77.8540" data-zoom="12">Brick Kiln Belt</button>
-              <button class="btn btn-outline jump-btn" data-lat="30.2450" data-lon="75.8420" data-zoom="10">Punjab Agro Fires</button>
-              <button class="btn btn-outline jump-btn" data-lat="22.5" data-lon="78.5" data-zoom="5">India Overview</button>
-
-              <div class="gis-toolbar-divider"></div>
-
-              <button class="btn btn-outline" id="btn-refresh-nasa" style="color: #34d399; border-color: rgba(52, 211, 153, 0.4); font-size: 0.72rem; padding: 3px 8px;">
-                <span class="pulse-dot pulse-dot-green" style="width: 6px; height: 6px;"></span>
-                <span>NASA Live Sync</span>
-              </button>
-            </div>
-
-            <!-- Timeline Slider Bar -->
-            <div id="timeline-bar" style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 900; background: rgba(10,14,26,0.92); backdrop-filter: blur(8px); border-top: 1px solid rgba(56,189,248,0.18); padding: 8px 14px; display: flex; align-items: center; gap: 12px;">
-              <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                <span style="font-size: 0.68rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.04em;">TIMELINE</span>
-              </div>
-              <button id="btn-timeline-play" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); border-radius: 4px; color: #38bdf8; font-size: 0.68rem; padding: 2px 8px; cursor: pointer; flex-shrink: 0;">▶ Play</button>
-              <div style="display: flex; flex-direction: column; flex: 1; gap: 2px;">
-                <input type="range" id="timeline-slider" min="0" max="6" value="6" step="1" style="width: 100%; accent-color: #38bdf8; height: 4px;" />
-                <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: #64748b; font-family: monospace;" id="timeline-labels"></div>
-              </div>
-              <div style="flex-shrink: 0; text-align: right;">
-                <div style="font-size: 0.68rem; color: #e2e8f0; font-weight: 600;" id="timeline-current-label">Today</div>
-                <div style="font-size: 0.6rem; color: #64748b;" id="timeline-count-label">All detections shown</div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                <label style="font-size: 0.63rem; color: #94a3b8; white-space: nowrap;">
-                  <input type="checkbox" id="chk-week-only" checked style="accent-color: #38bdf8;" /> This Week Only
-                </label>
-              </div>
-            </div>
-
-            <!-- Classification & Layer Filters Dock -->
-            <!-- Classification & Layer Filters Dock -->
-            <div class="gis-filters">
-              <!-- Header with Live Count -->
-              <div class="gis-filters-header">
-                <span class="gis-filters-title">
-                  Active Detections: <span id="hotspot-count-label" style="color: #38bdf8; font-weight: 700;">435</span> hotspots
-                </span>
-                <span class="badge badge-cyan" id="live-indicator-badge" style="font-size: 0.6rem;">LIVE SATELLITE</span>
-              </div>
-
-              <!-- Filter Tier 1: Constellation Sensor Feeds -->
-              <div style="margin-bottom: 6px;">
-                <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
-                  🛰️ Satellite Sensor Feed
-                </div>
-                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                  <button class="btn btn-primary filter-pill-sat" data-sat="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Sensors</button>
-                  <button class="btn btn-outline filter-pill-sat" data-sat="VIIRS" style="font-size: 0.68rem; padding: 2px 7px; color: #34d399; border-color: rgba(52, 211, 153, 0.4);">
-                    <span class="pulse-dot pulse-dot-green" style="width: 4px; height: 4px;"></span>
-                    <span>VIIRS 375m (LEO)</span>
-                  </button>
-                  <button class="btn btn-outline filter-pill-sat" data-sat="INSAT" style="font-size: 0.68rem; padding: 2px 7px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
-                    <span>INSAT-3DR (15m Nadir)</span>
-                  </button>
-                  <button class="btn btn-outline filter-pill-sat" data-sat="SEVIRI" style="font-size: 0.68rem; padding: 2px 7px; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
-                    <span>SEVIRI (15m Geo)</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Filter Tier 2: AI Thermal Classification -->
-              <div>
-                <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
-                  🎯 Thermal Source Classification
-                </div>
-                <div style="display: flex; gap: 4px; flex-wrap: wrap;" id="map-filter-buttons">
-                  <button class="btn btn-primary filter-pill" data-filter="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Types</button>
-                  <button class="btn btn-outline filter-pill" data-filter="FLAGGED" style="font-size: 0.68rem; padding: 2px 7px; color: #ef4444; border-color: rgba(239, 68, 68, 0.5);">
-                    <span class="pulse-dot pulse-dot-red" style="width: 4px; height: 4px;"></span>
-                    <span>🚩 Flagged Incidents</span>
-                  </button>
-                  <button class="btn btn-outline filter-pill" data-filter="ANOMALY" style="font-size: 0.68rem; padding: 2px 7px;">Critical Blowouts</button>
-                  <button class="btn btn-outline filter-pill" data-filter="INDUSTRIAL" style="font-size: 0.68rem; padding: 2px 7px;">Known Industrial</button>
-                  <button class="btn btn-outline filter-pill" data-filter="UNREGISTERED" style="font-size: 0.68rem; padding: 2px 7px;">Illegal Kilns</button>
-                  <button class="btn btn-outline filter-pill" data-filter="STUBBLE" style="font-size: 0.68rem; padding: 2px 7px;">Agro Stubble</button>
-                  <button class="btn btn-outline filter-pill" data-filter="WILDFIRE" style="font-size: 0.68rem; padding: 2px 7px;">Forest Wildfire</button>
-                </div>
-              </div>
-
-              <!-- Layer Toggles -->
-              <div class="gis-filters-toggles">
-                <label>
-                  <input type="checkbox" id="chk-osm" checked />
-                  <span>OSM Boundaries</span>
-                </label>
-                <label>
-                  <input type="checkbox" id="chk-plume" checked />
-                  <span>Hazard Cone</span>
-                </label>
-                <label>
-                  <input type="checkbox" id="chk-buffer" checked />
-                  <span>Buffer (2.8km)</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- State Zoom Anomaly Panel (shown when map zooms into a state) -->
-          <div id="state-zoom-panel" style="display: none; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 901; background: rgba(10,14,26,0.94); backdrop-filter: blur(12px); border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; padding: 10px 14px; min-width: 320px; max-width: 480px; box-shadow: 0 4px 24px rgba(0,0,0,0.5);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="pulse-dot pulse-dot-red" style="width: 6px; height: 6px;"></span>
-                <span id="state-panel-title" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">State Anomalies</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span id="state-panel-count" class="badge badge-critical" style="font-size: 0.6rem;">0 events</span>
-                <button onclick="document.getElementById('state-zoom-panel').style.display='none'" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 1rem; line-height: 1; padding: 2px;">×</button>
-              </div>
-            </div>
-            <div id="state-panel-list" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
-          </div>
-
-          <!-- Hotspot & Plume Inspector Sidebar -->
-          <aside class="gis-sidebar" id="hotspot-inspector">
-            <!-- Populated dynamically via JS -->
-          </aside>
+    <!-- =====================================================================
+         6. MODULE VIEW OVERLAY (Executes All Original Prototype Tabs)
+         ===================================================================== -->
+    <div id="moduleViewOverlay" class="module-view-overlay">
+      <div class="module-view-topbar">
+        <button id="btn-back-to-globe" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>&larr; Back to 3D FireMap Globe</span>
+        </button>
+        <div id="module-overlay-title" style="font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 700; color: #ffffff;">
+          National Dashboard
         </div>
-      </section>
-
-      <!-- TAB 2: DEMO FACILITY SHOWCASE & SENTINEL-2 -->
-      <section id="tab-showcase" class="tab-content">
-        <!-- Header -->
-        <div class="page-header">
-          <div class="page-title-group">
-            <div class="page-title-badge-row">
-              <span class="badge badge-cyan">DEMO FACILITY ASSET</span>
-              <span class="badge badge-critical">ACTIVE ANOMALY: +4.56σ</span>
-            </div>
-            <h2 class="page-title" id="showcase-facility-name">Reliance Jamnagar Mega-Refinery Complex</h2>
-            <p class="page-subtitle" id="showcase-facility-desc">
-              Operator: Reliance Industries Limited | District: Jamnagar, Gujarat | CPCB Red Category
-            </p>
-          </div>
-          <div class="page-actions">
-            <button class="btn btn-primary fac-switch-btn" data-fac="FAC-JAM-01">Reliance Jamnagar</button>
-            <button class="btn btn-outline fac-switch-btn" data-fac="FAC-DAD-02">NTPC Dadri</button>
-            <button class="btn btn-outline fac-switch-btn" data-fac="FAC-TAT-03">Tata Steel Jamshedpur</button>
-          </div>
+        <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">
+          AGNI-VISION Enterprise Suite
         </div>
+      </div>
+      <div class="module-view-container" id="module-view-container">
+        <!-- TAB 0: NATIONAL COMMAND DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content" style="padding: 24px; overflow-y: auto;">
+          <div id="dashboard-container"></div>
+        </section>
 
-        <!-- 2 Column Layout -->
-        <div class="grid-2col">
-          <!-- Left: Sub-Units Layout -->
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                Plant Units &amp; Flare Headers Spatial Topology
-              </span>
-              <span class="badge badge-warning">6 UNITS MONITORED</span>
-            </div>
-            <div class="panel-body" style="display: flex; flex-direction: column; gap: 14px;">
-              <div id="subunits-canvas" style="height: 320px; background: #070b14; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                <!-- Rendered via JS -->
+        <!-- TAB 1: INDIA 2D GIS MAP -->
+        <section id="tab-map" class="tab-content">
+          <div class="gis-layout">
+            <div class="gis-map-viewport">
+              <div id="leaflet-map"></div>
+
+              <div class="gis-toolbar">
+                <span class="gis-toolbar-label">Basemap</span>
+                <button class="btn btn-primary basemap-btn" data-layer="satellite">Satellite Hybrid</button>
+                <button class="btn btn-outline basemap-btn" data-layer="topo">Topo Terrain</button>
+                <button class="btn btn-outline basemap-btn" data-layer="osm">Streets (OSM)</button>
+                <button class="btn btn-outline basemap-btn" data-layer="dark">Tactical Dark</button>
+                
+                <div class="gis-toolbar-divider"></div>
+
+                <span class="gis-toolbar-label">Sector Focus</span>
+                <button class="btn btn-outline jump-btn" id="btn-top-anomaly" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.5); font-weight: 600;">
+                  <span class="pulse-dot pulse-dot-red" style="width: 5px; height: 5px;"></span>
+                  <span>🚩 Flagged Blowout</span>
+                </button>
+                <button class="btn btn-outline jump-btn" id="btn-top-live" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
+                  <span class="pulse-dot pulse-dot-green" style="width: 5px; height: 5px;"></span>
+                  <span>🔥 Top Live Fire</span>
+                </button>
+                <button class="btn btn-outline jump-btn" id="btn-insat-pass" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
+                  <span>🛰️ INSAT-3DR Geo</span>
+                </button>
+                <button class="btn btn-outline jump-btn" data-lat="22.3528" data-lon="69.8452" data-zoom="13">Jamnagar Refinery</button>
+                <button class="btn btn-outline jump-btn" data-lat="28.5995" data-lon="77.6080" data-zoom="13">Dadri Power Plant</button>
+                <button class="btn btn-outline jump-btn" data-lat="28.4082" data-lon="77.8540" data-zoom="12">Brick Kiln Belt</button>
+                <button class="btn btn-outline jump-btn" data-lat="30.2450" data-lon="75.8420" data-zoom="10">Punjab Agro Fires</button>
+                <button class="btn btn-outline jump-btn" data-lat="22.5" data-lon="78.5" data-zoom="5">India Overview</button>
+
+                <div class="gis-toolbar-divider"></div>
+
+                <button class="btn btn-outline" id="btn-refresh-nasa" style="color: #34d399; border-color: rgba(52, 211, 153, 0.4); font-size: 0.72rem; padding: 3px 8px;">
+                  <span class="pulse-dot pulse-dot-green" style="width: 6px; height: 6px;"></span>
+                  <span>NASA Live Sync</span>
+                </button>
               </div>
-              <div id="selected-unit-details" style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-                <!-- Rendered via JS -->
-              </div>
-            </div>
-          </div>
 
-          <!-- Right: Sentinel-2 Optical Validation -->
-          <div class="panel">
-            <div class="panel-header">
-              <span class="panel-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
-                Sentinel-2 Optical &amp; SWIR Validation (10m Resolution)
-              </span>
-              <span class="badge badge-purple">ESA COPERNICUS</span>
-            </div>
-            <div class="panel-body" style="display: flex; flex-direction: column; gap: 14px;">
-              <p style="font-size: 0.76rem; color: var(--text-secondary); line-height: 1.45; margin: 0;">
-                Validating coarse 375m VIIRS pixel detection against Sentinel-2 10m imagery. Slide below to compare True Color (RGB: B4, B3, B2) with False Color SWIR Thermal (B12, B8A, B4) which penetrates dense smoke plumes to isolate the flare combustion stack.
-              </p>
-
-              <!-- Split slider wrapper -->
-              <div style="position: relative; height: 260px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-subtle); user-select: none;">
-                <!-- Background: False Color SWIR -->
-                <div style="position: absolute; inset: 0; background: radial-gradient(circle at 62% 38%, #b91c1c 0%, #c2410c 18%, #78350f 35%, #1e293b 70%, #090d16 100%); display: flex; align-items: flex-end; padding: 12px;">
-                  <span style="background: rgba(15, 23, 42, 0.85); color: #fb923c; font-size: 0.68rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(251, 146, 60, 0.4); backdrop-filter: blur(4px);">
-                    SENTINEL-2 SWIR THERMAL (B12 / B8A / B4)
+              <!-- Classification & Layer Filters Dock -->
+              <div class="gis-filters">
+                <div class="gis-filters-header">
+                  <span class="gis-filters-title">
+                    Active Detections: <span id="hotspot-count-label" style="color: #38bdf8; font-weight: 700;">435</span> hotspots
                   </span>
+                  <span class="badge badge-cyan" id="live-indicator-badge" style="font-size: 0.6rem;">LIVE SATELLITE</span>
                 </div>
-                <!-- Foreground: Optical RGB -->
-                <div id="s2-split-container" style="position: absolute; inset: 0; width: 50%; overflow: hidden; background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%); border-right: 2px solid #38bdf8; display: flex; align-items: flex-end; padding: 12px;">
-                  <span style="background: rgba(15, 23, 42, 0.85); color: #38bdf8; font-size: 0.68rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.4); white-space: nowrap; backdrop-filter: blur(4px);">
-                    TRUE COLOR OPTICAL (10M RGB)
-                  </span>
-                </div>
-              </div>
 
-              <!-- Slider control -->
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 0.72rem; color: var(--text-tertiary); font-weight: 500;">Optical (RGB)</span>
-                <input type="range" id="s2-slider" min="0" max="100" value="50" style="flex: 1; accent-color: var(--primary);" />
-                <span style="font-size: 0.72rem; color: var(--text-tertiary); font-weight: 500;">SWIR Thermal</span>
-              </div>
-
-              <div style="background: var(--status-success-bg); border: 1px solid var(--status-success-border); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.74rem; line-height: 1.45;">
-                <div style="display: flex; align-items: center; gap: 6px; color: var(--status-success-text); margin-bottom: 3px; font-weight: 600;">
-                  <span>✓</span>
-                  <span>Sentinel-2 Multi-Spectral Analysis Complete</span>
+                <div style="margin-bottom: 6px;">
+                  <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
+                    🛰️ Satellite Sensor Feed
+                  </div>
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button class="btn btn-primary filter-pill-sat" data-sat="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Sensors</button>
+                    <button class="btn btn-outline filter-pill-sat" data-sat="VIIRS" style="font-size: 0.68rem; padding: 2px 7px; color: #34d399; border-color: rgba(52, 211, 153, 0.4);">
+                      <span class="pulse-dot pulse-dot-green" style="width: 4px; height: 4px;"></span>
+                      <span>VIIRS 375m (LEO)</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill-sat" data-sat="SENTINEL3" style="font-size: 0.68rem; padding: 2px 7px; color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);">
+                      <span>Sentinel-3 SLSTR (1km)</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill-sat" data-sat="SEVIRI" style="font-size: 0.68rem; padding: 2px 7px; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
+                      <span>SEVIRI (15m Geo)</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill-sat" data-sat="INSAT" style="font-size: 0.68rem; padding: 2px 7px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
+                      <span>INSAT-3DR (15m)</span>
+                    </button>
+                  </div>
                 </div>
-                <p style="color: var(--text-secondary); margin: 0;">
-                  Zero cloud obscuration detected over Jamnagar sector. SWIR Band 12 reflectance peak of 0.88 confirms high-temperature combustion confined to flare stack tip with no ground-level structural spread.
-                </p>
+
+                <div>
+                  <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
+                    🎯 XGBoost Thermal Classification (7 Tactical Types)
+                  </div>
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap;" id="map-filter-buttons">
+                    <button class="btn btn-primary filter-pill" data-filter="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Types</button>
+                    <button class="btn btn-outline filter-pill" data-filter="INDUSTRIAL_HIGH_ALERT" style="font-size: 0.68rem; padding: 2px 7px; color: #ef4444; border-color: rgba(239, 68, 68, 0.5);">
+                      <span class="pulse-dot pulse-dot-red" style="width: 4px; height: 4px;"></span>
+                      <span>🔴 High-Alert</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill" data-filter="FACTORY" style="font-size: 0.68rem; padding: 2px 7px; color: #f97316; border-color: rgba(249, 115, 22, 0.5);">
+                      <span>🟠 Factory</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill" data-filter="HEAT_RING" style="font-size: 0.68rem; padding: 2px 7px; color: #eab308; border-color: rgba(234, 179, 8, 0.5);">
+                      <span>🟡 Heat Ring</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill" data-filter="WILDFIRE" style="font-size: 0.68rem; padding: 2px 7px; color: #22c55e; border-color: rgba(34, 197, 94, 0.5);">
+                      <span>🟢 Wildfire</span>
+                    </button>
+                    <button class="btn btn-outline filter-pill" data-filter="CROP" style="font-size: 0.68rem; padding: 2px 7px; color: #b45309; border-color: rgba(180, 83, 9, 0.5);">
+                      <span>🟤 Crop</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- GIS Right Sidebar -->
+            <aside class="gis-sidebar">
+              <div class="gis-sidebar-tabs">
+                <button class="gis-sidebar-tab-btn active" id="tab-btn-inspector">Hotspot Inspector</button>
+                <button class="gis-sidebar-tab-btn" id="tab-btn-feed">Real-time Feed</button>
+              </div>
+              <div id="gis-sidebar-content" style="padding: 12px; overflow-y: auto; flex: 1;"></div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- TAB 2: FACILITY TOPOLOGY -->
+        <section id="tab-showcase" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="showcase-container"></div>
+        </section>
+
+        <!-- TAB 3: INDUSTRY COMPLIANCE PORTAL -->
+        <section id="tab-portal" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="portal-container"></div>
+        </section>
+
+        <!-- TAB 4: THERMAL BASELINE & FINGERPRINT -->
+        <section id="tab-fingerprint" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="fingerprint-container"></div>
+        </section>
+
+        <!-- TAB 5: EDGE IOT TELEMETRY -->
+        <section id="tab-iot" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="iot-container"></div>
+        </section>
+
+        <!-- TAB 6: DISASTER SOPS & SIMILARITY -->
+        <section id="tab-similarity" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="similarity-container"></div>
+        </section>
+
+        <!-- TAB 7: AGENTIC ESCALATION -->
+        <section id="tab-agentic" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="agentic-container"></div>
+        </section>
+
+        <!-- TAB 8: REGULATORY CPCB & ESG -->
+        <section id="tab-regulatory" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="regulatory-container"></div>
+        </section>
+
+        <!-- TAB 9: 3D REPLAY -->
+        <section id="tab-replay3d" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="replay3d-container"></div>
+        </section>
+
+        <!-- TAB 10: REST API -->
+        <section id="tab-api" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="api-container"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Hidden navigation tabs for JS state sync -->
+    <nav class="nav-tabs-container" id="nav-tabs" style="display: none;">
+      <button class="nav-tab-btn" data-tab="tab-dashboard"></button>
+      <button class="nav-tab-btn active" data-tab="tab-map"></button>
+      <button class="nav-tab-btn" data-tab="tab-showcase"></button>
+      <button class="nav-tab-btn" data-tab="tab-portal"></button>
+      <button class="nav-tab-btn" data-tab="tab-fingerprint"></button>
+      <button class="nav-tab-btn" data-tab="tab-iot"></button>
+      <button class="nav-tab-btn" data-tab="tab-similarity"></button>
+      <button class="nav-tab-btn" data-tab="tab-agentic"></button>
+      <button class="nav-tab-btn" data-tab="tab-regulatory"></button>
+      <button class="nav-tab-btn" data-tab="tab-replay3d"></button>
+      <button class="nav-tab-btn" data-tab="tab-api"></button>
+    </nav>
+
+    <!-- =====================================================================
+         7. BOTTOM FLOATING TIMELINE & OUTLOOK PLAYER BAR (firemap.live)
+         ===================================================================== -->
+    <div class="bottom-timeline-bar" id="bottomTimelineBar">
+      <div class="timeline-head-row" id="timelineHeadRow">
+        <span class="timeline-pill"><b></b> LIVE</span>
+        <div class="timeline-when">
+          <span class="timeline-local" id="timelineDateLabel">Today &middot; Live Satellite Feed</span>
+          <span class="timeline-utc" id="timelineCountLabel">Syncing 400+ Active Anomalies</span>
+        </div>
+        <button class="timeline-collapse-btn" id="timelineCollapseBtn">HIDE &or;</button>
+      </div>
+      <div class="timeline-body">
+        <button class="timeline-play-btn" id="btn-timeline-play" title="Play Historical Timeline Animation">▶</button>
+        <div class="timeline-track-container">
+          <input type="range" class="timeline-slider-range" id="timeline-slider" min="0" max="6" value="6" step="1">
+          <div class="timeline-ticks" id="timeline-labels">
+            <span>6d</span><span>5d</span><span>4d</span><span>3d</span><span>2d</span><span>1d</span><span class="active">Today</span>
           </div>
         </div>
-      </section>
+        <div class="timeline-model-badge">
+          <span>FIRMS</span><br>
+          <span style="color:#38bdf8;">GFS 22km</span>
+        </div>
+      </div>
+    </div>
 
-      <!-- TAB 3: INDUSTRY PORTAL & ANOMALY QUEUE -->
-      <section id="tab-portal" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <!-- Rendered via JS -->
-        <div id="industry-portal-container"></div>
-      </section>
+    <!-- Canvas for Wind Streamline Particles -->
+    <canvas id="wind-canvas"></canvas>
 
-      <!-- TAB 4: THERMAL FINGERPRINT & BASELINES -->
-      <section id="tab-fingerprint" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="fingerprint-container"></div>
-      </section>
-
-      <!-- TAB 5: SYNTHETIC EDGE IOT & ANOMALY INJECTION -->
-      <section id="tab-iot" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="iot-container"></div>
-      </section>
-
-      <!-- TAB 6: PAST INCIDENT VECTORS -->
-      <section id="tab-similarity" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="similarity-container"></div>
-      </section>
-
-      <!-- TAB 7: AGENTIC ESCALATION & TWO-WAY BOT -->
-      <section id="tab-agentic" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="agentic-container"></div>
-      </section>
-
-      <!-- TAB 8: CPCB & ESG AUDIT -->
-      <section id="tab-regulatory" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="regulatory-container"></div>
-      </section>
-
-      <!-- TAB 9: 3D TACTICAL INCIDENT REPLAY -->
-      <section id="tab-replay3d" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="replay3d-container"></div>
-      </section>
-
-      <!-- TAB 10: REST API & SACHET CAP-XML -->
-      <section id="tab-api" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-        <div id="api-container"></div>
-      </section>
-    </main>
-
+    <!-- =====================================================================
+         8. EXISTING PROTOCOL MODALS (Preserved)
+         ===================================================================== -->
     <!-- MODAL: HUMAN-IN-THE-LOOP PUBLIC BROADCAST GATE -->
     <div id="broadcast-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content">
@@ -456,39 +691,33 @@
           </div>
           <button id="btn-close-citizen" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 1.2rem; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
         </div>
-        <form id="citizen-form" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.78rem;">
+        <form id="citizen-form" style="display: flex; flex-direction: column; gap: 12px;">
           <div>
-            <label style="color: var(--text-tertiary); display: block; margin-bottom: 4px; font-size: 0.72rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Incident Location Name / Landmark:</label>
-            <input type="text" id="cit-loc" placeholder="e.g. Near Sikandrabad bypass, Bulandshahr, UP" required />
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-              <label style="color: var(--text-tertiary); display: block; margin-bottom: 4px; font-size: 0.72rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Observed Smoke Color:</label>
-              <select id="cit-smoke">
-                <option>Black / Heavy Soot</option>
-                <option>White / Steam</option>
-                <option>Yellowish / Chemical</option>
-                <option>Grey / Agricultural</option>
-              </select>
-            </div>
-            <div>
-              <label style="color: var(--text-tertiary); display: block; margin-bottom: 4px; font-size: 0.72rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Perceived Odor:</label>
-              <select id="cit-odor">
-                <option>Plastic / Acrid</option>
-                <option>Sulfur / Petroleum</option>
-                <option>Wood / Biomass</option>
-                <option>None</option>
-              </select>
-            </div>
+            <label style="font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">Reporter Name / Mobile</label>
+            <input type="text" id="citizen-name" placeholder="Ramesh Patel (+91 98250...)" required style="width: 100%; padding: 8px 10px; background: var(--bg-canvas); border: 1px solid var(--border-default); color: #fff; border-radius: var(--radius-sm); font-size: 0.8rem;" />
           </div>
           <div>
-            <label style="color: var(--text-tertiary); display: block; margin-bottom: 4px; font-size: 0.72rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Field Observation Notes:</label>
-            <textarea id="cit-notes" rows="3" placeholder="Describe flame height, chimney operation, or nearby population impact..."></textarea>
+            <label style="font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">Observation Type</label>
+            <select id="citizen-type" style="width: 100%; padding: 8px 10px; background: var(--bg-canvas); border: 1px solid var(--border-default); color: #fff; border-radius: var(--radius-sm); font-size: 0.8rem;">
+              <option value="VISIBLE_FLARE_HIGH">Abnormally High Flare Stack Height (&gt;20m)</option>
+              <option value="BLACK_SMOKE_PLUME">Dense Black Smoke / Soot Plume Observed</option>
+              <option value="PUNGENT_ODOR">Pungent Sulfur / Chemical Odor in Residential Area</option>
+              <option value="EXPLOSION_SOUND">Loud Rumbles / Vibration Felt</option>
+            </select>
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 6px; align-self: flex-end;">Submit Geotagged Ground-Truth Report</button>
+          <div>
+            <label style="font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">Description / Field Notes</label>
+            <textarea id="citizen-desc" rows="3" placeholder="Describe flame color, direction of plume, proximity to homes..." style="width: 100%; padding: 8px 10px; background: var(--bg-canvas); border: 1px solid var(--border-default); color: #fff; border-radius: var(--radius-sm); font-size: 0.8rem;"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+            <button type="button" id="btn-cancel-citizen" class="btn btn-outline">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit Report to CPCB Control Room</button>
+          </div>
         </form>
       </div>
-    <!-- MODAL: EUMETSAT SEVIRI (EUMDAC) CLIENT & DATA STORE -->
+    </div>
+
+    <!-- MODAL: METEOSAT SEVIRI STATUS -->
     <div id="seviri-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content" style="max-width: 680px; width: 92%;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
@@ -497,9 +726,9 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
             </div>
             <div>
-              <h3 style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin: 0;">EUMETSAT SEVIRI Integration via eumdac</h3>
-              <p style="font-size: 0.72rem; color: #a855f7; margin: 2px 0 0 0; font-family: var(--font-mono);">
-                Official Python SDK: eumdac v3.1.1 · Meteosat-9/11 MSG-IODC (45.5°E GEO)
+              <h3 style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin: 0;">EUMETSAT Meteosat MSG-IODC SEVIRI Integration</h3>
+              <p style="font-size: 0.72rem; color: #c084fc; margin: 2px 0 0 0; font-family: var(--font-mono);">
+                Official Python SDK: eumdac v3.1.1 &middot; Consumer Key Authenticated
               </p>
             </div>
           </div>
@@ -508,67 +737,77 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; font-size: 0.74rem;">
           <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">Satellite Orbital Slot</div>
-            <div style="color: #fff; font-weight: 600; margin-top: 2px;">45.5°E Geostationary (Altitude: 35,786 km)</div>
-            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">Meteosat-9 / Meteosat-11 (Indian Ocean Coverage)</div>
+            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">Orbital Slot &amp; Coverage</div>
+            <div style="color: #fff; font-weight: 600; margin-top: 2px;">45.5&deg;E Geostationary (Meteosat-9)</div>
+            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">Indian Ocean Data Coverage (IODC) Full Disk</div>
           </div>
           <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">Temporal &amp; Spectral Resolution</div>
-            <div style="color: #34d399; font-weight: 600; margin-top: 2px;">15-Min Continuous Scan · 96 Passes/24h</div>
-            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">Ch 4 MIR 3.9 µm (Fires) · Ch 9 TIR 10.8 µm</div>
+            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">Scan Cadence &amp; Thermal Channels</div>
+            <div style="color: #c084fc; font-weight: 600; margin-top: 2px;">15-Minute Rapid Repeat Cycle</div>
+            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">IR 3.9 &mu;m (MIR) &amp; IR 10.8 &mu;m (TIR)</div>
           </div>
         </div>
 
-        <!-- Connection Status Banner -->
-        <div id="seviri-status-banner" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <div style="font-size: 0.72rem; font-weight: 600; color: #c084fc; display: flex; align-items: center; gap: 6px;">
-              <span id="seviri-status-dot" class="pulse-dot" style="background: #eab308; box-shadow: 0 0 8px #eab308; width: 6px; height: 6px;"></span>
-              <span id="seviri-status-title">eumdac Client Ready · Credentials Check</span>
+        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.72rem; font-weight: 600; color: #c084fc; display: flex; align-items: center; gap: 6px;">
+                <span class="pulse-dot" style="background: #22c55e; box-shadow: 0 0 8px #22c55e; width: 6px; height: 6px;"></span>
+                <span>eumdac Local Microservice Ready (Port 5174)</span>
+              </div>
+              <div style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 4px;">
+                To stream real-time NetCDF / Native SEVIRI imagery: <code>python backend/seviri_eumdac.py serve --port 5174</code>
+              </div>
             </div>
-            <div id="seviri-status-desc" style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 2px;">
-              Target Collection: EO:EUM:DAT:MSG:HRSEVIRI-IODC
-            </div>
+            <button id="btn-sync-seviri-now" class="btn btn-primary" style="font-size: 0.72rem; padding: 6px 12px; background: #9333ea; border-color: #a855f7; flex-shrink: 0; margin-left: 12px;">
+              Sync SEVIRI Pass
+            </button>
           </div>
-          <button id="btn-sync-seviri-api" class="btn btn-primary" style="font-size: 0.72rem; padding: 4px 10px; background: #9333ea; border-color: #a855f7;">
-            Sync via eumdac
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="btn-download-seviri-script" class="btn btn-outline" style="font-size: 0.74rem; padding: 6px 14px;">
+            View eumdac Code
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- EUMETSAT Credentials Form -->
-        <div style="background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 14px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <label style="font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em;">
-              EUMETSAT API Credentials (Stored in .env)
-            </label>
-            <a href="https://api.eumetsat.int/api-key" target="_blank" rel="noopener noreferrer" style="font-size: 0.68rem; color: #38bdf8; text-decoration: underline;">
-              Get Free Key at api.eumetsat.int &rarr;
-            </a>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div>
-              <label style="font-size: 0.68rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Consumer Key:</label>
-              <input type="text" id="seviri-consumer-key" placeholder="Enter Consumer Key" style="width: 100%; padding: 6px 8px; font-size: 0.75rem; background: var(--bg-canvas); border: 1px solid var(--border-default); color: #fff; border-radius: var(--radius-sm); font-family: var(--font-mono);" />
+    <!-- MODAL: COPERNICUS SENTINEL-3 SLSTR -->
+    <div id="sentinel3-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 680px; width: 92%;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
             </div>
             <div>
-              <label style="font-size: 0.68rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Consumer Secret:</label>
-              <input type="password" id="seviri-consumer-secret" placeholder="Enter Consumer Secret" style="width: 100%; padding: 6px 8px; font-size: 0.75rem; background: var(--bg-canvas); border: 1px solid var(--border-default); color: #fff; border-radius: var(--radius-sm); font-family: var(--font-mono);" />
+              <h3 style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin: 0;">Copernicus Sentinel-3 SLSTR Integration via eumdac</h3>
+              <p style="font-size: 0.72rem; color: #38bdf8; margin: 2px 0 0 0; font-family: var(--font-mono);">
+                Official Python SDK: eumdac v3.1.1 &middot; Collection EO:EUM:DAT:0417 (Sentinel-3A &amp; 3B)
+              </p>
             </div>
           </div>
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button id="btn-save-seviri-creds" class="btn btn-outline" style="font-size: 0.72rem; padding: 4px 10px;">Save Credentials</button>
+          <button id="btn-close-sentinel3-modal" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 1.4rem; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; font-size: 0.74rem;">
+          <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">Orbit &amp; Spatial Footprint</div>
+            <div style="color: #fff; font-weight: 600; margin-top: 2px;">Polar Sun-Synchronous (Altitude: ~814 km)</div>
+            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">10 Real Orbital Granules Indexed Over India Today</div>
+          </div>
+          <div style="background: var(--bg-surface-elevated); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-tertiary); font-size: 0.65rem; text-transform: uppercase; font-weight: 600;">SLSTR Thermal Channels</div>
+            <div style="color: #38bdf8; font-weight: 600; margin-top: 2px;">1.0 km MWIR Nadir &middot; 500 m SWIR</div>
+            <div style="color: var(--text-secondary); font-size: 0.68rem; margin-top: 2px;">Ch F1 3.74 &mu;m (650K Ceiling) &middot; Ch F2 10.85 &mu;m</div>
           </div>
         </div>
 
-        <!-- Terminal CLI Instructions -->
-        <div style="background: var(--bg-canvas); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.68rem; color: #94a3b8;">
-          <div style="color: var(--text-tertiary); font-size: 0.62rem; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">
-            Command Line Usage (Using Local Python Virtualenv):
-          </div>
-          <div style="color: #38bdf8; margin-bottom: 3px;">./venv/bin/python backend/seviri_eumdac.py status</div>
-          <div style="color: #38bdf8; margin-bottom: 3px;">./venv/bin/python backend/seviri_eumdac.py search --hours 3</div>
-          <div style="color: #38bdf8; margin-bottom: 3px;">./venv/bin/python backend/seviri_eumdac.py sync</div>
-          <div style="color: #38bdf8;">./venv/bin/python backend/seviri_eumdac.py serve --port 5174</div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="btn-show-all-sensors" class="btn btn-outline" style="font-size: 0.74rem; padding: 6px 14px;">
+            Switch to All Sensors (Live Constellation Feed)
+          </button>
         </div>
       </div>
     </div>

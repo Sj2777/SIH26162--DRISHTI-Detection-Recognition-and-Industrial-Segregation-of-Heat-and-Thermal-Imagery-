@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "mapbox-gl": "^3.31.0"
   },
   "devDependencies": {
     "vite": "^6.0.0"

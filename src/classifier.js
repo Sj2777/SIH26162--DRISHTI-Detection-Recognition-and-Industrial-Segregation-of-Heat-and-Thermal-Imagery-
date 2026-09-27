@@ -22,11 +22,15 @@ export function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 export function isPointInPolygon(point, polygon) {
+  if (!polygon || !Array.isArray(polygon) || polygon.length < 3) return false;
   const [lat, lon] = point;
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [xi, yi] = polygon[i];
-    const [xj, yj] = polygon[j];
+    const p1 = polygon[i];
+    const p2 = polygon[j];
+    if (!p1 || !p2) continue;
+    const [xi, yi] = p1;
+    const [xj, yj] = p2;
     const intersect = yi > lon !== yj > lon && lat < ((xj - xi) * (lon - yi)) / (yj - yi) + xi;
     if (intersect) inside = !inside;
   }
@@ -38,11 +42,12 @@ export function classifyHotspot(hotspot, facilities) {
   let minDistanceKm = 9999;
 
   for (const fac of facilities) {
+    if (!fac || fac.lat == null || fac.lon == null) continue;
     const dist = getDistanceKm(hotspot.latitude, hotspot.longitude, fac.lat, fac.lon);
     if (dist < minDistanceKm) {
       minDistanceKm = dist;
     }
-    if (isPointInPolygon([hotspot.latitude, hotspot.longitude], fac.boundary) || dist < 1.8) {
+    if ((fac.boundary && isPointInPolygon([hotspot.latitude, hotspot.longitude], fac.boundary)) || dist < 1.8) {
       matchedFacility = fac;
       break;
     }

@@ -1,0 +1,46 @@
+{
+  "model": "XGBoost Multi-Class Fire Classifier v1.0",
+  "classes": [
+    "INDUSTRIAL_HIGH_ALERT",
+    "FACTORY",
+    "HEAT_RING",
+    "WILDFIRE",
+    "CROP",
+    "MINE",
+    "UNKNOWN"
+  ],
+  "features": [
+    "frp",
+    "brightness",
+    "land_cover_code",
+    "ghsl_pop_density",
+    "wind_speed",
+    "tropomi_no2",
+    "persistence_30d",
+    "dist_to_factory_km",
+    "hour_utc",
+    "day_night_flag"
+  ],
+  "feature_importances": {
+    "frp": 0.09886087477207184,
+    "brightness": 0.053065016865730286,
+    "land_cover_code": 0.30757734179496765,
+    "ghsl_pop_density": 0.08602037280797958,
+    "wind_speed": 0.012075701728463173,
+    "tropomi_no2": 0.045629020780324936,
+    "persistence_30d": 0.24195384979248047,
+    "dist_to_factory_km": 0.12683764100074768,
+    "hour_utc": 0.0026436869520694017,
+    "day_night_flag": 0.02533651515841484
+  },
+  "accuracy": 0.9917,
+  "class_colors": {
+    "INDUSTRIAL_HIGH_ALERT": "#ef4444",
+    "FACTORY": "#f97316",
+    "HEAT_RING": "#eab308",
+    "WILDFIRE": "#22c55e",
+    "CROP": "#b45309",
+    "MINE": "#a855f7",
+    "UNKNOWN": "#64748b"
+  }
+}

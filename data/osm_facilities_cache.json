@@ -1,0 +1,1368 @@
+[
+  {
+    "id": "FAC-JAM-01",
+    "name": "Reliance Jamnagar Mega-Refinery Complex",
+    "type": "refinery",
+    "operator": "Reliance Industries Limited",
+    "lat": 22.3528,
+    "lon": 69.8452,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "Reliance Industries Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Ministry of Petroleum & Natural Gas",
+    "boundary": [
+      [
+        22.3648,
+        69.8332
+      ],
+      [
+        22.3648,
+        69.8572
+      ],
+      [
+        22.3408,
+        69.8572
+      ],
+      [
+        22.3408,
+        69.8332
+      ],
+      [
+        22.3648,
+        69.8332
+      ]
+    ]
+  },
+  {
+    "id": "FAC-VAD-02",
+    "name": "Vadinar Refinery (Nayara Energy)",
+    "type": "refinery",
+    "operator": "Nayara Energy",
+    "lat": 22.4284,
+    "lon": 69.7042,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "Nayara Energy",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.4404,
+        69.6922
+      ],
+      [
+        22.4404,
+        69.7162
+      ],
+      [
+        22.4164,
+        69.7162
+      ],
+      [
+        22.4164,
+        69.6922
+      ],
+      [
+        22.4404,
+        69.6922
+      ]
+    ]
+  },
+  {
+    "id": "FAC-HAZ-03",
+    "name": "ONGC Hazira Gas Processing & Petrochemicals Complex",
+    "type": "petrochemical",
+    "operator": "Oil and Natural Gas Corporation (ONGC)",
+    "lat": 21.1325,
+    "lon": 72.645,
+    "osm_tags": {
+      "industrial": "petrochemical",
+      "operator": "ONGC",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        21.1445,
+        72.633
+      ],
+      [
+        21.1445,
+        72.657
+      ],
+      [
+        21.1205,
+        72.657
+      ],
+      [
+        21.1205,
+        72.633
+      ],
+      [
+        21.1445,
+        72.633
+      ]
+    ]
+  },
+  {
+    "id": "FAC-DAD-04",
+    "name": "NTPC Dadri Super Thermal Power Station",
+    "type": "thermal_power",
+    "operator": "NTPC Limited",
+    "lat": 28.5986,
+    "lon": 77.6042,
+    "osm_tags": {
+      "power": "plant",
+      "operator": "NTPC Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Central Electricity Authority",
+    "boundary": [
+      [
+        28.6106,
+        77.5922
+      ],
+      [
+        28.6106,
+        77.6162
+      ],
+      [
+        28.5866,
+        77.6162
+      ],
+      [
+        28.5866,
+        77.5922
+      ],
+      [
+        28.6106,
+        77.5922
+      ]
+    ]
+  },
+  {
+    "id": "FAC-PAN-05",
+    "name": "IOCL Panipat Refinery & Petrochemical Complex",
+    "type": "refinery",
+    "operator": "Indian Oil Corporation Limited",
+    "lat": 29.475,
+    "lon": 76.92,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "IOCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        29.487,
+        76.908
+      ],
+      [
+        29.487,
+        76.932
+      ],
+      [
+        29.463,
+        76.932
+      ],
+      [
+        29.463,
+        76.908
+      ],
+      [
+        29.487,
+        76.908
+      ]
+    ]
+  },
+  {
+    "id": "FAC-PAR-06",
+    "name": "IOCL Paradip Refinery",
+    "type": "refinery",
+    "operator": "Indian Oil Corporation Limited",
+    "lat": 20.2789,
+    "lon": 86.6456,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "IOCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        20.2909,
+        86.6336
+      ],
+      [
+        20.2909,
+        86.6576
+      ],
+      [
+        20.2669,
+        86.6576
+      ],
+      [
+        20.2669,
+        86.6336
+      ],
+      [
+        20.2909,
+        86.6336
+      ]
+    ]
+  },
+  {
+    "id": "FAC-JAM-07",
+    "name": "Tata Steel Jamshedpur Works",
+    "type": "steel_plant",
+    "operator": "Tata Steel Limited",
+    "lat": 22.802,
+    "lon": 86.203,
+    "osm_tags": {
+      "industrial": "steel",
+      "operator": "Tata Steel",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.814,
+        86.191
+      ],
+      [
+        22.814,
+        86.215
+      ],
+      [
+        22.79,
+        86.215
+      ],
+      [
+        22.79,
+        86.191
+      ],
+      [
+        22.814,
+        86.191
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MUN-08",
+    "name": "Adani Mundra Thermal Power Plant & SEZ",
+    "type": "thermal_power",
+    "operator": "Adani Power",
+    "lat": 22.825,
+    "lon": 69.525,
+    "osm_tags": {
+      "power": "plant",
+      "operator": "Adani Power",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.837,
+        69.513
+      ],
+      [
+        22.837,
+        69.537
+      ],
+      [
+        22.813,
+        69.537
+      ],
+      [
+        22.813,
+        69.513
+      ],
+      [
+        22.837,
+        69.513
+      ]
+    ]
+  },
+  {
+    "id": "FAC-ROU-09",
+    "name": "SAIL Rourkela Steel Plant",
+    "type": "steel_plant",
+    "operator": "Steel Authority of India Limited",
+    "lat": 22.215,
+    "lon": 84.872,
+    "osm_tags": {
+      "industrial": "steel",
+      "operator": "SAIL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.227,
+        84.86
+      ],
+      [
+        22.227,
+        84.884
+      ],
+      [
+        22.203,
+        84.884
+      ],
+      [
+        22.203,
+        84.86
+      ],
+      [
+        22.227,
+        84.86
+      ]
+    ]
+  },
+  {
+    "id": "FAC-KOR-10",
+    "name": "NTPC Korba Super Thermal Power Plant",
+    "type": "thermal_power",
+    "operator": "NTPC Limited",
+    "lat": 22.385,
+    "lon": 82.685,
+    "osm_tags": {
+      "power": "plant",
+      "operator": "NTPC",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.397,
+        82.673
+      ],
+      [
+        22.397,
+        82.697
+      ],
+      [
+        22.373,
+        82.697
+      ],
+      [
+        22.373,
+        82.673
+      ],
+      [
+        22.397,
+        82.673
+      ]
+    ]
+  },
+  {
+    "id": "FAC-VIN-11",
+    "name": "NTPC Vindhyachal Super Thermal Power Station",
+    "type": "thermal_power",
+    "operator": "NTPC Limited",
+    "lat": 24.1,
+    "lon": 82.6667,
+    "osm_tags": {
+      "power": "plant",
+      "operator": "NTPC",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        24.112,
+        82.6547
+      ],
+      [
+        24.112,
+        82.6787
+      ],
+      [
+        24.088,
+        82.6787
+      ],
+      [
+        24.088,
+        82.6547
+      ],
+      [
+        24.112,
+        82.6547
+      ]
+    ]
+  },
+  {
+    "id": "FAC-VIZ-12",
+    "name": "HPCL Visakh Refinery",
+    "type": "refinery",
+    "operator": "Hindustan Petroleum Corporation Limited",
+    "lat": 17.685,
+    "lon": 83.255,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "HPCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        17.697,
+        83.243
+      ],
+      [
+        17.697,
+        83.267
+      ],
+      [
+        17.673,
+        83.267
+      ],
+      [
+        17.673,
+        83.243
+      ],
+      [
+        17.697,
+        83.243
+      ]
+    ]
+  },
+  {
+    "id": "FAC-HAL-13",
+    "name": "Haldia Petrochemicals Complex",
+    "type": "petrochemical",
+    "operator": "Haldia Petrochemicals Ltd",
+    "lat": 22.05,
+    "lon": 88.085,
+    "osm_tags": {
+      "industrial": "petrochemical",
+      "operator": "HPL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        22.062,
+        88.073
+      ],
+      [
+        22.062,
+        88.097
+      ],
+      [
+        22.038,
+        88.097
+      ],
+      [
+        22.038,
+        88.073
+      ],
+      [
+        22.062,
+        88.073
+      ]
+    ]
+  },
+  {
+    "id": "FAC-KOC-14",
+    "name": "BPCL Kochi Refinery",
+    "type": "refinery",
+    "operator": "Bharat Petroleum Corporation Limited",
+    "lat": 9.992,
+    "lon": 76.368,
+    "osm_tags": {
+      "industrial": "oil_refinery",
+      "operator": "BPCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        10.004,
+        76.356
+      ],
+      [
+        10.004,
+        76.38
+      ],
+      [
+        9.98,
+        76.38
+      ],
+      [
+        9.98,
+        76.356
+      ],
+      [
+        10.004,
+        76.356
+      ]
+    ]
+  },
+  {
+    "id": "FAC-ANG-15",
+    "name": "Jindal Steel & Power Angul Complex",
+    "type": "steel_plant",
+    "operator": "Jindal Steel & Power Limited",
+    "lat": 20.84,
+    "lon": 85.12,
+    "osm_tags": {
+      "industrial": "steel",
+      "operator": "JSPL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        20.852,
+        85.108
+      ],
+      [
+        20.852,
+        85.132
+      ],
+      [
+        20.828,
+        85.132
+      ],
+      [
+        20.828,
+        85.108
+      ],
+      [
+        20.852,
+        85.108
+      ]
+    ]
+  },
+  {
+    "id": "FAC-TRO-16",
+    "name": "Tata Power Trombay Thermal Power Generating Station",
+    "type": "thermal_power",
+    "operator": "The Tata Power Company",
+    "lat": 19.002,
+    "lon": 72.898,
+    "osm_tags": {
+      "power": "plant",
+      "operator": "Tata Power",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        19.014,
+        72.886
+      ],
+      [
+        19.014,
+        72.91
+      ],
+      [
+        18.99,
+        72.91
+      ],
+      [
+        18.99,
+        72.886
+      ],
+      [
+        19.014,
+        72.886
+      ]
+    ]
+  },
+  {
+    "id": "FAC-BAT-17",
+    "name": "Guru Gobind Singh Refinery Bathinda (HMEL)",
+    "type": "refinery",
+    "operator": "HPCL-Mittal Energy Limited",
+    "lat": 30.015,
+    "lon": 75.02,
+    "osm_tags": {
+      "industrial": "refinery",
+      "operator": "HMEL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        30.027,
+        75.008
+      ],
+      [
+        30.027,
+        75.032
+      ],
+      [
+        30.003,
+        75.032
+      ],
+      [
+        30.003,
+        75.008
+      ],
+      [
+        30.027,
+        75.008
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-01",
+    "name": "Inder Coal Mine (Kamptee Area)",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 21.245,
+    "lon": 79.215,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        21.257,
+        79.203
+      ],
+      [
+        21.257,
+        79.227
+      ],
+      [
+        21.233,
+        79.227
+      ],
+      [
+        21.233,
+        79.203
+      ],
+      [
+        21.257,
+        79.203
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-02",
+    "name": "Kamptee Colliery Open-Cast Mine",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 21.238,
+    "lon": 79.208,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        21.25,
+        79.196
+      ],
+      [
+        21.25,
+        79.22
+      ],
+      [
+        21.226,
+        79.22
+      ],
+      [
+        21.226,
+        79.196
+      ],
+      [
+        21.25,
+        79.196
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-03",
+    "name": "Gondegaon-Ghatrohana Coal Mine",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 21.258,
+    "lon": 79.205,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        21.27,
+        79.193
+      ],
+      [
+        21.27,
+        79.217
+      ],
+      [
+        21.246,
+        79.217
+      ],
+      [
+        21.246,
+        79.193
+      ],
+      [
+        21.27,
+        79.193
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-04",
+    "name": "Singhori Open-Cast Coal Mine",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 21.272,
+    "lon": 79.228,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        21.284,
+        79.216
+      ],
+      [
+        21.284,
+        79.24
+      ],
+      [
+        21.26,
+        79.24
+      ],
+      [
+        21.26,
+        79.216
+      ],
+      [
+        21.284,
+        79.216
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-05",
+    "name": "Umrer Open-Cast Coal Mine",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 20.845,
+    "lon": 79.325,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        20.857,
+        79.313
+      ],
+      [
+        20.857,
+        79.337
+      ],
+      [
+        20.833,
+        79.337
+      ],
+      [
+        20.833,
+        79.313
+      ],
+      [
+        20.857,
+        79.313
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-06",
+    "name": "Durgapur Open-Cast Mine Chandrapur",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 19.995,
+    "lon": 79.298,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        20.007,
+        79.286
+      ],
+      [
+        20.007,
+        79.31
+      ],
+      [
+        19.983,
+        79.31
+      ],
+      [
+        19.983,
+        79.286
+      ],
+      [
+        20.007,
+        79.286
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-WCL-07",
+    "name": "Padmapur Open-Cast Mine Chandrapur",
+    "type": "mine",
+    "operator": "Western Coalfields Limited (Coal India Ltd)",
+    "lat": 20.025,
+    "lon": 79.312,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "Western Coalfields Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Western Coalfields Ltd",
+    "boundary": [
+      [
+        20.037,
+        79.3
+      ],
+      [
+        20.037,
+        79.324
+      ],
+      [
+        20.013,
+        79.324
+      ],
+      [
+        20.013,
+        79.3
+      ],
+      [
+        20.037,
+        79.3
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-SECL-01",
+    "name": "Gevra Mega Open-Cast Coal Mine (Korba)",
+    "type": "mine",
+    "operator": "South Eastern Coalfields Limited (Coal India Ltd)",
+    "lat": 22.345,
+    "lon": 82.595,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "SECL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SECL",
+    "boundary": [
+      [
+        22.357,
+        82.583
+      ],
+      [
+        22.357,
+        82.607
+      ],
+      [
+        22.333,
+        82.607
+      ],
+      [
+        22.333,
+        82.583
+      ],
+      [
+        22.357,
+        82.583
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-SECL-02",
+    "name": "Dipka Open-Cast Coal Mine (Korba)",
+    "type": "mine",
+    "operator": "South Eastern Coalfields Limited (Coal India Ltd)",
+    "lat": 22.32,
+    "lon": 82.55,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "SECL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SECL",
+    "boundary": [
+      [
+        22.332,
+        82.538
+      ],
+      [
+        22.332,
+        82.562
+      ],
+      [
+        22.308,
+        82.562
+      ],
+      [
+        22.308,
+        82.538
+      ],
+      [
+        22.332,
+        82.538
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-SECL-03",
+    "name": "Kusmunda Open-Cast Coal Mine (Korba)",
+    "type": "mine",
+    "operator": "South Eastern Coalfields Limited (Coal India Ltd)",
+    "lat": 22.335,
+    "lon": 82.685,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "SECL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SECL",
+    "boundary": [
+      [
+        22.347,
+        82.673
+      ],
+      [
+        22.347,
+        82.697
+      ],
+      [
+        22.323,
+        82.697
+      ],
+      [
+        22.323,
+        82.673
+      ],
+      [
+        22.347,
+        82.673
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-BCCL-01",
+    "name": "Kusunda Coal Mine (Jharia Coalfield)",
+    "type": "mine",
+    "operator": "Bharat Coking Coal Limited (Coal India Ltd)",
+    "lat": 23.775,
+    "lon": 86.415,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "BCCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & BCCL",
+    "boundary": [
+      [
+        23.787,
+        86.403
+      ],
+      [
+        23.787,
+        86.427
+      ],
+      [
+        23.763,
+        86.427
+      ],
+      [
+        23.763,
+        86.403
+      ],
+      [
+        23.787,
+        86.403
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-BCCL-02",
+    "name": "Lodna Coal Mine (Jharia Coalfield)",
+    "type": "mine",
+    "operator": "Bharat Coking Coal Limited (Coal India Ltd)",
+    "lat": 23.725,
+    "lon": 86.44,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "BCCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & BCCL",
+    "boundary": [
+      [
+        23.737,
+        86.428
+      ],
+      [
+        23.737,
+        86.452
+      ],
+      [
+        23.713,
+        86.452
+      ],
+      [
+        23.713,
+        86.428
+      ],
+      [
+        23.737,
+        86.428
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-NCL-01",
+    "name": "Jayant Open-Cast Coal Mine (Singrauli)",
+    "type": "mine",
+    "operator": "Northern Coalfields Limited (Coal India Ltd)",
+    "lat": 24.125,
+    "lon": 82.645,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "NCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & NCL",
+    "boundary": [
+      [
+        24.137,
+        82.633
+      ],
+      [
+        24.137,
+        82.657
+      ],
+      [
+        24.113,
+        82.657
+      ],
+      [
+        24.113,
+        82.633
+      ],
+      [
+        24.137,
+        82.633
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-NCL-02",
+    "name": "Nigahi Open-Cast Coal Mine (Singrauli)",
+    "type": "mine",
+    "operator": "Northern Coalfields Limited (Coal India Ltd)",
+    "lat": 24.11,
+    "lon": 82.585,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "NCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & NCL",
+    "boundary": [
+      [
+        24.122,
+        82.573
+      ],
+      [
+        24.122,
+        82.597
+      ],
+      [
+        24.098,
+        82.597
+      ],
+      [
+        24.098,
+        82.573
+      ],
+      [
+        24.122,
+        82.573
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-MCL-01",
+    "name": "Bhubaneswari Open-Cast Mine (Talcher)",
+    "type": "mine",
+    "operator": "Mahanadi Coalfields Limited (Coal India Ltd)",
+    "lat": 20.965,
+    "lon": 85.175,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "MCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & MCL",
+    "boundary": [
+      [
+        20.977,
+        85.163
+      ],
+      [
+        20.977,
+        85.187
+      ],
+      [
+        20.953,
+        85.187
+      ],
+      [
+        20.953,
+        85.163
+      ],
+      [
+        20.977,
+        85.163
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-CCL-01",
+    "name": "Amrapali Open-Cast Coal Mine (North Karanpura)",
+    "type": "mine",
+    "operator": "Central Coalfields Limited (Coal India Ltd)",
+    "lat": 23.825,
+    "lon": 84.975,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "CCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & CCL",
+    "boundary": [
+      [
+        23.837,
+        84.963
+      ],
+      [
+        23.837,
+        84.987
+      ],
+      [
+        23.813,
+        84.987
+      ],
+      [
+        23.813,
+        84.963
+      ],
+      [
+        23.837,
+        84.963
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-SCCL-01",
+    "name": "Ramagundam Open-Cast Mine (Godavari Valley)",
+    "type": "mine",
+    "operator": "Singareni Collieries Company Limited (SCCL)",
+    "lat": 18.765,
+    "lon": 79.515,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "coal",
+      "operator": "SCCL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SCCL",
+    "boundary": [
+      [
+        18.777,
+        79.503
+      ],
+      [
+        18.777,
+        79.527
+      ],
+      [
+        18.753,
+        79.527
+      ],
+      [
+        18.753,
+        79.503
+      ],
+      [
+        18.777,
+        79.503
+      ]
+    ]
+  },
+  {
+    "id": "FAC-MINE-NLC-01",
+    "name": "Neyveli Lignite Mine-II",
+    "type": "mine",
+    "operator": "NLC India Limited",
+    "lat": 11.535,
+    "lon": 79.465,
+    "osm_tags": {
+      "landuse": "quarry",
+      "industrial": "mine",
+      "resource": "lignite",
+      "operator": "NLC India",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & NLC",
+    "boundary": [
+      [
+        11.547,
+        79.453
+      ],
+      [
+        11.547,
+        79.477
+      ],
+      [
+        11.523,
+        79.477
+      ],
+      [
+        11.523,
+        79.453
+      ],
+      [
+        11.547,
+        79.453
+      ]
+    ]
+  }
+]

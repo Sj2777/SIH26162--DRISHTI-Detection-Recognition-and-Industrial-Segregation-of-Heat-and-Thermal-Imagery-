@@ -15,7 +15,18 @@ const firmsLog = (name) => (proxy) => {
 export default defineConfig({
   server: {
     port: 5173,
+    strictPort: true,
     host: true,
+    watch: {
+      ignored: [
+        '**/venv/**',
+        '**/.git/**',
+        '**/data/**',
+        '**/*.pyc',
+        '**/__pycache__/**',
+        '**/.pytest_cache/**'
+      ]
+    },
     proxy: {
       // ── VIIRS NOAA-20 (J1) ──────────────────────────────────
       '/api/firms/noaa20/24h': {
@@ -97,6 +108,37 @@ export default defineConfig({
         target: 'http://127.0.0.1:5174',
         changeOrigin: true,
         secure: false
+      },
+
+      // ── Copernicus Sentinel-3 SLSTR (eumdac Python Microservice) ─
+      '/api/sentinel3': {
+        target: 'http://127.0.0.1:5175',
+        changeOrigin: true,
+        secure: false
+      },
+
+      // ── Real-Data Context Service (WorldCover, GHSL, TROPOMI, Sentinel-2 NBR, OSM) ─
+      '/api/context': {
+        target: 'http://127.0.0.1:5176',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/context/, ''),
+        configure: (proxy) => {
+          proxy.on('proxyReq', (_, req) => console.log(`[Context] ${req.url}`));
+          proxy.on('error',   (err)     => console.warn('[Context] Proxy error:', err.message));
+        }
+      },
+
+      // ── NASA/IBM Prithvi Foundation Model Inference ─────────────
+      '/api/prithvi': {
+        target: 'http://127.0.0.1:5178',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/prithvi/, '/prithvi'),
+        configure: (proxy) => {
+          proxy.on('proxyReq', () => console.log('[Prithvi] Inference request forwarded'));
+          proxy.on('error',   (err) => console.warn('[Prithvi] Proxy error:', err.message));
+        }
       },
 
       // ── Legacy routes (keep backward compat) ────────────────
