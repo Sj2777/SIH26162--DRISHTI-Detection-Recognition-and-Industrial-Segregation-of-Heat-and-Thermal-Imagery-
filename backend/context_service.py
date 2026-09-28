@@ -1206,6 +1206,182 @@ def get_hotspot_proximity(lat, lon, radius=5000):
 
 
 # ─────────────────────────────────────────────────────────────
+# Genuine NASA FIRMS 7-Day & Planetary Computer S2 History Engine
+# ─────────────────────────────────────────────────────────────
+import time
+import urllib.request
+
+_firms_cache_lock = threading.Lock()
+_firms_7d_cache = {'ts': 0, 'data': []}
+
+def get_firms_7d_records():
+    global _firms_7d_cache
+    now = time.time()
+    with _firms_cache_lock:
+        if now - _firms_7d_cache['ts'] < 600 and _firms_7d_cache['data']:
+            return _firms_7d_cache['data']
+
+    urls = [
+        ('VIIRS NOAA-20', 'https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_South_Asia_7d.csv'),
+        ('VIIRS NOAA-21', 'https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-21-viirs-c2/csv/J2_VIIRS_C2_South_Asia_7d.csv'),
+        ('VIIRS Suomi-NPP', 'https://firms.modaps.eosdis.nasa.gov/data/active_fire/suomi-npp-viirs-c2/csv/SUOMI_VIIRS_C2_South_Asia_7d.csv')
+    ]
+    records = []
+    for sat_name, url in urls:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'AGNI-VISION/1.0'})
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                lines = resp.read().decode('utf-8', errors='ignore').strip().split('\n')
+                if len(lines) < 2:
+                    continue
+                headers = [h.strip().lower() for h in lines[0].split(',')]
+                lat_idx = headers.index('latitude') if 'latitude' in headers else -1
+                lon_idx = headers.index('longitude') if 'longitude' in headers else -1
+                frp_idx = headers.index('frp') if 'frp' in headers else -1
+                temp_idx = headers.index('bright_ti4') if 'bright_ti4' in headers else -1
+                date_idx = headers.index('acq_date') if 'acq_date' in headers else -1
+                time_idx = headers.index('acq_time') if 'acq_time' in headers else -1
+                daynight_idx = headers.index('daynight') if 'daynight' in headers else -1
+                conf_idx = headers.index('confidence') if 'confidence' in headers else -1
+
+                if lat_idx < 0 or lon_idx < 0 or frp_idx < 0:
+                    continue
+
+                for line in lines[1:]:
+                    parts = line.split(',')
+                    if len(parts) <= max(lat_idx, lon_idx, frp_idx):
+                        continue
+                    try:
+                        lat_val = float(parts[lat_idx])
+                        lon_val = float(parts[lon_idx])
+                        if not (6.0 <= lat_val <= 38.0 and 68.0 <= lon_val <= 98.0):
+                            continue
+                        frp_val = float(parts[frp_idx])
+                        bright_val = float(parts[temp_idx]) if temp_idx >= 0 and temp_idx < len(parts) and parts[temp_idx] else 320.0
+                        d_str = parts[date_idx] if date_idx >= 0 else ''
+                        t_str = parts[time_idx] if time_idx >= 0 else ''
+                        dn_str = parts[daynight_idx] if daynight_idx >= 0 else 'D'
+                        conf_str = parts[conf_idx] if conf_idx >= 0 else 'nominal'
+
+                        records.append({
+                            'lat': lat_val,
+                            'lon': lon_val,
+                            'frp': frp_val,
+                            'brightness': bright_val,
+                            'acq_date': d_str,
+                            'acq_time': t_str,
+                            'day_night': dn_str,
+                            'satellite': sat_name,
+                            'confidence': conf_str
+                        })
+                    except (ValueError, IndexError):
+                        continue
+        except Exception as e:
+            print(f"[get_firms_7d_records] Fetch {sat_name} error: {e}")
+
+    with _firms_cache_lock:
+        if records:
+            _firms_7d_cache['ts'] = time.time()
+            _firms_7d_cache['data'] = records
+            print(f"[get_firms_7d_records] Successfully cached {len(records)} active South Asia FIRMS detections.")
+        return _firms_7d_cache['data']
+
+
+def get_facility_history(lat, lon, radius_km=4.5, name=None):
+    all_firms = get_firms_7d_records()
+    matches = []
+    for r in all_firms:
+        d = haversine_km(lat, lon, r['lat'], r['lon'])
+        if d <= radius_km:
+            m = dict(r)
+            m['distance_km'] = round(d, 2)
+            matches.append(m)
+
+    # Sort newest detections first
+    matches.sort(key=lambda x: (x.get('acq_date', ''), x.get('acq_time', '')), reverse=True)
+
+    frp_vals = [m['frp'] for m in matches] if matches else []
+    total_detections = len(matches)
+    mean_frp = round(sum(frp_vals) / len(frp_vals), 2) if frp_vals else 0.0
+    max_frp = round(max(frp_vals), 2) if frp_vals else 0.0
+    min_frp = round(min(frp_vals), 2) if frp_vals else 0.0
+
+    # Group by date for real timeline breakdown
+    daily_stats = {}
+    for m in matches:
+        d_key = m.get('acq_date')
+        if not d_key:
+            continue
+        if d_key not in daily_stats:
+            daily_stats[d_key] = {'count': 0, 'frps': []}
+        daily_stats[d_key]['count'] += 1
+        daily_stats[d_key]['frps'].append(m['frp'])
+
+    daily_timeline = []
+    for d_key in sorted(daily_stats.keys(), reverse=True):
+        vals = daily_stats[d_key]['frps']
+        daily_timeline.append({
+            'date': d_key,
+            'detections': daily_stats[d_key]['count'],
+            'mean_frp': round(sum(vals) / len(vals), 2),
+            'max_frp': round(max(vals), 2)
+        })
+
+    # Query Microsoft Planetary Computer STAC for genuine Sentinel-2 passes
+    s2_scenes = []
+    try:
+        stac_url = 'https://planetarycomputer.microsoft.com/api/stac/v1/search'
+        delta = 0.04
+        stac_payload = {
+            'collections': ['sentinel-2-l2a'],
+            'bbox': [lon - delta, lat - delta, lon + delta, lat + delta],
+            'datetime': '2026-01-01T00:00:00Z/2026-09-28T00:00:00Z',
+            'limit': 8
+        }
+        stac_req = urllib.request.Request(
+            stac_url,
+            data=json.dumps(stac_payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json', 'User-Agent': 'AGNI-VISION/1.0'}
+        )
+        with urllib.request.urlopen(stac_req, timeout=5) as stac_resp:
+            stac_data = json.loads(stac_resp.read().decode('utf-8'))
+            for f in stac_data.get('features', []):
+                dt_raw = f['properties'].get('datetime', '')
+                dt_formatted = dt_raw.split('.')[0].replace('T', ' ') + ' UTC' if dt_raw else ''
+                s2_scenes.append({
+                    'id': f['id'],
+                    'datetime': dt_formatted,
+                    'cloud_cover_pct': round(f['properties'].get('eo:cloud_cover', 0), 1),
+                    'platform': f['properties'].get('platform', 'Sentinel-2')
+                })
+    except Exception as e:
+        print(f"[get_facility_history] STAC Sentinel-2 query error: {e}")
+
+    return {
+        'facility_name': name or 'Industrial Facility',
+        'coordinates': {'lat': lat, 'lon': lon},
+        'radius_km': radius_km,
+        'source': 'Genuine NASA FIRMS (7-Day Multi-Sensor NRT) + Copernicus Sentinel-2 MSI (Planetary Computer STAC)',
+        'summary': {
+            'total_7d_detections': total_detections,
+            'mean_frp_mw': mean_frp,
+            'max_frp_mw': max_frp,
+            'min_frp_mw': min_frp,
+            'has_active_detections': total_detections > 0
+        },
+        'daily_timeline': daily_timeline,
+        'recent_overpasses': matches[:30],
+        'sentinel2_passes': s2_scenes,
+        'archive_portals': {
+            'nasa_firms_10yr_url': f"https://firms.modaps.eosdis.nasa.gov/map/#d:24hrs;@{lon:.4f},{lat:.4f},14z",
+            'copernicus_cdse_url': f"https://browser.dataspace.copernicus.eu/?zoom=14&lat={lat:.5f}&lng={lon:.5f}&datasetId=S2_L2A_CDAS",
+            'moefcc_parivesh_url': "https://parivesh.nic.in/",
+            'cpcb_ocems_url': "https://cpcb.nic.in/online-monitoring-system-glance/"
+        }
+    }
+
+
+# ─────────────────────────────────────────────────────────────
 # HTTP Request Handler
 # ─────────────────────────────────────────────────────────────
 class ContextHandler(BaseHTTPRequestHandler):
@@ -1281,6 +1457,13 @@ class ContextHandler(BaseHTTPRequestHandler):
                 lon = float(p('lon'))
                 radius = int(p('radius') or '5000')
                 self.send_json(get_hotspot_proximity(lat, lon, radius))
+
+            elif path == '/facility-history':
+                lat = float(p('lat'))
+                lon = float(p('lon'))
+                radius = float(p('radius_km') or '4.5')
+                name = p('name')
+                self.send_json(get_facility_history(lat, lon, radius, name))
 
             else:
                 self.send_json({'error': f'Unknown endpoint: {path}'}, 404)

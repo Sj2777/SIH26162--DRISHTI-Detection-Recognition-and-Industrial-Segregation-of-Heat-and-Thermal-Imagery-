@@ -3533,7 +3533,7 @@ function initModals() {
 // =========================================================================
 // HISTORICAL INDUSTRY DATA & SATELLITE ARCHIVES ENGINE
 // =========================================================================
-window.openIndustryHistoryModal = function(facilityName, facilityId, lat, lon) {
+window.openIndustryHistoryModal = async function(facilityName, facilityId, lat, lon) {
   const modal = document.getElementById('industryHistoryModal');
   const body = document.getElementById('industry-history-modal-body');
   const titleEl = document.getElementById('ind-hist-title');
@@ -3564,168 +3564,231 @@ window.openIndustryHistoryModal = function(facilityName, facilityId, lat, lon) {
   const fOp = fac?.operator || fac?.osm_tags?.operator || 'Registered Industrial Operator';
   const fLat = fac?.lat || lat || 22.5;
   const fLon = fac?.lon || lon || 78.5;
-  const fType = (fac?.type || 'Integrated Manufacturing Works').replace(/_/g, ' ').toUpperCase();
-  const fState = fac?.state || (fLat > 20 ? 'Central / Western India' : 'Southern India');
-  const fDistrict = fac?.district || 'Industrial Corridor';
-  const fBaseline = fac?.baseline_frp_mw || 42.0;
-  const fCurrent = fac?.current_frp_mw || (Math.round(fBaseline * 1.07 * 10) / 10);
-  const fDevRatio = fac?.flaring_deviation_ratio || 1.07;
   const isMine = fac?.type === 'mine' || fName.toLowerCase().includes('mine') || fName.toLowerCase().includes('coal');
 
   if (titleEl) titleEl.innerText = fName;
   if (catEl) catEl.innerText = isMine ? 'CPCB RED · COAL MINING' : 'CPCB RED · 17-CATEGORY INDUSTRY';
-  if (subEl) subEl.innerText = `${fOp} · ${fDistrict}, ${fState} · (${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E)`;
-
-  const monthlyData = [
-    { m: 'Oct 25', frp: Math.round((fBaseline * 0.96)*10)/10, events: 14, status: 'NORMAL' },
-    { m: 'Nov 25', frp: Math.round((fBaseline * 1.02)*10)/10, events: 18, status: 'NORMAL' },
-    { m: 'Dec 25', frp: Math.round((fBaseline * 0.98)*10)/10, events: 15, status: 'NORMAL' },
-    { m: 'Jan 26', frp: Math.round((fBaseline * 1.05)*10)/10, events: 21, status: 'NORMAL' },
-    { m: 'Feb 26', frp: Math.round((fBaseline * 0.94)*10)/10, events: 12, status: 'NORMAL' },
-    { m: 'Mar 26', frp: Math.round((fBaseline * 1.10)*10)/10, events: 24, status: 'NORMAL' },
-    { m: 'Apr 26', frp: Math.round((fBaseline * 1.08)*10)/10, events: 22, status: 'NORMAL' },
-    { m: 'May 26', frp: Math.round((fBaseline * 1.03)*10)/10, events: 17, status: 'NORMAL' },
-    { m: 'Jun 26', frp: Math.round((fBaseline * 0.92)*10)/10, events: 11, status: 'NORMAL' },
-    { m: 'Jul 26', frp: Math.round((fBaseline * 0.89)*10)/10, events: 9, status: 'MONSOON_DIP' },
-    { m: 'Aug 26', frp: Math.round((fBaseline * 0.91)*10)/10, events: 10, status: 'MONSOON_DIP' },
-    { m: 'Sep 26', frp: fCurrent, events: 19, status: fDevRatio > 2.0 ? 'ELEVATED' : 'NORMAL' }
-  ];
-
-  const maxVal = Math.max(...monthlyData.map(d => d.frp), fBaseline * 1.5);
-
-  body.innerHTML = `
-    <!-- Top KPI Grid -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Historical Baseline FRP</div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #38bdf8; font-family: monospace; margin: 4px 0 2px 0;">${fBaseline.toFixed(1)} <span style="font-size: 11px;">MW</span></div>
-        <div style="font-size: 10.5px; color: #64748b;">5-Year Multi-Sensor Mean</div>
-      </div>
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Current Month Telemetry</div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #ff7f50; font-family: monospace; margin: 4px 0 2px 0;">${fCurrent.toFixed(1)} <span style="font-size: 11px;">MW</span></div>
-        <div style="font-size: 10.5px; color: ${fDevRatio > 1.5 ? '#ef4444' : '#22c55e'}; font-weight: 600;">${fDevRatio}× of Baseline (${fDevRatio <= 1.25 ? 'Within Normal Envelope' : 'Elevated Flaring'})</div>
-      </div>
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Historical Scorch (ΔNBR)</div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #22c55e; font-family: monospace; margin: 4px 0 2px 0;">-0.015</div>
-        <div style="font-size: 10.5px; color: #22c55e;">Zero Ground Scar (Stack Only)</div>
-      </div>
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">10-Yr Detections</div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #c084fc; font-family: monospace; margin: 4px 0 2px 0;">3,842</div>
-        <div style="font-size: 10.5px; color: #94a3b8;">VIIRS/MODIS Continuous Record</div>
-      </div>
-    </div>
-
-    <!-- 12-Month Historical Telemetry Chart -->
-    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 12px; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.04em;">📈 12-Month Thermal Telemetry &amp; Flaring Trend (VIIRS S-NPP/NOAA-20/21)</span>
-        <span style="font-size: 11px; color: #94a3b8; font-family: monospace;">Monthly Mean FRP (MW)</span>
-      </div>
-      <div style="display: flex; align-items: flex-end; gap: 8px; height: 110px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-        ${monthlyData.map(d => {
-          const pct = Math.round((d.frp / maxVal) * 100);
-          const col = d.status === 'ELEVATED' ? '#ef4444' : d.status === 'MONSOON_DIP' ? '#38bdf8' : '#f59e0b';
-          return `
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;" title="${d.m}: ${d.frp} MW (${d.events} satellite detections)">
-              <span style="font-size: 9.5px; font-family: monospace; color: ${col}; font-weight: 600;">${d.frp}</span>
-              <div style="width: 100%; max-width: 32px; height: ${pct}%; background: ${col}33; border: 1px solid ${col}; border-radius: 3px; transition: height 0.3s ease;"></div>
-              <span style="font-size: 9px; color: #94a3b8; white-space: nowrap; margin-top: 2px;">${d.m.split(' ')[0]}</span>
-            </div>
-          `;
-        }).join('')}
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 10.5px; color: #94a3b8;">
-        <span>5-Year Baseline: <strong style="color: #38bdf8;">${fBaseline} MW</strong></span>
-        <span>Chimney Stack Emission Status: <strong style="color: #22c55e;">Controlled Process Exhaust (No Ground Fire)</strong></span>
-      </div>
-    </div>
-
-    <!-- Official Historical Portals & Direct Launchers -->
-    <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-      <div style="font-size: 12px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;">
-        🌐 Authoritative Historical Satellite Portals &amp; Compliance Registries (1-Click Launch)
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        
-        <!-- NASA FIRMS Archive -->
-        <a href="https://firms.modaps.eosdis.nasa.gov/map/#d:24hrs;@${fLon.toFixed(4)},${fLat.toFixed(4)},14z" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-          <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#38bdf8'; this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(56,189,248,0.3)'; this.style.transform='none'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 12px; font-weight: 700; color: #38bdf8;">🚀 NASA FIRMS 10-Year Global Archive</span>
-              <span style="font-size: 11px; color: #38bdf8;">↗</span>
-            </div>
-            <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-              Access 10+ years of VIIRS &amp; MODIS thermal pixel time-series centered at ${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E.
-            </div>
-          </div>
-        </a>
-
-        <!-- Copernicus CDSE Sentinel-2 -->
-        <a href="https://browser.dataspace.copernicus.eu/?zoom=14&lat=${fLat.toFixed(5)}&lng=${fLon.toFixed(5)}&datasetId=S2_L2A_CDAS" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-          <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#c084fc'; this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(168,85,247,0.3)'; this.style.transform='none'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 12px; font-weight: 700; color: #c084fc;">🇪🇺 Copernicus CDSE Sentinel-2 Browser</span>
-              <span style="font-size: 11px; color: #c084fc;">↗</span>
-            </div>
-            <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-              Inspect optical, SWIR, and false-color plume passes at 10m spatial resolution from 2015 to present.
-            </div>
-          </div>
-        </a>
-
-        <!-- MoEFCC Parivesh -->
-        <a href="https://parivesh.nic.in/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-          <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#22c55e'; this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(34,197,94,0.3)'; this.style.transform='none'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 12px; font-weight: 700; color: #22c55e;">🏛️ MoEFCC PARIVESH Clearance Portal</span>
-              <span style="font-size: 11px; color: #22c55e;">↗</span>
-            </div>
-            <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-              Statutory Government of India Environmental Clearance (EC), CTO, and 6-monthly compliance submissions.
-            </div>
-          </div>
-        </a>
-
-        <!-- CPCB OCEMS Realtime Stack Portal -->
-        <a href="https://cpcb.nic.in/online-monitoring-system-glance/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-          <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#f59e0b'; this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(245,158,11,0.3)'; this.style.transform='none'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-size: 12px; font-weight: 700; color: #f59e0b;">📊 CPCB OCEMS Stack Emission Portal</span>
-              <span style="font-size: 11px; color: #f59e0b;">↗</span>
-            </div>
-            <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-              Central Pollution Control Board continuous stack gas emission telemetry (PM, SO₂, NOₓ, CO) records.
-            </div>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Facility Operational Units Breakdown -->
-    ${fac?.sub_units && fac.sub_units.length > 0 ? `
-      <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px;">
-        <div style="font-size: 11.5px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px;">
-          🏭 Identified Plant Sub-Units &amp; Process Stacks:
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
-          ${fac.sub_units.map(u => `
-            <div style="background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px; padding: 8px 10px;">
-              <div style="font-size: 11.5px; font-weight: 600; color: #fff;">${u.name}</div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 10px;">
-                <span style="color: #94a3b8;">${u.type}</span>
-                <span class="fmpop-tag" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); font-size: 9px;">${u.status}</span>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    ` : ''}
-  `;
+  if (subEl) subEl.innerText = `${fOp} · (${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E) · Live Genuine Satellite Stream`;
 
   modal.style.display = 'flex';
+
+  // 1. Initial Genuine Loading Screen
+  body.innerHTML = `
+    <div style="padding: 40px 20px; text-align: center;">
+      <div style="font-size: 26px; margin-bottom: 12px; display: inline-block;">🛰️</div>
+      <div style="font-size: 14px; font-weight: 600; color: #f1f5f9; margin-bottom: 6px;">
+        Querying Genuine Satellite Telemetry for ${fName}...
+      </div>
+      <div style="font-size: 12px; color: #94a3b8; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+        Fetching real NASA FIRMS 7-day multi-sensor constellation (VIIRS NOAA-20, NOAA-21, Suomi-NPP) and Microsoft Planetary Computer Sentinel-2 STAC over coordinates ${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E...
+      </div>
+    </div>
+  `;
+
+  // 2. Fetch genuine live data from context_service
+  try {
+    const res = await fetch(`/api/context/facility-history?lat=${fLat}&lon=${fLon}&radius_km=4.5&name=${encodeURIComponent(fName)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const sum = data.summary || {};
+    const timeline = data.daily_timeline || [];
+    const recent = data.recent_overpasses || [];
+    const s2Scenes = data.sentinel2_passes || [];
+    const maxVal = Math.max(...timeline.map(d => d.mean_frp), 10);
+
+    body.innerHTML = `
+      <!-- Top KPI Grid with Real Satellite Telemetry -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Genuine 7-Day Detections</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #38bdf8; font-family: monospace; margin: 4px 0 2px 0;">
+            ${sum.total_7d_detections || 0}
+          </div>
+          <div style="font-size: 10.5px; color: #64748b;">VIIRS NOAA-20/21 &amp; Suomi-NPP</div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Observed Mean FRP</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #ff7f50; font-family: monospace; margin: 4px 0 2px 0;">
+            ${sum.mean_frp_mw ? sum.mean_frp_mw + ' MW' : 'No Overpass Heat'}
+          </div>
+          <div style="font-size: 10.5px; color: #22c55e;">Stack Process Baseline</div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Peak Thermal Surge</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: ${sum.max_frp_mw >= 35 ? '#ef4444' : '#eab308'}; font-family: monospace; margin: 4px 0 2px 0;">
+            ${sum.max_frp_mw ? sum.max_frp_mw + ' MW' : '0.0 MW'}
+          </div>
+          <div style="font-size: 10.5px; color: ${sum.max_frp_mw >= 35 ? '#ef4444' : '#94a3b8'};">
+            ${sum.max_frp_mw >= 35 ? '⚠️ Major Anomaly' : 'Controlled Process Range'}
+          </div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Data Provenance</div>
+          <div style="font-size: 1.05rem; font-weight: 700; color: #c084fc; margin: 4px 0 2px 0;">LIVE SATELLITE</div>
+          <div style="font-size: 10.5px; color: #34d399;">NASA FIRMS + Copernicus STAC</div>
+        </div>
+      </div>
+
+      <!-- Real Daily Detection Timeline -->
+      <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 12px; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.04em;">
+            📈 Daily Thermal Activity Timeline (Real NASA FIRMS Observations Within 4.5 km)
+          </span>
+          <span style="font-size: 11px; color: #94a3b8; font-family: monospace;">Radius: 4.5 km</span>
+        </div>
+        ${timeline.length > 0 ? `
+          <div style="display: flex; align-items: flex-end; gap: 12px; height: 110px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            ${timeline.map(d => {
+              const pct = Math.max(14, Math.round((d.mean_frp / maxVal) * 100));
+              const col = d.max_frp >= 35 ? '#ef4444' : '#f59e0b';
+              return `
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;" title="${d.date}: ${d.detections} detections, Mean FRP: ${d.mean_frp} MW, Max: ${d.max_frp} MW">
+                  <span style="font-size: 9.5px; font-family: monospace; color: ${col}; font-weight: 600;">${d.mean_frp}M</span>
+                  <div style="width: 100%; max-width: 36px; height: ${pct}%; background: ${col}33; border: 1px solid ${col}; border-radius: 3px;"></div>
+                  <span style="font-size: 9.5px; color: #94a3b8; white-space: nowrap; margin-top: 2px;">${d.date.slice(5)}</span>
+                  <span style="font-size: 8.5px; color: #64748b;">${d.detections} hits</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : `
+          <div style="padding: 16px; text-align: center; color: #94a3b8; font-size: 12px;">
+            No active satellite thermal anomalies detected within the 4.5 km facility boundary in the last 7 days.
+          </div>
+        `}
+      </div>
+
+      <!-- Real Satellite Overpass Log Table -->
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: #e2e8f0; text-transform: uppercase;">
+            🛰️ Genuine NASA VIIRS Overpass Detections (${recent.length} Recorded in South Asia Stream)
+          </span>
+          <span style="font-size: 10.5px; color: #34d399; font-family: monospace;">● Live 7-Day Satellite Data</span>
+        </div>
+        <div style="max-height: 180px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+                <th style="padding: 6px 8px;">Date &amp; Time (UTC)</th>
+                <th style="padding: 6px 8px;">Satellite Sensor</th>
+                <th style="padding: 6px 8px;">Radiative Power</th>
+                <th style="padding: 6px 8px;">Planck Temp</th>
+                <th style="padding: 6px 8px;">Distance to Center</th>
+                <th style="padding: 6px 8px;">Pass Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recent.map(r => `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0;">
+                  <td style="padding: 6px 8px; font-family: monospace;">${r.acq_date} ${r.acq_time ? r.acq_time.slice(0,2)+':'+r.acq_time.slice(2,4) : ''}</td>
+                  <td style="padding: 6px 8px; color: #38bdf8;">${r.satellite}</td>
+                  <td style="padding: 6px 8px; font-weight: 600; color: #ff7f50;">${r.frp} MW</td>
+                  <td style="padding: 6px 8px; font-family: monospace;">${Math.round(r.brightness)} K</td>
+                  <td style="padding: 6px 8px; font-family: monospace;">${r.distance_km} km</td>
+                  <td style="padding: 6px 8px;">${r.day_night === 'N' ? '🌙 Night (0% Glint)' : '☀️ Day'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Real Sentinel-2 Optical Scenes via Planetary Computer STAC -->
+      ${s2Scenes.length > 0 ? `
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: #c084fc; text-transform: uppercase;">
+              🇪🇺 Genuine Copernicus Sentinel-2 MSI Multi-Spectral Scenes (Planetary Computer STAC)
+            </span>
+            <span style="font-size: 10.5px; color: #94a3b8;">10m L2A Resolution</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px;">
+            ${s2Scenes.map(s => `
+              <div style="background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px; padding: 8px 10px;">
+                <div style="font-size: 10.5px; font-weight: 600; color: #fff; word-break: break-all;">${s.id}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 10px; color: #94a3b8;">
+                  <span>📅 ${s.datetime}</span>
+                  <span class="fmpop-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 9px;">Cloud: ${s.cloud_cover_pct}%</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Official Multi-Decadal Historical External Portals -->
+      <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="font-size: 12px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;">
+          🌐 Official External Multi-Decadal Archives &amp; Statutory Portals
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <a href="${data.archive_portals?.nasa_firms_10yr_url || '#'}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#38bdf8'" onmouseleave="this.style.borderColor='rgba(56,189,248,0.3)'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: #38bdf8;">🚀 NASA FIRMS 10-Year Global Archive</span>
+                <span style="font-size: 11px; color: #38bdf8;">↗</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                Complete 10+ year time-series of MODIS/VIIRS detections centered on ${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E.
+              </div>
+            </div>
+          </a>
+
+          <a href="${data.archive_portals?.copernicus_cdse_url || '#'}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#c084fc'" onmouseleave="this.style.borderColor='rgba(168,85,247,0.3)'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: #c084fc;">🇪🇺 Copernicus CDSE Sentinel-2 Browser</span>
+                <span style="font-size: 11px; color: #c084fc;">↗</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                Optical, SWIR, and false-color plume passes at 10m resolution from 2015 to present.
+              </div>
+            </div>
+          </a>
+
+          <a href="https://parivesh.nic.in/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#22c55e'" onmouseleave="this.style.borderColor='rgba(34,197,94,0.3)'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: #22c55e;">🏛️ MoEFCC PARIVESH Clearance Portal</span>
+                <span style="font-size: 11px; color: #22c55e;">↗</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                Statutory Government of India Environmental Clearance (EC) and compliance filings.
+              </div>
+            </div>
+          </a>
+
+          <a href="https://cpcb.nic.in/online-monitoring-system-glance/" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.borderColor='#f59e0b'" onmouseleave="this.style.borderColor='rgba(245,158,11,0.3)'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: #f59e0b;">📊 CPCB OCEMS Stack Emission Portal</span>
+                <span style="font-size: 11px; color: #f59e0b;">↗</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                Continuous emission monitoring system (PM, SO₂, NOₓ, CO) records for Red Category industries.
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    `;
+
+  } catch (err) {
+    console.error('[IndustryHistory] Failed to fetch genuine satellite history:', err);
+    body.innerHTML = `
+      <div style="padding: 24px; text-align: center; color: #ef4444;">
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 6px;">Satellite Query Error</div>
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Failed to query live satellite history microservice: ${err.message}</div>
+        <button class="btn btn-outline" onclick="window.openIndustryHistoryModal('${fName.replace(/'/g, "\\'")}', '${facilityId}', ${fLat}, ${fLon})">Retry Satellite Query</button>
+      </div>
+    `;
+  }
 };
 
 window.updateDashboardIndustryCard = function(selectedFacId) {
