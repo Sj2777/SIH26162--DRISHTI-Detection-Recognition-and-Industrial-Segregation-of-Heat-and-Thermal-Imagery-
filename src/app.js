@@ -3560,17 +3560,27 @@ window.openIndustryHistoryModal = async function(facilityName, facilityId, lat, 
     });
   }
 
-  const fName = fac?.name || facilityName || 'Industrial Complex';
-  const fOp = fac?.operator || fac?.osm_tags?.operator || 'Registered Industrial Operator';
-  const fLat = fac?.lat || lat || 22.5;
-  const fLon = fac?.lon || lon || 78.5;
+  const fLat = Number(fac?.lat ?? lat ?? 22.5) || 22.5;
+  const fLon = Number(fac?.lon ?? lon ?? 78.5) || 78.5;
   const isMine = fac?.type === 'mine' || fName.toLowerCase().includes('mine') || fName.toLowerCase().includes('coal');
 
   if (titleEl) titleEl.innerText = fName;
   if (catEl) catEl.innerText = isMine ? 'CPCB RED · COAL MINING' : 'CPCB RED · 17-CATEGORY INDUSTRY';
   if (subEl) subEl.innerText = `${fOp} · (${fLat.toFixed(4)}°N, ${fLon.toFixed(4)}°E) · Live Genuine Satellite Stream`;
 
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
   modal.style.display = 'flex';
+  modal.style.zIndex = '99999';
+
+  const closeBtn = document.getElementById('btn-close-industry-history-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => { modal.style.display = 'none'; };
+  }
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  };
 
   // 1. Initial Genuine Loading Screen
   body.innerHTML = `

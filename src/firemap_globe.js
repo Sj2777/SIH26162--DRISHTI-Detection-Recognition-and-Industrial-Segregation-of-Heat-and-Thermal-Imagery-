@@ -462,6 +462,9 @@ export class FireMapGlobe {
           <button class="fmpop-btn" onclick="window.inspectHotspotFromPopup('${p.id}'); if(window.event){window.event.stopPropagation();}">
             Inspect Full Dossier &rarr;
           </button>
+          <button class="fmpop-btn" style="margin-top: 6px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;" onclick="window.openIndustryHistoryModal('${(title).replace(/'/g, "\\'")}', '${p.id || ''}', ${Number(coords[1])}, ${Number(coords[0])}); if(window.event){window.event.stopPropagation();}">
+            📊 Historical Telemetry &amp; Satellite Archives &rarr;
+          </button>
         </div>
       `;
 

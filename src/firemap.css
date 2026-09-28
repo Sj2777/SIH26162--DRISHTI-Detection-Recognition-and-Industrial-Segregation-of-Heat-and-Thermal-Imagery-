@@ -806,7 +806,8 @@ html, body {
 }
 
 .hotspot-drawer.active {
-  display: flex;
+  display: flex !important;
+  z-index: 1005;
 }
 
 @keyframes drawer-slide {
