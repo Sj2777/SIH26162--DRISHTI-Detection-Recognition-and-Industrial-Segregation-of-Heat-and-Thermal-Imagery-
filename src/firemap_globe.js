@@ -542,11 +542,11 @@ export class FireMapGlobe {
           frp: Number(h.frp || h.brightness || 10),
           confidence: h.confidence || 'high',
           satellite: h.satellite || 'VIIRS NOAA-20',
-          fire_type: h.fire_type || (color === '#a855f7' ? 'MINE' : 'WILDFIRE'),
+          fire_type: h.fire_type || (color === '#a855f7' ? 'MINE' : color === '#f97316' ? 'FACTORY' : color === '#ef4444' ? 'INDUSTRIAL_HIGH_ALERT' : color === '#b45309' ? 'CROP' : 'WILDFIRE'),
           color: color,
           icon_id: icon_id,
-          facility_name: h.facility_name || (color === '#a855f7' ? 'Open-Cast Coal Mine' : 'Active Thermal Detection'),
-          operator: h.operator || (color === '#a855f7' ? 'Coal India Limited' : 'Natural / Rural Area'),
+          facility_name: h.facility_name || (color === '#a855f7' ? 'Open-Cast Coal Mine' : color === '#f97316' ? 'Industrial Facility' : color === '#ef4444' ? 'Industrial High-Alert Area' : 'Active Thermal Detection'),
+          operator: h.operator || (color === '#a855f7' ? 'Coal India Limited' : color === '#f97316' ? (h.facility_name || 'Industrial Operator') : color === '#ef4444' ? (h.facility_name || 'Industrial Plant Operator') : 'Natural / Rural Area'),
           acq_date: h.acq_date || h.date || new Date().toISOString().slice(0, 10),
           acq_time: h.acq_time || '1200'
         }

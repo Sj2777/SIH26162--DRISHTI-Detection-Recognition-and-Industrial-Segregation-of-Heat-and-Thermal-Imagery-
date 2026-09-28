@@ -214,6 +214,139 @@ export const MOCK_FACILITIES = [
     downwind_population_1km: 22100
   },
   {
+    id: 'FAC-JSW-VIJ-01',
+    name: 'JSW Steel Vijayanagar Integrated Works',
+    type: 'steel_plant',
+    operator: 'JSW Steel Limited (Jindal Group)',
+    state: 'Karnataka',
+    district: 'Ballari (Toranagallu)',
+    lat: 15.1681,
+    lon: 76.6706,
+    boundary: [
+      [15.1950, 76.6400],
+      [15.1950, 76.7050],
+      [15.1380, 76.7050],
+      [15.1380, 76.6400],
+      [15.1950, 76.6400]
+    ],
+    osm_tags: {
+      industrial: 'steel_mill',
+      man_made: 'chimney',
+      power: 'generator',
+      landuse: 'industrial',
+      operator: 'JSW Steel Limited'
+    },
+    baseline_frp_mw: 48.0,
+    current_frp_mw: 52.4,
+    flaring_deviation_ratio: 1.09,
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'Rajesh Nair (VP Environment & Safety)',
+    phone: '+91 839 525 0120',
+    downwind_population_1km: 18500,
+    sub_units: [
+      { id: 'U-JSW-BF', name: 'Blast Furnace #1-4 & Corex Units', lat: 15.1690, lon: 76.6690, type: 'Blast Furnace', status: 'NORMAL' },
+      { id: 'U-JSW-PWR', name: 'Vijayanagar Toranagallu Captive Power Plant (860 MW)', lat: 15.1740, lon: 76.6650, type: 'Thermal Power', status: 'NORMAL' },
+      { id: 'U-JSW-PELLET', name: 'Pellet & Sintering Plant Header', lat: 15.1620, lon: 76.6740, type: 'Pellet Plant', status: 'NORMAL' },
+      { id: 'U-JSW-SLAG', name: 'Slag Yard & Metal Recovery Facility', lat: 15.1580, lon: 76.6780, type: 'Slag Processing', status: 'NORMAL' }
+    ]
+  },
+  {
+    id: 'FAC-SAIL-IISCO-01',
+    name: 'SAIL IISCO Steel Plant Burnpur (Asansol)',
+    type: 'steel_plant',
+    operator: 'Steel Authority of India Limited (SAIL)',
+    state: 'West Bengal',
+    district: 'Paschim Bardhaman (Asansol)',
+    lat: 23.6634,
+    lon: 86.9190,
+    boundary: [
+      [23.6850, 86.9000],
+      [23.6850, 86.9400],
+      [23.6400, 86.9400],
+      [23.6400, 86.9000],
+      [23.6850, 86.9000]
+    ],
+    osm_tags: {
+      industrial: 'steel_mill',
+      man_made: 'blast_furnace',
+      landuse: 'industrial',
+      operator: 'SAIL'
+    },
+    baseline_frp_mw: 36.0,
+    current_frp_mw: 38.2,
+    flaring_deviation_ratio: 1.06,
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'S. K. Ganguly (GM Operations)',
+    phone: '+91 341 224 0200',
+    downwind_population_1km: 34200
+  },
+  {
+    id: 'FAC-SAIL-BHI-01',
+    name: 'SAIL Bhilai Steel Plant (BSP)',
+    type: 'steel_plant',
+    operator: 'Steel Authority of India Limited (SAIL)',
+    state: 'Chhattisgarh',
+    district: 'Durg',
+    lat: 21.1820,
+    lon: 81.3910,
+    boundary: [
+      [21.2050, 81.3700],
+      [21.2050, 81.4200],
+      [21.1600, 81.4200],
+      [21.1600, 81.3700],
+      [21.2050, 81.3700]
+    ],
+    osm_tags: {
+      industrial: 'steel_mill',
+      landuse: 'industrial',
+      operator: 'SAIL'
+    },
+    baseline_frp_mw: 54.0,
+    current_frp_mw: 58.1,
+    flaring_deviation_ratio: 1.07,
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'P. K. Sen (ED Safety)',
+    phone: '+91 788 222 2200',
+    downwind_population_1km: 42000
+  },
+  {
+    id: 'FAC-SAIL-BOK-01',
+    name: 'SAIL Bokaro Steel Plant (BSL)',
+    type: 'steel_plant',
+    operator: 'Steel Authority of India Limited (SAIL)',
+    state: 'Jharkhand',
+    district: 'Bokaro',
+    lat: 23.6700,
+    lon: 86.1550,
+    boundary: [
+      [23.6900, 86.1300],
+      [23.6900, 86.1800],
+      [23.6500, 86.1800],
+      [23.6500, 86.1300],
+      [23.6900, 86.1300]
+    ],
+    osm_tags: {
+      industrial: 'steel_mill',
+      landuse: 'industrial',
+      operator: 'SAIL'
+    },
+    baseline_frp_mw: 44.0,
+    current_frp_mw: 46.2,
+    flaring_deviation_ratio: 1.05,
+    registered: true,
+    cpcb_category: 'Red',
+    active_incidents: 0,
+    contact_officer: 'M. K. Sharma (Chief GM)',
+    phone: '+91 654 224 0100',
+    downwind_population_1km: 29800
+  },
+  {
     id: 'FAC-UNREG-07',
     name: 'Bulandshahr Unregistered Fixed-Chimney Brick Kiln Belt #14',
     type: 'illegal_brick_kiln',

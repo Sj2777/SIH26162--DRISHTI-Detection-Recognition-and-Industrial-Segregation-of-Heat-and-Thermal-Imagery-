@@ -768,6 +768,42 @@ VERIFIED_INDIAN_FACILITIES = [
         'osm_tags': {'industrial': 'refinery', 'operator': 'HMEL', 'cpcb_category': 'Red'},
         'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap'
     },
+    {
+        'id': 'FAC-JSW-VIJ-01', 'name': 'JSW Steel Vijayanagar Integrated Works', 'type': 'steel_plant',
+        'operator': 'JSW Steel Limited (Jindal Group)', 'lat': 15.1681, 'lon': 76.6706,
+        'osm_tags': {'industrial': 'steel_mill', 'man_made': 'chimney', 'power': 'generator', 'operator': 'JSW Steel Limited', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap & CPCB Registry'
+    },
+    {
+        'id': 'FAC-SAIL-IISCO-01', 'name': 'SAIL IISCO Steel Plant Burnpur (Asansol)', 'type': 'steel_plant',
+        'operator': 'Steel Authority of India Limited (SAIL)', 'lat': 23.6634, 'lon': 86.9190,
+        'osm_tags': {'industrial': 'steel_mill', 'operator': 'SAIL', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap & SAIL'
+    },
+    {
+        'id': 'FAC-SAIL-BHI-01', 'name': 'SAIL Bhilai Steel Plant (BSP)', 'type': 'steel_plant',
+        'operator': 'Steel Authority of India Limited (SAIL)', 'lat': 21.1820, 'lon': 81.3910,
+        'osm_tags': {'industrial': 'steel_mill', 'operator': 'SAIL', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap & SAIL'
+    },
+    {
+        'id': 'FAC-SAIL-BOK-01', 'name': 'SAIL Bokaro Steel Plant (BSL)', 'type': 'steel_plant',
+        'operator': 'Steel Authority of India Limited (SAIL)', 'lat': 23.6700, 'lon': 86.1550,
+        'osm_tags': {'industrial': 'steel_mill', 'operator': 'SAIL', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap & SAIL'
+    },
+    {
+        'id': 'FAC-TAT-KAL-01', 'name': 'Tata Steel Kalinganagar Integrated Works', 'type': 'steel_plant',
+        'operator': 'Tata Steel Limited', 'lat': 20.9700, 'lon': 86.0200,
+        'osm_tags': {'industrial': 'steel_mill', 'operator': 'Tata Steel', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap & Tata Steel'
+    },
+    {
+        'id': 'FAC-JSW-DOL-01', 'name': 'JSW Steel Dolvi Works', 'type': 'steel_plant',
+        'operator': 'JSW Steel Limited (Jindal Group)', 'lat': 18.7050, 'lon': 73.0250,
+        'osm_tags': {'industrial': 'steel_mill', 'operator': 'JSW Steel', 'cpcb_category': 'Red'},
+        'registered': True, 'cpcb_category': 'Red', 'source': 'OpenStreetMap'
+    },
     # ── Major Indian Open-Cast Coal Mines & Mining Complexes ─────
     {
         'id': 'FAC-MINE-WCL-01', 'name': 'Inder Coal Mine (Kamptee Area)', 'type': 'mine',
@@ -1128,13 +1164,29 @@ def get_hotspot_proximity(lat, lon, radius=5000):
         else:
             is_mine = False
 
+    # Industrial proximity: facility must be within 4.5 km of its registered footprint
+    is_industrial = bool(nearest_fac and nearest_fac['distance_km'] <= 4.5 and not is_mine)
+
+    # Strictly enforce spatial radius: never attribute a facility 500 km away!
+    resolved_fac_name = None
+    resolved_operator = None
+    if is_mine and nearest_mine and nearest_mine['distance_km'] <= 4.5:
+        resolved_fac_name = nearest_mine['name']
+        resolved_operator = nearest_mine.get('operator') or 'Coal India Limited'
+    elif is_industrial and nearest_fac and nearest_fac['distance_km'] <= 4.5:
+        resolved_fac_name = nearest_fac['name']
+        resolved_operator = nearest_fac.get('operator') or 'Registered Industrial Operator'
+    else:
+        resolved_fac_name = None
+        resolved_operator = 'Natural / Rural Area'
+
     result = {
         'is_mine': is_mine,
         'in_coal_basin': bool(coal_basin),
-        'is_industrial': bool(nearest_fac and nearest_fac['distance_km'] <= 2.5 and not is_mine),
+        'is_industrial': is_industrial,
         'coalfield_basin': coal_basin['name'] if coal_basin else None,
-        'nearest_mine': nearest_mine if nearest_mine else None,
-        'nearest_facility': nearest_fac if (nearest_fac and nearest_fac['distance_km'] <= 8.0) else None,
+        'nearest_mine': (nearest_mine if nearest_mine and nearest_mine['distance_km'] <= 6.0 else None),
+        'nearest_facility': (nearest_fac if is_industrial else None),
         'nearest_built_up': {
             'name': settlement_name,
             'distance_km': settlement_dist_km,
@@ -1142,10 +1194,12 @@ def get_hotspot_proximity(lat, lon, radius=5000):
             'formatted': f"{settlement_name} ({settlement_dist_km} km)"
         },
         'distance_to_built_up_km': settlement_dist_km,
-        'distance_to_facility_km': min_mine_dist if is_mine else (nearest_fac['distance_km'] if nearest_fac else None),
-        'facility_name': (nearest_mine['name'] if is_mine and nearest_mine else (nearest_fac['name'] if nearest_fac else None)),
-        'operator': (nearest_mine.get('operator') if is_mine and nearest_mine else (nearest_fac.get('operator') if nearest_fac else None)),
-        'formatted_facility': f"{nearest_mine['name']} — {nearest_mine.get('operator','')} ({min_mine_dist} km)" if is_mine and nearest_mine else (f"{nearest_fac['name']} ({nearest_fac['distance_km']} km)" if nearest_fac and nearest_fac['distance_km'] <= 10.0 else 'None within 10 km')
+        'distance_to_facility_km': (min_mine_dist if is_mine else (nearest_fac['distance_km'] if (is_industrial and nearest_fac) else None)),
+        'facility_name': resolved_fac_name,
+        'operator': resolved_operator,
+        'formatted_facility': (f"{nearest_mine['name']} — {nearest_mine.get('operator','')} ({min_mine_dist} km)" if is_mine and nearest_mine and min_mine_dist <= 4.5
+                               else (f"{nearest_fac['name']} ({round(nearest_fac['distance_km'], 1)} km)" if is_industrial and nearest_fac
+                                     else 'None within 5 km'))
     }
     cache_set(k, result)
     return result

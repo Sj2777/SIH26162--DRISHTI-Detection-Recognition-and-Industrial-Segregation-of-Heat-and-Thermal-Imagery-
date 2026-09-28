@@ -646,6 +646,236 @@
     ]
   },
   {
+    "id": "FAC-JSW-VIJ-01",
+    "name": "JSW Steel Vijayanagar Integrated Works",
+    "type": "steel_plant",
+    "operator": "JSW Steel Limited (Jindal Group)",
+    "lat": 15.1681,
+    "lon": 76.6706,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "man_made": "chimney",
+      "power": "generator",
+      "operator": "JSW Steel Limited",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & CPCB Registry",
+    "boundary": [
+      [
+        15.1801,
+        76.6586
+      ],
+      [
+        15.1801,
+        76.6826
+      ],
+      [
+        15.1561,
+        76.6826
+      ],
+      [
+        15.1561,
+        76.6586
+      ],
+      [
+        15.1801,
+        76.6586
+      ]
+    ]
+  },
+  {
+    "id": "FAC-SAIL-IISCO-01",
+    "name": "SAIL IISCO Steel Plant Burnpur (Asansol)",
+    "type": "steel_plant",
+    "operator": "Steel Authority of India Limited (SAIL)",
+    "lat": 23.6634,
+    "lon": 86.919,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "operator": "SAIL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SAIL",
+    "boundary": [
+      [
+        23.6754,
+        86.907
+      ],
+      [
+        23.6754,
+        86.931
+      ],
+      [
+        23.6514,
+        86.931
+      ],
+      [
+        23.6514,
+        86.907
+      ],
+      [
+        23.6754,
+        86.907
+      ]
+    ]
+  },
+  {
+    "id": "FAC-SAIL-BHI-01",
+    "name": "SAIL Bhilai Steel Plant (BSP)",
+    "type": "steel_plant",
+    "operator": "Steel Authority of India Limited (SAIL)",
+    "lat": 21.182,
+    "lon": 81.391,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "operator": "SAIL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SAIL",
+    "boundary": [
+      [
+        21.194,
+        81.379
+      ],
+      [
+        21.194,
+        81.403
+      ],
+      [
+        21.17,
+        81.403
+      ],
+      [
+        21.17,
+        81.379
+      ],
+      [
+        21.194,
+        81.379
+      ]
+    ]
+  },
+  {
+    "id": "FAC-SAIL-BOK-01",
+    "name": "SAIL Bokaro Steel Plant (BSL)",
+    "type": "steel_plant",
+    "operator": "Steel Authority of India Limited (SAIL)",
+    "lat": 23.67,
+    "lon": 86.155,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "operator": "SAIL",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & SAIL",
+    "boundary": [
+      [
+        23.682,
+        86.143
+      ],
+      [
+        23.682,
+        86.167
+      ],
+      [
+        23.658,
+        86.167
+      ],
+      [
+        23.658,
+        86.143
+      ],
+      [
+        23.682,
+        86.143
+      ]
+    ]
+  },
+  {
+    "id": "FAC-TAT-KAL-01",
+    "name": "Tata Steel Kalinganagar Integrated Works",
+    "type": "steel_plant",
+    "operator": "Tata Steel Limited",
+    "lat": 20.97,
+    "lon": 86.02,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "operator": "Tata Steel",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap & Tata Steel",
+    "boundary": [
+      [
+        20.982,
+        86.008
+      ],
+      [
+        20.982,
+        86.032
+      ],
+      [
+        20.958,
+        86.032
+      ],
+      [
+        20.958,
+        86.008
+      ],
+      [
+        20.982,
+        86.008
+      ]
+    ]
+  },
+  {
+    "id": "FAC-JSW-DOL-01",
+    "name": "JSW Steel Dolvi Works",
+    "type": "steel_plant",
+    "operator": "JSW Steel Limited (Jindal Group)",
+    "lat": 18.705,
+    "lon": 73.025,
+    "osm_tags": {
+      "industrial": "steel_mill",
+      "operator": "JSW Steel",
+      "cpcb_category": "Red"
+    },
+    "registered": true,
+    "cpcb_category": "Red",
+    "source": "OpenStreetMap",
+    "boundary": [
+      [
+        18.717,
+        73.013
+      ],
+      [
+        18.717,
+        73.037
+      ],
+      [
+        18.693,
+        73.037
+      ],
+      [
+        18.693,
+        73.013
+      ],
+      [
+        18.717,
+        73.013
+      ]
+    ]
+  },
+  {
     "id": "FAC-MINE-WCL-01",
     "name": "Inder Coal Mine (Kamptee Area)",
     "type": "mine",
