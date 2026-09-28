@@ -1758,6 +1758,15 @@ function renderHotspotInspector(h) {
               </div>
             </div>
 
+            <div style="margin-top: 8px; padding: 8px 10px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                <span style="font-size: 11px; font-weight: 700; color: #c084fc;">🔬 How Prithvi-100M Foundation Model Detects Fire:</span>
+              </div>
+              <div style="font-size: 10.5px; color: #94a3b8; line-height: 1.45;">
+                Processes 6-band Sentinel-2 imagery (B02 Blue, B03 Green, B04 Red, B8A Narrow-NIR, B11 SWIR-1, B12 SWIR-2). Vision Transformer self-attention identifies sharp chlorophyll collapse in NIR paired with ash/charcoal thermal reflectance spikes in SWIR-1/2.
+              </div>
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
               <a href="${dossier?.visualVerification?.copernicusBrowserUrl || `https://browser.dataspace.copernicus.eu/?zoom=14&lat=${h.latitude.toFixed(5)}&lng=${h.longitude.toFixed(5)}&datasetId=S2_L2A_CDAS`}"
                  target="_blank" rel="noopener noreferrer"
@@ -3904,12 +3913,41 @@ function initFireMapGlobe() {
     onHotspotInspect: (h) => {
       state.selectedHotspot = h;
       state.activeIncident = createIncidentFromHotspot(h);
+      state.sidebarTab = 'inspector';
       renderHotspotInspector(h);
       const drawer = document.getElementById('hotspotDetailDrawer');
       if (drawer) drawer.classList.add('active');
+      const fireListBtn = document.getElementById('fireListBtn');
+      if (fireListBtn) fireListBtn.classList.add('active');
     }
   });
   window.fireMapGlobe.init();
+
+  // Rock-solid global popup inspect handler — works on first click every time
+  window.inspectHotspotFromPopup = function(id) {
+    let hotspot = state.hotspots?.find(h => String(h.id) === String(id));
+    if (!hotspot && window.fireMapGlobe?.activeHotspots) {
+      hotspot = window.fireMapGlobe.activeHotspots.find(h => String(h.id) === String(id));
+    }
+    if (!hotspot && state.selectedHotspot) {
+      hotspot = state.selectedHotspot;
+    }
+    if (hotspot) {
+      state.selectedHotspot = hotspot;
+      state.activeIncident = createIncidentFromHotspot(hotspot);
+    }
+    state.sidebarTab = 'inspector';
+    const drawer = document.getElementById('hotspotDetailDrawer');
+    const fireListBtn = document.getElementById('fireListBtn');
+    if (drawer) {
+      closeAllFloatingPanels(false);
+      drawer.classList.add('active');
+      if (fireListBtn) fireListBtn.classList.add('active');
+    }
+    if (hotspot) {
+      renderHotspotInspector(hotspot);
+    }
+  };
 
   // Top-Left Logo Button (Fly back to India)
   const logoBtn = document.getElementById('logoBtn');
@@ -3999,16 +4037,21 @@ function initFireMapGlobe() {
     });
   }
 
-  // Fire List Drawer Button
+  // Fire List Drawer Button (Reliable single-click open & close)
   const fireListBtn = document.getElementById('fireListBtn');
   const hotspotDrawer = document.getElementById('hotspotDetailDrawer');
   if (fireListBtn && hotspotDrawer) {
-    fireListBtn.addEventListener('click', () => {
+    fireListBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const isOpen = hotspotDrawer.classList.contains('active');
-      closeAllFloatingPanels();
-      if (!isOpen) {
+      if (isOpen) {
+        hotspotDrawer.classList.remove('active');
+        fireListBtn.classList.remove('active');
+      } else {
+        closeAllFloatingPanels(false);
         hotspotDrawer.classList.add('active');
         fireListBtn.classList.add('active');
+        state.sidebarTab = 'inspector';
         if (state.selectedHotspot) {
           renderHotspotInspector(state.selectedHotspot);
         } else if (state.hotspots && state.hotspots.length > 0) {
@@ -4019,10 +4062,11 @@ function initFireMapGlobe() {
     });
   }
 
-  // Close Drawer Button
+  // Close Drawer Button (Instant single-click close)
   const closeDrawerBtn = document.getElementById('closeDrawerBtn');
   if (closeDrawerBtn && hotspotDrawer) {
-    closeDrawerBtn.addEventListener('click', () => {
+    closeDrawerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       hotspotDrawer.classList.remove('active');
       fireListBtn?.classList.remove('active');
     });
@@ -4178,11 +4222,15 @@ function initFireMapGlobe() {
     cb?.addEventListener('change', onSensorCheckboxChange);
   });
 
-  function closeAllFloatingPanels() {
+  function closeAllFloatingPanels(includeDrawer = true) {
     document.querySelectorAll('.fm-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.toolbar-btn').forEach(b => {
-      if (b.id !== 'windBtn') b.classList.remove('active');
+      if (b.id !== 'windBtn' && (!includeDrawer || b.id !== 'fireListBtn')) b.classList.remove('active');
     });
+    if (includeDrawer) {
+      document.querySelectorAll('.hotspot-drawer').forEach(d => d.classList.remove('active'));
+      document.getElementById('fireListBtn')?.classList.remove('active');
+    }
   }
 }
 

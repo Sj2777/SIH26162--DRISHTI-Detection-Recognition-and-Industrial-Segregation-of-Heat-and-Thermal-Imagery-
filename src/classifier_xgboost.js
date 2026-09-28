@@ -22,22 +22,22 @@
 export const FIRE_CLASSES = {
   INDUSTRIAL_HIGH_ALERT: {
     key: 'INDUSTRIAL_HIGH_ALERT',
-    label: 'Industrial High-Alert',
+    label: 'Industrial Accidental Fire',
     color: '#ef4444', // Red
     bgLight: 'rgba(239, 68, 68, 0.15)',
     border: '#ef4444',
-    badgeText: '🔴 INDUSTRIAL HIGH-ALERT',
-    description: 'Major industrial accident, blowout, or critical flare deviation exceeding baseline thresholds.',
+    badgeText: '🔴 INDUSTRIAL ACCIDENTAL FIRE',
+    description: 'Accidental industrial facility fire, tank blowout, or chemical blaze. Multi-pixel thermal blowout with confirmed surrounding ground scorch (ΔNBR ≥ 0.10) or FRP ≥ 35 MW.',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/><circle cx="12" cy="12" r="3"/></svg>`
   },
   FACTORY: {
     key: 'FACTORY',
-    label: 'Factory',
+    label: 'Industrial Chimney / Flare Stack',
     color: '#f97316', // Orange
     bgLight: 'rgba(249, 115, 22, 0.15)',
     border: '#f97316',
-    badgeText: '🟠 FACTORY (INDUSTRIAL)',
-    description: 'Active factory flare, refinery stack, or registered thermal manufacturing facility.',
+    badgeText: '🟠 CHIMNEY / FLARE STACK (OPERATIONAL)',
+    description: 'Controlled industrial chimney stack emission, furnace exhaust, or routine refinery process flaring. Point-source vertical emission with zero surrounding ground scorch (ΔNBR < 0.10).',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4H2z"/><path d="M18 16v4"/><path d="M14 16v4"/><path d="M10 16v4"/></svg>`
   },
   HEAT_RING: {
@@ -448,7 +448,11 @@ export async function fetchRealContextDossier(h, facilities = [], weatherData = 
       wcLabel = `${wc?.label || 'Grassland/Bare'} (Open-Cast Coal Pit / Overburden)`;
     }
   } else if (minDist <= 2.5 || proximity?.is_industrial) {
-    refinedClass = (Number(h.frp) >= 40) ? 'INDUSTRIAL_HIGH_ALERT' : 'FACTORY';
+    // Differentiate between Operational Industrial Chimney / Stack Emission (zero ground scorch)
+    // vs Accidental Facility Fire / Disaster (ground damage ΔNBR ≥ 0.10 or high blowout FRP ≥ 35 MW)
+    const hasGroundBurn = (nbr?.delta_nbr !== null && nbr?.delta_nbr !== undefined && nbr.delta_nbr >= 0.10);
+    const isMajorBlowout = Number(h.frp) >= 35;
+    refinedClass = (hasGroundBurn || isMajorBlowout) ? 'INDUSTRIAL_HIGH_ALERT' : 'FACTORY';
   } else if (wcCode && wcCode > 0) {
     const wcClass = WC_TO_FIRE_CLASS[wcCode];
     if (wcClass) {

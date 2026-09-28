@@ -90,16 +90,182 @@ export class FireMapGlobe {
     }
   }
 
-  // 2. Initialize Hotspot Cluster and Circle Layers
+  // 2. Dynamic 2x Retina Logo Badge Icons for each Fire Classification
+  initFireTypeIcons() {
+    const iconDefinitions = {
+      'MINE': {
+        color: '#a855f7',
+        draw: (ctx) => {
+          // Crossed mining pickaxes
+          ctx.beginPath();
+          ctx.moveTo(15, 35); ctx.lineTo(35, 15);
+          ctx.moveTo(33, 12); ctx.lineTo(38, 17);
+          ctx.moveTo(35, 35); ctx.lineTo(15, 15);
+          ctx.moveTo(17, 12); ctx.lineTo(12, 17);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.6;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
+      },
+      'WILDFIRE': {
+        color: '#22c55e',
+        draw: (ctx) => {
+          // Pine tree / forest canopy
+          ctx.beginPath();
+          ctx.moveTo(25, 10);
+          ctx.lineTo(33, 19);
+          ctx.lineTo(29, 19);
+          ctx.lineTo(36, 29);
+          ctx.lineTo(14, 29);
+          ctx.lineTo(21, 19);
+          ctx.lineTo(17, 19);
+          ctx.closePath();
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          // Trunk
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(23, 29, 4, 6);
+        }
+      },
+      'FACTORY': {
+        color: '#f97316',
+        draw: (ctx) => {
+          // Factory building with tall chimney and smoke stack
+          ctx.beginPath();
+          ctx.moveTo(13, 35);
+          ctx.lineTo(13, 22);
+          ctx.lineTo(18, 22);
+          ctx.lineTo(18, 14); // Tall chimney
+          ctx.lineTo(23, 14);
+          ctx.lineTo(23, 25);
+          ctx.lineTo(29, 21);
+          ctx.lineTo(29, 25);
+          ctx.lineTo(37, 19);
+          ctx.lineTo(37, 35);
+          ctx.closePath();
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          // Smoke puff from chimney stack
+          ctx.beginPath();
+          ctx.arc(20.5, 10, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.fill();
+        }
+      },
+      'INDUSTRIAL_HIGH_ALERT': {
+        color: '#ef4444',
+        draw: (ctx) => {
+          // Warning hazard triangle with exclamation mark
+          ctx.beginPath();
+          ctx.moveTo(25, 10);
+          ctx.lineTo(38, 35);
+          ctx.lineTo(12, 35);
+          ctx.closePath();
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          // Exclamation mark
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(23.5, 18, 3, 9);
+          ctx.beginPath();
+          ctx.arc(25, 30.5, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      },
+      'CROP': {
+        color: '#b45309',
+        draw: (ctx) => {
+          // Wheat / crop stubble stalk
+          ctx.beginPath();
+          ctx.moveTo(25, 36);
+          ctx.lineTo(25, 12);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.4;
+          ctx.stroke();
+          // Grain kernels
+          ctx.beginPath();
+          ctx.arc(20.5, 17, 3.2, 0, Math.PI * 2);
+          ctx.arc(29.5, 17, 3.2, 0, Math.PI * 2);
+          ctx.arc(20.5, 24, 3.2, 0, Math.PI * 2);
+          ctx.arc(29.5, 24, 3.2, 0, Math.PI * 2);
+          ctx.arc(25, 11, 2.8, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        }
+      },
+      'HEAT_RING': {
+        color: '#eab308',
+        draw: (ctx) => {
+          // Concentric thermal rings
+          ctx.beginPath();
+          ctx.arc(25, 25, 13, 0, Math.PI * 2);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(25, 25, 7.5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(25, 25, 2.8, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        }
+      },
+      'UNKNOWN': {
+        color: '#64748b',
+        draw: (ctx) => {
+          ctx.beginPath();
+          ctx.arc(25, 25, 8, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        }
+      }
+    };
+
+    Object.entries(iconDefinitions).forEach(([key, def]) => {
+      const imgId = `fire-icon-${key}`;
+      if (this.map.hasImage(imgId)) return;
+
+      const size = 50;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Outer glow and badge circle
+      ctx.shadowColor = def.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, 21, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+      ctx.fill();
+
+      // Colored solid rim
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = def.color;
+      ctx.stroke();
+
+      // Custom icon inside
+      def.draw(ctx);
+
+      const imageData = ctx.getImageData(0, 0, size, size);
+      this.map.addImage(imgId, imageData, { pixelRatio: 2 });
+    });
+  }
+
+  // 3. Initialize Hotspot Cluster and Circle Layers
   initHotspotLayers() {
     if (this.map.getSource('fire-hotspots')) return;
+
+    this.initFireTypeIcons();
 
     this.map.addSource('fire-hotspots', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: [] },
       cluster: true,
-      clusterMaxZoom: 14,
-      clusterRadius: 45
+      clusterMaxZoom: 13,
+      clusterRadius: 40
     });
 
     // A. Clustered Fire Glow
@@ -184,7 +350,7 @@ export class FireMapGlobe {
       }
     });
 
-    // E. Unclustered Individual Fire Core
+    // E. Unclustered Individual Fire Core Base
     this.map.addLayer({
       id: 'unclustered-point',
       type: 'circle',
@@ -194,12 +360,33 @@ export class FireMapGlobe {
         'circle-color': ['get', 'color'],
         'circle-radius': [
           'interpolate', ['linear'], ['get', 'frp'],
-          0, 5,
-          50, 8,
-          200, 13
+          0, 4,
+          50, 7,
+          200, 11
         ],
-        'circle-stroke-width': 1.8,
+        'circle-stroke-width': 1.5,
         'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    // F. Unclustered Individual Fire Distinct Logo Emblem Layer
+    this.map.addLayer({
+      id: 'unclustered-symbol',
+      type: 'symbol',
+      source: 'fire-hotspots',
+      filter: ['!', ['has', 'point_count']],
+      layout: {
+        'icon-image': ['get', 'icon_id'],
+        'icon-size': [
+          'interpolate', ['linear'], ['zoom'],
+          4, 0.45,
+          7, 0.60,
+          10, 0.78,
+          13, 0.95,
+          16, 1.15
+        ],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true
       }
     });
 
@@ -226,7 +413,7 @@ export class FireMapGlobe {
 
     // Click individual hotspot: smoothly fly to point and open detailed dossier
     const handlePointClick = (e) => {
-      const features = this.map.queryRenderedFeatures(e.point, { layers: ['unclustered-point', 'unclustered-pulse'] });
+      const features = this.map.queryRenderedFeatures(e.point, { layers: ['unclustered-symbol', 'unclustered-point', 'unclustered-pulse'] });
       if (!features || !features.length) return;
       const f = features[0];
       const p = f.properties;
@@ -272,7 +459,7 @@ export class FireMapGlobe {
             <span class="info-label">Operator:</span>
             <span class="info-value" style="color: ${typeColor}; font-weight: 600;">${operator}</span>
           </div>
-          <button class="fmpop-btn" id="fmpop-inspect-btn">
+          <button class="fmpop-btn" onclick="window.inspectHotspotFromPopup('${p.id}'); if(window.event){window.event.stopPropagation();}">
             Inspect Full Dossier &rarr;
           </button>
         </div>
@@ -287,20 +474,11 @@ export class FireMapGlobe {
       this.currentHazardHotspot = { lat: Number(coords[1]), lon: Number(coords[0]) };
       this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
 
-      setTimeout(() => {
-        const btn = document.getElementById('fmpop-inspect-btn');
-        if (btn) {
-          btn.addEventListener('click', () => {
-            const raw = this.activeHotspots.find(h => String(h.id) === String(p.id)) || p;
-            this.onHotspotInspect(raw);
-          });
-        }
-      }, 50);
-
       const raw = this.activeHotspots.find(h => String(h.id) === String(p.id)) || p;
       this.onHotspotSelect(raw);
     };
 
+    this.map.on('click', 'unclustered-symbol', handlePointClick);
     this.map.on('click', 'unclustered-point', handlePointClick);
     this.map.on('click', 'unclustered-pulse', handlePointClick);
 
@@ -309,6 +487,8 @@ export class FireMapGlobe {
     this.map.on('mouseleave', 'clusters', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'clusters-glow', () => { this.map.getCanvas().style.cursor = 'pointer'; });
     this.map.on('mouseleave', 'clusters-glow', () => { this.map.getCanvas().style.cursor = ''; });
+    this.map.on('mouseenter', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+    this.map.on('mouseleave', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'unclustered-point', () => { this.map.getCanvas().style.cursor = 'pointer'; });
     this.map.on('mouseleave', 'unclustered-point', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'unclustered-pulse', () => { this.map.getCanvas().style.cursor = 'pointer'; });
@@ -324,20 +504,29 @@ export class FireMapGlobe {
     const features = hotspots.map(h => {
       const typeKey = (h.fire_type || h.classification || 'WILDFIRE').toUpperCase();
       let color = '#22c55e'; // Default Wildfire green
+      let icon_id = 'fire-icon-WILDFIRE';
+
       if (typeKey.includes('MINE') || typeKey.includes('COLLIERY')) {
         color = '#a855f7'; // Purple - Coal Mine / Pit Mine
+        icon_id = 'fire-icon-MINE';
       } else if (typeKey.includes('ALERT') || typeKey.includes('ACCIDENT')) {
-        color = '#ef4444'; // Red - Industrial High Alert
-      } else if (typeKey.includes('FACTORY') || typeKey.includes('INDUSTR')) {
-        color = '#f97316'; // Orange - Factory / Refinery Flare
+        color = '#ef4444'; // Red - Industrial High Alert / Accidental Blaze
+        icon_id = 'fire-icon-INDUSTRIAL_HIGH_ALERT';
+      } else if (typeKey.includes('FACTORY') || typeKey.includes('INDUSTR') || typeKey.includes('CHIMNEY') || typeKey.includes('FLARE') || typeKey.includes('SMOKE')) {
+        color = '#f97316'; // Orange - Factory / Industrial Chimney Stack Smoke
+        icon_id = 'fire-icon-FACTORY';
       } else if (typeKey.includes('CROP') || typeKey.includes('STUBBLE') || typeKey.includes('AGRI')) {
         color = '#b45309'; // Brown / Amber - Crop Stubble
+        icon_id = 'fire-icon-CROP';
       } else if (typeKey.includes('HEAT') || typeKey.includes('RING')) {
-        color = '#eab308'; // Yellow - Heat Ring
+        color = '#ec4899'; // Pink - Heat Ring
+        icon_id = 'fire-icon-HEAT_RING';
       } else if (typeKey.includes('WILD') || typeKey.includes('FOREST')) {
         color = '#22c55e'; // Green - Forest Wildfire
+        icon_id = 'fire-icon-WILDFIRE';
       } else if (h.color) {
         color = h.color;
+        icon_id = 'fire-icon-DEFAULT';
       }
 
       return {
@@ -355,6 +544,7 @@ export class FireMapGlobe {
           satellite: h.satellite || 'VIIRS NOAA-20',
           fire_type: h.fire_type || (color === '#a855f7' ? 'MINE' : 'WILDFIRE'),
           color: color,
+          icon_id: icon_id,
           facility_name: h.facility_name || (color === '#a855f7' ? 'Open-Cast Coal Mine' : 'Active Thermal Detection'),
           operator: h.operator || (color === '#a855f7' ? 'Coal India Limited' : 'Natural / Rural Area'),
           acq_date: h.acq_date || h.date || new Date().toISOString().slice(0, 10),
