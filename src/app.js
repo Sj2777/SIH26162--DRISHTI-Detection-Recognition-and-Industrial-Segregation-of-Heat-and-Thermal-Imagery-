@@ -310,11 +310,26 @@ function initDashboard() {
   if (!container) return;
 
   const hs = state.hotspots;
-  const industrial = hs.filter(h => h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT' || h.classification === 'KNOWN_INDUSTRIAL_FLARE').length;
-  const anomalies = hs.filter(h => h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT').length;
-  const wildfires = hs.filter(h => h.classification === 'WILDFIRE_FOREST').length;
-  const agro = hs.filter(h => h.classification === 'AGRICULTURAL_STUBBLE').length;
-  const unreg = hs.filter(h => h.classification === 'UNREGISTERED_ILLEGAL_FACILITY').length;
+  // Pre-classify any unclassified hotspots using XGBoost & facility bounds
+  hs.forEach((h) => {
+    if (!h.fire_type || !h.xgb_meta) {
+      const res = classifyHotspotXGBoost(h, state.facilities || MOCK_FACILITIES);
+      h.xgb_meta = res;
+      h.fire_type = res.fireClass;
+      h.fire_class_meta = res.classMeta;
+      h.xgb_confidence = res.confidence;
+      h.context_dossier = res.contextDossier;
+      if (res.facilityName) h.facility_name = res.facilityName;
+      if (res.operator) h.operator = res.operator;
+      if (res.minDistanceKm !== undefined) h.distance_to_facility_km = res.minDistanceKm;
+    }
+  });
+
+  const industrial = hs.filter(h => h.fire_type === 'FACTORY' || h.fire_type === 'INDUSTRIAL_HIGH_ALERT' || h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT' || h.classification === 'KNOWN_INDUSTRIAL_FLARE').length;
+  const anomalies = hs.filter(h => h.fire_type === 'INDUSTRIAL_HIGH_ALERT' || h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT').length;
+  const wildfires = hs.filter(h => h.fire_type === 'WILDFIRE' || h.classification === 'WILDFIRE_FOREST').length;
+  const agro = hs.filter(h => h.fire_type === 'CROP' || h.classification === 'AGRICULTURAL_STUBBLE').length;
+  const unreg = hs.filter(h => h.classification === 'UNREGISTERED_ILLEGAL_FACILITY' || h.is_unregistered).length;
   const flagged = hs.filter(h => h.is_flagged).length;
   const total = hs.length;
 
@@ -325,15 +340,8 @@ function initDashboard() {
   });
   const topStates = Object.entries(stateCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
 
-  // Dynamic Priority Selection: Find top 10 highest-severity thermal events across India
-  const sortedFires = [...hs].sort((a, b) => {
-    const aCrit = (a.classification && (a.classification.includes('INDUSTRIAL') || a.classification.includes('CRITICAL') || a.classification.includes('ANOMALY') || a.classification.includes('COAL'))) ? 1 : 0;
-    const bCrit = (b.classification && (b.classification.includes('INDUSTRIAL') || b.classification.includes('CRITICAL') || b.classification.includes('ANOMALY') || b.classification.includes('COAL'))) ? 1 : 0;
-    if (bCrit !== aCrit) return bCrit - aCrit;
-    return (b.frp || 0) - (a.frp || 0);
-  });
-
-  const top10Incidents = sortedFires.slice(0, 10).map((h, idx) => {
+  // Map ALL active thermal events across India with full dynamic telemetry
+  const allDashboardIncidents = hs.map((h, idx) => {
     let districtObj = null;
     if (h.latitude && h.longitude && Array.isArray(INDIAN_DISTRICTS)) {
       for (const d of INDIAN_DISTRICTS) {
@@ -357,7 +365,8 @@ function initDashboard() {
     const distName = districtObj ? districtObj.name : (h.district || 'Regional');
     const stName = districtObj ? districtObj.state : ((h.region ? h.region.split('/')[0].trim() : null) || getStateFromCoords(h.latitude, h.longitude) || 'India');
     const frp = Number(h.frp) || 20;
-    const isCritical = frp >= 35 || (h.classification && (h.classification.includes('CRITICAL') || h.classification.includes('INDUSTRIAL')));
+    const fireType = (h.fire_type || h.classification || 'FACTORY').toUpperCase();
+    const isCritical = frp >= 35 || fireType.includes('ALERT') || fireType.includes('ACCIDENT');
     const priority = isCritical ? 'CRITICAL' : (frp >= 20 ? 'HIGH' : 'ELEVATED');
     const priorityColor = priority === 'CRITICAL' ? '#ef4444' : (priority === 'HIGH' ? '#f97316' : '#f59e0b');
     const priorityBadgeClass = priority === 'CRITICAL' ? 'badge-critical' : 'badge-warning';
@@ -389,6 +398,9 @@ function initDashboard() {
       district: distName,
       state: stName,
       sector: sector,
+      fire_type: fireType,
+      classification: h.classification || fireType,
+      is_flagged: !!h.is_flagged,
       frp: frp.toFixed(1),
       deviation: `${dev}×`,
       confidence: h.confidence || h.confidence_score || 94,
@@ -403,6 +415,16 @@ function initDashboard() {
       explanation: explanation
     };
   });
+
+  state.allDashboardIncidents = allDashboardIncidents;
+  state.dashIncidentFilter = state.dashIncidentFilter || 'FACTORY';
+
+  const countInd = allDashboardIncidents.filter(inc => matchesFireType(inc, 'FACTORY')).length;
+  const countAlert = allDashboardIncidents.filter(inc => matchesFireType(inc, 'INDUSTRIAL_HIGH_ALERT')).length;
+  const countWild = allDashboardIncidents.filter(inc => matchesFireType(inc, 'WILDFIRE')).length;
+  const countCrop = allDashboardIncidents.filter(inc => matchesFireType(inc, 'CROP')).length;
+  const countMine = allDashboardIncidents.filter(inc => matchesFireType(inc, 'MINE')).length;
+  const countTotal = allDashboardIncidents.length;
 
   const now = new Date();
   const freshness = now.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
@@ -453,61 +475,38 @@ function initDashboard() {
 
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
         <div style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.22);border-radius:10px;padding:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:10px;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="pulse-dot pulse-dot-red"></span>
-              <span style="font-size:0.75rem;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.05em;">ACTIVE HIGH-PRIORITY INCIDENTS — TOP 10 ACROSS INDIA</span>
+              <span style="font-size:0.76rem;font-weight:700;color:#f1f5f9;text-transform:uppercase;letter-spacing:0.05em;">ALL AFFECTED INDUSTRIAL FACILITIES &amp; SITES ACROSS INDIA</span>
             </div>
-            <span class="badge badge-critical" style="font-size:0.62rem;">10 CRITICAL DETECTIONS</span>
+            <span class="badge badge-critical" id="dashIncidentsCountBadge" style="font-size:0.62rem;">ALL SITES MONITORED</span>
           </div>
 
-          <div class="top10-incidents-scroll" style="max-height: 520px; overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 10px;">
-            ${top10Incidents.map(inc => `
-              <div style="background:rgba(15,23,42,0.65);border:1px solid rgba(255,255,255,0.06);border-left:3px solid ${inc.priorityColor};border-radius:8px;padding:12px 14px;transition:all 0.18s ease;"
-                   onmouseenter="this.style.background='rgba(30,41,59,0.8)';this.style.borderColor='rgba(56,189,248,0.4)';"
-                   onmouseleave="this.style.background='rgba(15,23,42,0.65)';this.style.borderColor='rgba(255,255,255,0.06)';">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="background:${inc.rank === 1 ? 'linear-gradient(135deg, #ef4444, #f97316)' : 'rgba(255,255,255,0.08)'};color:${inc.rank === 1 ? '#fff' : '#94a3b8'};font-weight:800;font-size:0.65rem;padding:2px 7px;border-radius:4px;font-family:monospace;">#${inc.rank}</span>
-                    <span style="font-size:0.65rem;color:#64748b;font-family:monospace;">${inc.id}</span>
-                    <span style="font-size:0.65rem;color:#94a3b8;">· ${inc.satellite} (${inc.acqTime})</span>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <span class="badge ${inc.priorityBadgeClass}" style="font-size:0.58rem;padding:2px 6px;">${inc.priority}</span>
-                    <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);font-size:0.58rem;padding:2px 6px;">${inc.districtAction}</span>
-                  </div>
-                </div>
+          <!-- Interactive Category Filter Tabs -->
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;" id="dashIncidentFilterPills">
+            <button class="btn ${state.dashIncidentFilter === 'FACTORY' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('FACTORY')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              🏭 Affected Industries (${countInd})
+            </button>
+            <button class="btn ${state.dashIncidentFilter === 'INDUSTRIAL_HIGH_ALERT' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('INDUSTRIAL_HIGH_ALERT')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              🔴 Critical Accidents (${countAlert})
+            </button>
+            <button class="btn ${state.dashIncidentFilter === 'WILDFIRE' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('WILDFIRE')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              🌲 Forest Wildfires (${countWild})
+            </button>
+            <button class="btn ${state.dashIncidentFilter === 'CROP' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('CROP')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              🌾 Agricultural Stubble (${countCrop})
+            </button>
+            <button class="btn ${state.dashIncidentFilter === 'MINE' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('MINE')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              ♨️ Coal Mines (${countMine})
+            </button>
+            <button class="btn ${state.dashIncidentFilter === 'ALL' ? 'btn-primary' : 'btn-outline'} btn-34 dash-inc-btn" onclick="window.setDashboardIncidentFilter('ALL')" style="font-size:0.66rem;padding:4px 9px;height:27px;">
+              🔥 All Incidents (${countTotal})
+            </button>
+          </div>
 
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.86rem;font-weight:700;color:#f1f5f9;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${inc.facility}">
-                      ${inc.facility}
-                    </div>
-                    <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:8px;">
-                      Sector: <span style="color:#cbd5e1;">${inc.sector}</span> · Confidence: <span style="color:#38bdf8;">${inc.confidence}%</span> · 📍 <span style="color:#94a3b8;">${inc.district}, ${inc.state}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;font-size:0.68rem;font-family:monospace;">
-                      <span style="color:#f97316;">🔥 Max FRP: <strong>${inc.frp} MW</strong></span>
-                      <span style="color:#ef4444;">📈 Dev: <strong>${inc.deviation}</strong></span>
-                      <span style="color:#fbbf24;">👥 Pop. at Risk: <strong>${inc.popRisk.toLocaleString()}</strong></span>
-                    </div>
-                  </div>
-
-                  <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-                    <button class="btn btn-primary" style="font-size:0.68rem;padding:5px 10px;height:28px !important;line-height:28px !important;" onclick="window.selectHotspot('${inc.id}');window.scrollToGlobe();">
-                      View on Map →
-                    </button>
-                    <a href="https://maps.google.com/?q=${inc.lat},${inc.lon}" target="_blank" style="text-decoration:none;">
-                      <button class="btn btn-outline" style="font-size:0.66rem;padding:4px 8px;width:100%;height:26px !important;line-height:26px !important;">📍 Google Maps</button>
-                    </a>
-                  </div>
-                </div>
-
-                <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.04);font-size:0.67rem;color:#94a3b8;line-height:1.4;">
-                  <strong style="color:#cbd5e1;">AI Diagnosis:</strong> ${inc.explanation}
-                </div>
-              </div>
-            `).join('')}
+          <div id="dashIncidentsScrollList" class="top10-incidents-scroll" style="max-height: 520px; overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 10px;">
+            <!-- Populated dynamically by window.renderDashboardIncidentCards() -->
           </div>
         </div>
 
@@ -602,7 +601,180 @@ function initDashboard() {
       window.updateDashboardIndustryCard(facilities[0].id);
     }
   }
+
+  // Populate All Affected Incidents List with direct category badges
+  if (typeof window.renderDashboardIncidentCards === 'function') {
+    window.renderDashboardIncidentCards(state.dashIncidentFilter || 'FACTORY');
+  }
 }
+
+// Direct Category SVG Badge helper for dashboard and cards (matches map emblem symbols)
+export function getCategorySvgBadge(fireType, size = 32) {
+  const fType = (fireType || 'FACTORY').toUpperCase();
+  if (fType.includes('MINE') || fType.includes('COLLIERY')) {
+    return `
+      <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: rgba(168, 85, 247, 0.16); border: 1.5px solid #a855f7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(168,85,247,0.3);">
+        <svg viewBox="0 0 50 50" width="${Math.round(size * 0.72)}" height="${Math.round(size * 0.72)}">
+          <path d="M15 35 L35 15 M33 12 L38 17 M35 35 L15 15 M17 12 L12 17" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>`;
+  }
+  if (fType.includes('ALERT') || fType.includes('ACCIDENT')) {
+    return `
+      <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 1.5px solid #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(239,68,68,0.35);">
+        <svg viewBox="0 0 50 50" width="${Math.round(size * 0.72)}" height="${Math.round(size * 0.72)}">
+          <path d="M25 10 C21 16 16 20 16 27 C16 33.5 20 37 25 37 C30 37 34 33.5 34 27 C34 20 29 16 25 10 Z" fill="#ef4444"/>
+          <path d="M25 19 C23 23 20 26 20 30 C20 34 22.5 35.5 25 35.5 C27.5 35.5 30 34 30 30 C30 26 27 23 25 19 Z" fill="#ffffff"/>
+        </svg>
+      </div>`;
+  }
+  if (fType.includes('WILD') || fType.includes('FOREST')) {
+    return `
+      <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: rgba(34, 197, 94, 0.16); border: 1.5px solid #22c55e; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(34,197,94,0.3);">
+        <svg viewBox="0 0 50 50" width="${Math.round(size * 0.72)}" height="${Math.round(size * 0.72)}">
+          <path d="M25 10 L33 19 L29 19 L36 29 L14 29 L21 19 L17 19 Z" fill="#22c55e"/>
+          <rect x="23" y="29" width="4" height="6" fill="#ffffff"/>
+        </svg>
+      </div>`;
+  }
+  if (fType.includes('CROP') || fType.includes('STUBBLE') || fType.includes('AGRI')) {
+    return `
+      <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: rgba(234, 179, 8, 0.16); border: 1.5px solid #eab308; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(234,179,8,0.3);">
+        <svg viewBox="0 0 50 50" width="${Math.round(size * 0.72)}" height="${Math.round(size * 0.72)}">
+          <path d="M25 36 L25 14 M25 18 C28 15 31 16 32 18 C31 20 28 20 25 21 M25 24 C28 21 31 22 32 24 C31 26 28 26 25 27 M25 18 C22 15 19 16 18 18 C19 20 22 20 25 21 M25 24 C22 21 19 22 18 24 C19 26 22 26 25 27" stroke="#eab308" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>`;
+  }
+  // Default to FACTORY (Industrial Chimney / Stack Smoke)
+  return `
+    <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: rgba(249, 115, 22, 0.16); border: 1.5px solid #f97316; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(249,115,22,0.35);">
+      <svg viewBox="0 0 50 50" width="${Math.round(size * 0.72)}" height="${Math.round(size * 0.72)}">
+        <path d="M13 35 L13 22 L21 27 L21 22 L29 27 L29 14 L37 14 L37 35 Z" fill="#f97316"/>
+        <circle cx="33" cy="10" r="1.8" fill="#ffffff"/>
+        <circle cx="34.5" cy="7" r="2.2" fill="#ffffff"/>
+      </svg>
+    </div>`;
+}
+
+// Render all affected incidents across India with direct category symbols
+window.renderDashboardIncidentCards = function(categoryFilter = 'FACTORY') {
+  const container = document.getElementById('dashIncidentsScrollList');
+  if (!container) return;
+
+  const incidents = state.allDashboardIncidents || [];
+  const filtered = categoryFilter === 'ALL'
+    ? incidents
+    : incidents.filter(inc => matchesFireType(inc, categoryFilter));
+
+  const countBadge = document.getElementById('dashIncidentsCountBadge');
+  if (countBadge) {
+    const labelMap = {
+      'FACTORY': 'AFFECTED INDUSTRIAL SITES DETECTED',
+      'INDUSTRIAL_HIGH_ALERT': 'CRITICAL INDUSTRIAL ACCIDENTS DETECTED',
+      'WILDFIRE': 'ACTIVE FOREST WILDFIRES DETECTED',
+      'CROP': 'AGRICULTURAL STUBBLE SITES DETECTED',
+      'MINE': 'OPEN-CAST COAL MINES DETECTED',
+      'ALL': 'ALL ACTIVE INCIDENTS NATIONWIDE'
+    };
+    countBadge.innerText = `${filtered.length} ${labelMap[categoryFilter] || 'SITES DETECTED'}`;
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div style="padding: 36px 16px; text-align: center; color: #94a3b8; font-size: 0.78rem;">
+        No active thermal detections currently recorded in this category across India.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map((inc) => {
+    const fType = (inc.fire_type || 'FACTORY').toUpperCase();
+    const typeColor = fType.includes('MINE') ? '#a855f7'
+      : (fType.includes('ALERT') || fType.includes('ACCIDENT')) ? '#ef4444'
+      : (fType.includes('WILD') || fType.includes('FOREST')) ? '#22c55e'
+      : (fType.includes('CROP') || fType.includes('STUBBLE') || fType.includes('AGRI')) ? '#eab308'
+      : '#f97316';
+
+    const categoryTitle = fType.includes('MINE') ? 'Open-Cast Coal Mine'
+      : (fType.includes('ALERT') || fType.includes('ACCIDENT')) ? 'Industrial Critical Anomaly'
+      : (fType.includes('WILD') || fType.includes('FOREST')) ? 'Forest Wildfire'
+      : (fType.includes('CROP') || fType.includes('STUBBLE') || fType.includes('AGRI')) ? 'Agricultural Stubble Burning'
+      : 'Registered Industrial Plant';
+
+    return `
+      <div class="top10-card" style="background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(255, 255, 255, 0.08); border-left: 4px solid ${typeColor}; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; transition: all 0.15s ease;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            ${getCategorySvgBadge(inc.fire_type, 36)}
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span style="font-size: 0.82rem; font-weight: 700; color: #f8fafc;">${inc.facility}</span>
+                <span class="badge" style="background: ${typeColor}22; color: ${typeColor}; border: 1px solid ${typeColor}55; font-size: 0.6rem; padding: 1px 6px;">
+                  ${categoryTitle}
+                </span>
+                <span class="badge ${inc.priorityBadgeClass}" style="font-size: 0.58rem; padding: 1px 5px;">
+                  ${inc.priority}
+                </span>
+              </div>
+              <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px;">
+                <span style="color: #cbd5e1; font-weight: 500;">📍 ${inc.district}, ${inc.state}</span> &middot; 
+                <span style="font-family: monospace; color: #64748b;">${inc.lat.toFixed(4)}°N, ${inc.lon.toFixed(4)}°E</span> &middot; 
+                <span style="color: #38bdf8;">🛰️ ${inc.satellite}</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-34" style="font-size: 0.68rem; padding: 4px 11px; height: 28px; white-space: nowrap; flex-shrink: 0;" onclick="window.selectHotspot('${inc.id}'); window.scrollToGlobe();">
+            View on Map &rarr;
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.32); border-radius: 6px; padding: 6px 10px; font-size: 0.68rem; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div>
+              <span style="color: #64748b;">Thermal FRP:</span>
+              <strong style="color: #f97316; font-family: monospace; margin-left: 3px;">${inc.frp} MW</strong>
+            </div>
+            <div>
+              <span style="color: #64748b;">Deviation:</span>
+              <strong style="color: ${parseFloat(inc.deviation) > 2 ? '#ef4444' : '#f59e0b'}; font-family: monospace; margin-left: 3px;">${inc.deviation}</strong>
+            </div>
+            <div>
+              <span style="color: #64748b;">Confidence:</span>
+              <strong style="color: #34d399; font-family: monospace; margin-left: 3px;">${inc.confidence}%</strong>
+            </div>
+            <div>
+              <span style="color: #64748b;">Pop. at Risk:</span>
+              <strong style="color: #cbd5e1; font-family: monospace; margin-left: 3px;">${Number(inc.popRisk).toLocaleString('en-IN')}</strong>
+            </div>
+          </div>
+          <div style="font-size: 0.64rem; color: #94a3b8; font-style: italic;">
+            ${inc.explanation}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+// Filter pills switcher for command dashboard
+window.setDashboardIncidentFilter = function(category) {
+  state.dashIncidentFilter = category;
+  
+  const buttons = document.querySelectorAll('#dashIncidentFilterPills .dash-inc-btn');
+  buttons.forEach(btn => {
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline');
+  });
+
+  const activeBtn = Array.from(buttons).find(b => b.getAttribute('onclick')?.includes(`'${category}'`));
+  if (activeBtn) {
+    activeBtn.classList.remove('btn-outline');
+    activeBtn.classList.add('btn-primary');
+  }
+
+  window.renderDashboardIncidentCards(category);
+};
 
 function dashCard(title, value, color, icon, subtitle, targetTab) {
   return `

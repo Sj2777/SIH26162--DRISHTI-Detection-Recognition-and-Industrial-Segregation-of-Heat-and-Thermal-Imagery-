@@ -750,162 +750,76 @@ export class FireMapGlobe {
     });
   }
 
-  // 3. Initialize Hotspot Cluster and Circle Layers
+  // 3. Initialize Hotspot Direct Symbol and Pulse Layers (Zero Clustering - Direct Category Symbols)
   initHotspotLayers() {
     if (this.map.getSource('fire-hotspots')) return;
 
     this.initFireTypeIcons();
 
+    // Disable clustering entirely: render all affected industries and categories directly
     this.map.addSource('fire-hotspots', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: [] },
-      cluster: true,
-      clusterMaxZoom: 13,
-      clusterRadius: 40
+      cluster: false
     });
 
-    // A. Clustered Fire Glow
-    this.map.addLayer({
-      id: 'clusters-glow',
-      type: 'circle',
-      source: 'fire-hotspots',
-      filter: ['has', 'point_count'],
-      paint: {
-        'circle-color': [
-          'step', ['get', 'point_count'],
-          'rgba(245, 158, 11, 0.4)',
-          10, 'rgba(249, 115, 22, 0.45)',
-          50, 'rgba(239, 68, 68, 0.55)'
-        ],
-        'circle-radius': [
-          'step', ['get', 'point_count'],
-          18,
-          10, 24,
-          50, 32
-        ],
-        'circle-blur': 0.4
-      }
-    });
-
-    // B. Clustered Fire Center
-    this.map.addLayer({
-      id: 'clusters',
-      type: 'circle',
-      source: 'fire-hotspots',
-      filter: ['has', 'point_count'],
-      paint: {
-        'circle-color': [
-          'step', ['get', 'point_count'],
-          '#f59e0b',
-          10, '#f97316',
-          50, '#ef4444'
-        ],
-        'circle-radius': [
-          'step', ['get', 'point_count'],
-          10,
-          10, 14,
-          50, 18
-        ],
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff'
-      }
-    });
-
-    // C. Cluster Count Label
-    this.map.addLayer({
-      id: 'cluster-count',
-      type: 'symbol',
-      source: 'fire-hotspots',
-      filter: ['has', 'point_count'],
-      layout: {
-        'text-field': '{point_count_abbreviated}',
-        'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
-        'text-size': 11
-      },
-      paint: {
-        'text-color': '#ffffff'
-      }
-    });
-
-    // D. Unclustered Individual Fire Outer Pulse
+    // A. Direct Individual Fire Outer Pulse
     this.map.addLayer({
       id: 'unclustered-pulse',
       type: 'circle',
       source: 'fire-hotspots',
-      filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': ['get', 'color'],
         'circle-radius': [
-          'interpolate', ['linear'], ['get', 'frp'],
-          0, 9,
-          50, 16,
-          200, 26
+          'interpolate', ['linear'], ['zoom'],
+          3, 5,
+          6, 8,
+          9, 13,
+          13, 19
         ],
-        'circle-opacity': 0.45,
+        'circle-opacity': 0.38,
         'circle-blur': 0.45
       }
     });
 
-    // E. Unclustered Individual Fire Core Base
+    // B. Direct Individual Fire Core Base Ring
     this.map.addLayer({
       id: 'unclustered-point',
       type: 'circle',
       source: 'fire-hotspots',
-      filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': ['get', 'color'],
         'circle-radius': [
-          'interpolate', ['linear'], ['get', 'frp'],
-          0, 4,
-          50, 7,
-          200, 11
+          'interpolate', ['linear'], ['zoom'],
+          3, 2.5,
+          6, 4.5,
+          9, 7.0,
+          13, 10
         ],
-        'circle-stroke-width': 1.5,
+        'circle-stroke-width': 1.2,
         'circle-stroke-color': '#ffffff'
       }
     });
 
-    // F. Unclustered Individual Fire Distinct Logo Emblem Layer
+    // C. Direct Fire Distinct Logo Emblem Layer (renders direct category symbol for every point!)
     this.map.addLayer({
       id: 'unclustered-symbol',
       type: 'symbol',
       source: 'fire-hotspots',
-      filter: ['!', ['has', 'point_count']],
       layout: {
         'icon-image': ['get', 'icon_id'],
         'icon-size': [
           'interpolate', ['linear'], ['zoom'],
-          4, 0.45,
-          7, 0.60,
-          10, 0.78,
-          13, 0.95,
-          16, 1.15
+          3, 0.44,
+          5, 0.56,
+          8, 0.72,
+          11, 0.92,
+          14, 1.15
         ],
         'icon-allow-overlap': true,
         'icon-ignore-placement': true
       }
     });
-
-    // Click cluster: decisively zoom in to break apart points in one smooth animation
-    const handleClusterClick = (e) => {
-      const features = this.map.queryRenderedFeatures(e.point, { layers: ['clusters', 'clusters-glow'] });
-      if (!features || !features.length) return;
-      const clusterId = features[0].properties.cluster_id;
-      const coords = features[0].geometry.coordinates;
-      this.map.getSource('fire-hotspots').getClusterExpansionZoom(clusterId, (err, zoom) => {
-        if (err) return;
-        const targetZoom = Math.max(zoom + 1.8, 12);
-        this.map.flyTo({
-          center: coords,
-          zoom: targetZoom,
-          speed: 1.4,
-          curve: 1.1,
-          essential: true
-        });
-      });
-    };
-    this.map.on('click', 'clusters', handleClusterClick);
-    this.map.on('click', 'clusters-glow', handleClusterClick);
 
     // Click individual hotspot: smoothly fly to point and open detailed dossier
     const handlePointClick = (e) => {
@@ -979,10 +893,6 @@ export class FireMapGlobe {
     this.map.on('click', 'unclustered-pulse', handlePointClick);
 
     // Pointer cursors
-    this.map.on('mouseenter', 'clusters', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-    this.map.on('mouseleave', 'clusters', () => { this.map.getCanvas().style.cursor = ''; });
-    this.map.on('mouseenter', 'clusters-glow', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-    this.map.on('mouseleave', 'clusters-glow', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = 'pointer'; });
     this.map.on('mouseleave', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = ''; });
     this.map.on('mouseenter', 'unclustered-point', () => { this.map.getCanvas().style.cursor = 'pointer'; });
