@@ -7,7 +7,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { toast } from "sonner";
-
+import Map, { Marker } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import municipalityMap from "@/assets/municipality-satellite-map.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,19 +138,36 @@ function Dashboard() {
             </div>
 
             <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              <Kpi icon={Flame} label="Active fires" value={criticalCount} note="Requires attention" tone="text-critical" />
-              <Kpi icon={MapPinned} label="Risk zones" value={riskZones} note="Across monitored wards" tone="text-warning" />
-              <Kpi icon={Layers3} label="Monitored area" value="482 km²" note="Satellite coverage" tone="text-info" />
-              <Kpi icon={ShieldCheck} label="Detection accuracy" value={`${avgAccuracy}%`} note="30-day confidence" tone="text-success" />
+              <Kpi icon={Flame} label="Active incidents" value={criticalCount} note="Require immediate action" tone="text-critical" />
+              <Kpi icon={MapPinned} label="New alerts" value={alerts.filter(a => a.status === 'New' || a.status === 'PENDING').length} note="Awaiting ACK" tone="text-warning" />
+              <Kpi icon={Layers3} label="Persistent thermal sites" value="4" note="Repeated 3+ times" tone="text-info" />
+              <Kpi icon={ShieldCheck} label="Escalated to Fire Dept" value={alerts.filter(a => a.status === 'Escalated to state' || a.status === 'Fire-control-room notified').length} note="Currently active" tone="text-destructive" />
+              <Kpi icon={Activity} label="Under investigation" value={alerts.filter(a => a.status === 'Under verification').length} note="Field team assigned" tone="text-warning" />
+              <Kpi icon={BarChart3} label="Resolved incidents" value={alerts.filter(a => a.status === 'Resolved').length} note="This month" tone="text-success" />
+              <Kpi icon={Activity} label="Avg ACK time" value="4.2m" note="-1.5m vs last month" tone="text-success" />
             </section>
 
             <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
               <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h2 className="font-semibold">Satellite fire map</h2><p className="text-xs text-muted-foreground">Focused on {session.municipality}</p></div><span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase text-primary">Satellite</span></div>
                 <div className="relative h-[500px] overflow-hidden bg-map-surface">
-                  {mapUrl ? <iframe title={`Satellite map of ${session.municipality}`} src={mapUrl} className="absolute inset-0 size-full border-0" loading="eager" referrerPolicy="no-referrer-when-downgrade" /> : <img src={municipalityMap} alt={`Satellite map of ${session.municipality}`} className="absolute inset-0 size-full object-cover" />}
-                  <div className="pointer-events-none absolute inset-0 bg-map-tint" />
-                  {alerts.map((alert, index) => <button key={alert.id} type="button" onClick={() => setSelectedId(alert.id)} aria-label={`Open ${alert.id}`} className={cn("absolute grid size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-primary-foreground shadow-lg transition-transform hover:scale-110", alert.severity === "CRITICAL" ? "bg-critical text-critical-foreground" : alert.severity === "WARNING" ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground", ["left-[49%] top-[44%]", "left-[36%] top-[62%]", "left-[67%] top-[34%]", "left-[61%] top-[58%]"][index % 4])}><Flame className="size-4" /></button>)}
+                  <Map
+                    initialViewState={{ longitude: 79.0882, latitude: 21.1458, zoom: 11 }}
+                    mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+                  >
+                    {alerts.map((alert, index) => {
+                      const isCritical = alert.severity === "CRITICAL";
+                      const isWarning = alert.severity === "WARNING";
+                      // Mock dynamic lat/lng near Nagpur
+                      const lat = 21.1458 + (index % 4 - 2) * 0.05;
+                      const lng = 79.0882 + ((index + 2) % 4 - 2) * 0.05;
+                      return (
+                        <Marker key={alert.id} longitude={lng} latitude={lat} anchor="center">
+                          <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedId(alert.id); }} aria-label={`Open ${alert.id}`} className={cn("grid size-8 place-items-center rounded-full border-2 border-primary-foreground shadow-lg transition-transform hover:scale-110", isCritical ? "bg-critical text-critical-foreground animate-pulse" : isWarning ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}><Flame className="size-4" /></button>
+                        </Marker>
+                      );
+                    })}
+                  </Map>
                   <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 rounded-md border border-map-border bg-map-overlay px-3 py-2 text-[10px] text-map-foreground shadow-lg"><Legend tone="bg-critical" label="Active fire" /><Legend tone="bg-warning" label="Hotspot" /><Legend tone="bg-success" label="Normal" /></div>
                   <div className="absolute right-4 top-4 rounded-md border border-map-border bg-map-overlay px-3 py-2 text-right text-map-foreground shadow-lg"><div className="text-[9px] uppercase text-map-muted">Viewing</div><div className="text-xs font-semibold">{session.municipality}</div></div>
                 </div>
@@ -188,8 +206,51 @@ function Dashboard() {
               <Panel title="Top-risk regions" icon={MapPinned}><div className="space-y-3">{[...INDUSTRIES].sort((a, b) => b.riskScore - a.riskScore).slice(0, 3).map((item) => <Link key={item.id} to="/industries/$industryId" params={{ industryId: item.id }} className="flex items-center justify-between rounded-md border border-border px-3 py-2 hover:bg-secondary"><div><div className="text-sm font-medium">{item.name}</div><div className="text-[10px] text-muted-foreground">{item.ward}</div></div><span className="text-sm font-bold text-critical">{item.riskScore}</span></Link>)}</div></Panel>
             </section>
 
-            <section className="mt-5 rounded-lg border border-border bg-card p-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3"><div><div className="text-xs font-semibold uppercase text-critical">Selected incident · {selected.id}</div><h2 className="mt-1 font-semibold">{selected.facility}</h2></div><div className="flex flex-wrap gap-2">{actions.map((action) => <Button key={action.status} size="sm" variant={action.status === "ESCALATED" ? "destructive" : "outline"} onClick={() => updateAlert(action.status, action.label)}>{action.status === "FALSE POSITIVE" && <XCircle />}{action.label}</Button>)}</div></div>
+            <section className="mt-5 rounded-lg border border-border bg-card p-5 shadow-sm">
+              <div className="flex flex-wrap justify-between items-start border-b border-border pb-4 mb-4">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-primary mb-1">Incident Brief · {selected.id}</div>
+                  <h2 className="text-xl font-bold">{selected.facility}</h2>
+                  <div className="text-sm text-muted-foreground mt-1">{selected.location} • {selected.classification} ({selected.landCover})</div>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-end max-w-lg">
+                  {actions.map((action) => (
+                    <Button key={action.status} size="sm" variant={action.status === "Escalated to state" || action.status === "Fire-control-room notified" ? "destructive" : "outline"} onClick={() => updateAlert(action.status, action.label)}>
+                      {action.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Thermal Trend</div>
+                  <div>Intensifying (+12% FRP)</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Nearby Population</div>
+                  <div>~12,500 (within 2km)</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Downwind Direction</div>
+                  <div>SE (towards residential zone)</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Nearest Fire Station</div>
+                  <div>Station 4 (3.2 km away)</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Historical Match</div>
+                  <div>94% match (routine flare profile)</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">SACHET Alert</div>
+                  <div>None active in this grid</div>
+                </div>
+                <div className="col-span-2">
+                  <div className="font-semibold text-muted-foreground text-xs uppercase mb-1">Recommended Action</div>
+                  <div className="text-critical font-medium">Verify with facility supervisor immediately (High FRP for non-flare stack)</div>
+                </div>
+              </div>
             </section>
           </main>
         </div>
