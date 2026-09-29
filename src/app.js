@@ -51,7 +51,7 @@ const state = {
   selectedSubUnitId: 'U-FLARE-ACID',
   activeIncident: createIncidentFromHotspot(null),
   windBearing: 245,
-  windSpeed: 18.5,
+  windSpeed: 12,
   filterType: 'ALL',
   sensorFilter: 'ALL',
   showOSM: true,

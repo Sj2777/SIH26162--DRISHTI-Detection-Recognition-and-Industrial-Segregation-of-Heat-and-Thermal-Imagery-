@@ -24,7 +24,7 @@ export class FireMapGlobe {
     this.isGlobeProjection = true;
     this.currentBasemap = 'satellite';
     this.isWindActive = true;
-    this.windSpeedKmh = 14;
+    this.windSpeedKmh = 12;
     this.windBearingDeg = 240;
     this.windParticles = [];
     this.currentHazardHotspot = null;
@@ -1485,8 +1485,8 @@ export class FireMapGlobe {
       p.prevLon = lon;
       p.prevLat = lat;
       p.age = 0;
-      p.maxAge = 40 + Math.floor(Math.random() * 55);
-      p.speed = (0.04 + Math.random() * 0.06) * (Math.max(8, Number(this.windSpeedKmh) || 14) / 14.0);
+      p.maxAge = 75 + Math.floor(Math.random() * 85);
+      p.speed = (0.005 + Math.random() * 0.007) * (Math.max(4, Number(this.windSpeedKmh) || 12) / 14.0);
       p.trail = [{ lon, lat }];
     };
 
@@ -1536,7 +1536,7 @@ export class FireMapGlobe {
 
           // Maintain streamline trail
           p.trail.push({ lon: p.lon, lat: p.lat });
-          if (p.trail.length > 5) p.trail.shift();
+          if (p.trail.length > 7) p.trail.shift();
 
           // Project trail onto 3D globe screen coordinates
           const projectedPts = [];
@@ -1579,12 +1579,12 @@ export class FireMapGlobe {
   }
 
   setWindParameters(speedKmh, bearingDeg) {
-    this.windSpeedKmh = Number(speedKmh) || 14;
+    this.windSpeedKmh = Number(speedKmh) || 12;
     this.windBearingDeg = Number(bearingDeg) || 240;
 
     if (this.windParticles) {
       this.windParticles.forEach(p => {
-        p.speed = (0.04 + Math.random() * 0.06) * (Math.max(8, this.windSpeedKmh) / 14.0);
+        p.speed = (0.005 + Math.random() * 0.007) * (Math.max(4, this.windSpeedKmh) / 14.0);
       });
     }
 
