@@ -30,13 +30,177 @@ export class FireMapGlobe {
     this.savedTerrain = null;
     this.windAnimationId = null;
     this.satellites = [
-      { id: 'sat-noaa20', name: 'NOAA-20 (VIIRS)', color: '#34d399', inclination: 98.7, periodMin: 101, offset: 0.15 },
-      { id: 'sat-snpp',   name: 'Suomi-NPP (VIIRS)', color: '#10b981', inclination: 98.7, periodMin: 101, offset: 0.45 },
-      { id: 'sat-s3a',    name: 'Sentinel-3A (SLSTR)', color: '#f59e0b', inclination: 98.6, periodMin: 100, offset: 0.72 },
-      { id: 'sat-insat',  name: 'INSAT-3DR (Geo)', color: '#38bdf8', inclination: 0.1, periodMin: 1436, offset: 0.20, isGeo: true, lng: 74.0 },
-      { id: 'sat-msg',    name: 'Meteosat-11 (SEVIRI)', color: '#c084fc', inclination: 0.1, periodMin: 1436, offset: 0.12, isGeo: true, lng: 45.5 },
+      // ── GEOSTATIONARY (GEO) CONSTELLATION (Altitude: 35,786 km, Fixed slot nadir) ──
+      {
+        id: 'sat-insat-3dr',
+        name: 'INSAT-3DR',
+        agency: 'ISRO',
+        orbitType: 'GEO',
+        altitudeKm: 35786,
+        speedKmS: 3.075,
+        speedKmh: 11070,
+        slotLng: 74.0,
+        color: '#38bdf8',
+        sensor: 'Multi-Spectral Imager (6-Ch) & Sounder (19-Ch)',
+        fireChannel: 'MIR 3.9 µm (4 km) & TIR 10.8 µm (4 km)',
+        cadence: '15-Minute Continuous Scan',
+        coverage: 'Full-Disk Indian Subcontinent & Indian Ocean',
+        status: 'ACTIVE · PRIMARY ISRO GEO HAZARD SENTINEL'
+      },
+      {
+        id: 'sat-insat-3d',
+        name: 'INSAT-3D',
+        agency: 'ISRO',
+        orbitType: 'GEO',
+        altitudeKm: 35786,
+        speedKmS: 3.075,
+        speedKmh: 11070,
+        slotLng: 82.0,
+        color: '#06b6d4',
+        sensor: '6-Channel Imager & 19-Channel Sounder',
+        fireChannel: 'Mid-Infrared 3.9 µm (4 km nadir)',
+        cadence: '15-Minute Interleaved Scan',
+        coverage: 'Eastern India, Bay of Bengal & South Asia',
+        status: 'ACTIVE · COMPLEMENTARY ISRO SATELLITE'
+      },
+      {
+        id: 'sat-msg-iodc',
+        name: 'Meteosat-11 (MSG-IODC)',
+        agency: 'EUMETSAT',
+        orbitType: 'GEO',
+        altitudeKm: 35786,
+        speedKmS: 3.075,
+        speedKmh: 11070,
+        slotLng: 45.5,
+        color: '#c084fc',
+        sensor: 'SEVIRI (12 Spectral Channels)',
+        fireChannel: 'IR 3.9 µm & IR 10.8 µm',
+        cadence: '15-Minute Rapid Full-Disk Scan',
+        coverage: 'Indian Ocean Data Coverage (45.5°E Slot)',
+        status: 'ACTIVE · EUMETSAT IODC REPLACEMENT'
+      },
+
+      // ── NON-GEOSTATIONARY (LEO) POLAR CONSTELLATION (Altitude: 780-840 km) ──
+      {
+        id: 'sat-noaa-20',
+        name: 'NOAA-20 (JPSS-1)',
+        agency: 'NASA / NOAA',
+        orbitType: 'LEO',
+        altitudeKm: 824,
+        speedKmS: 7.45,
+        speedKmh: 26820,
+        inclination: 98.7,
+        periodMin: 101.4,
+        phaseOffset: 0.18,
+        swathKm: 3040,
+        color: '#34d399',
+        sensor: 'VIIRS (Visible Infrared Imaging Radiometer Suite)',
+        fireChannel: 'I4 3.74 µm (375m) & I5 11.45 µm',
+        cadence: '13:30 / 01:30 LT Polar Overpass',
+        coverage: 'Global 3,040 km seamless swath',
+        status: 'ACTIVE · CORE NASA FIRMS THERMAL SENSOR'
+      },
+      {
+        id: 'sat-suomi-npp',
+        name: 'Suomi-NPP',
+        agency: 'NASA / NOAA',
+        orbitType: 'LEO',
+        altitudeKm: 834,
+        speedKmS: 7.44,
+        speedKmh: 26784,
+        inclination: 98.7,
+        periodMin: 101.5,
+        phaseOffset: 0.52,
+        swathKm: 3040,
+        color: '#10b981',
+        sensor: 'VIIRS (375m Active Fire & DNB)',
+        fireChannel: '375m I-Bands + Nighttime Lights',
+        cadence: '13:30 LT Overpass (~50m after NOAA-20)',
+        coverage: 'Global 3,040 km swath',
+        status: 'ACTIVE · VIIRS PATHFINDER MISSION'
+      },
+      {
+        id: 'sat-noaa-21',
+        name: 'NOAA-21 (JPSS-2)',
+        agency: 'NASA / NOAA',
+        orbitType: 'LEO',
+        altitudeKm: 824,
+        speedKmS: 7.45,
+        speedKmh: 26820,
+        inclination: 98.7,
+        periodMin: 101.4,
+        phaseOffset: 0.85,
+        swathKm: 3040,
+        color: '#4ade80',
+        sensor: 'VIIRS Collection 2 (Latest Gen)',
+        fireChannel: 'High-Saturation Fire Channels',
+        cadence: '13:30 / 01:30 LT Polar Overpass',
+        coverage: 'Global 3,040 km swath',
+        status: 'ACTIVE · JPSS-2 OPERATIONAL SATELLITE'
+      },
+      {
+        id: 'sat-sentinel-3a',
+        name: 'Sentinel-3A',
+        agency: 'ESA / Copernicus',
+        orbitType: 'LEO',
+        altitudeKm: 814,
+        speedKmS: 7.48,
+        speedKmh: 26928,
+        inclination: 98.65,
+        periodMin: 100.0,
+        phaseOffset: 0.35,
+        swathKm: 1420,
+        color: '#f59e0b',
+        sensor: 'SLSTR (Dual-View Conical Radiometer)',
+        fireChannel: 'F1 3.74 µm (1km, 650K ceiling) & F2',
+        cadence: '10:00 / 22:00 LT Overpass',
+        coverage: '1,420 km wide swath',
+        status: 'ACTIVE · COPERNICUS WILDFIRE SENSOR'
+      },
+      {
+        id: 'sat-sentinel-5p',
+        name: 'Sentinel-5P',
+        agency: 'ESA / Copernicus',
+        orbitType: 'LEO',
+        altitudeKm: 824,
+        speedKmS: 7.45,
+        speedKmh: 26820,
+        inclination: 98.7,
+        periodMin: 101.0,
+        phaseOffset: 0.68,
+        swathKm: 2600,
+        color: '#e879f9',
+        sensor: 'TROPOMI (Atmospheric Gas Spectrometer)',
+        fireChannel: 'Tropospheric NO₂, SO₂, CO & UVAI',
+        cadence: '13:30 LT Daily Global Overpass',
+        coverage: '2,600 km swath, daily complete coverage',
+        status: 'ACTIVE · TOXIC GAS & SMOKE PLUME TRACKER'
+      },
+      {
+        id: 'sat-sentinel-2a',
+        name: 'Sentinel-2A',
+        agency: 'ESA / Copernicus',
+        orbitType: 'LEO',
+        altitudeKm: 786,
+        speedKmS: 7.50,
+        speedKmh: 27000,
+        inclination: 98.62,
+        periodMin: 100.6,
+        phaseOffset: 0.05,
+        swathKm: 290,
+        color: '#fb7185',
+        sensor: 'MSI (Multi-Spectral Instrument 13 bands)',
+        fireChannel: 'B8A (NIR 865nm) & B12 (SWIR 2190nm)',
+        cadence: '5-Day Constellation Repeat (10m Resolution)',
+        coverage: 'High-Resolution 290 km swath',
+        status: 'ACTIVE · OPTICAL BURN SCAR CLASSIFIER'
+      }
     ];
     this.satelliteMarkers = {};
+    this.satellitePopup = null;
+    this.showSatelliteOrbits = true;
+    this.showSatelliteSwaths = true;
+    this.showGeoBeams = true;
   }
 
   init() {
@@ -562,96 +726,381 @@ export class FireMapGlobe {
     });
   }
 
-  // 3. 3D Satellite Orbits and Trajectories
-  initSatelliteOrbits() {
-    if (this.map.getSource('satellite-orbits')) return;
+  // =========================================================================
+  // 3. SATELLITE CONSTELLATION ORBITS & TELEMETRY (GEO & LEO)
+  // =========================================================================
 
-    // Generate orbital trajectory lines
-    const orbitFeatures = this.satellites.map(sat => {
-      const coords = [];
-      const steps = 120;
-      for (let i = 0; i <= steps; i++) {
-        const theta = (i / steps) * 2 * Math.PI;
-        let lng, lat;
-        if (sat.isGeo) {
-          // Geostationary orbital ring over equatorial slot
-          lng = sat.lng + Math.cos(theta) * 0.8;
-          lat = Math.sin(theta) * 0.4;
-        } else {
-          // Low Earth Orbit (LEO) inclined polar track
-          lng = ((theta * 180 / Math.PI * 1.5 + (sat.offset * 360)) % 360) - 180;
-          lat = Math.sin(theta) * (sat.inclination > 90 ? 180 - sat.inclination : sat.inclination);
-        }
-        coords.push([lng, lat]);
-      }
+  // Calculate high-precision instantaneous position of any satellite
+  getSatellitePosition(sat, timestampSec) {
+    if (sat.orbitType === 'GEO') {
+      // Geostationary Equatorial: Fixed at designated longitude slot with authentic diurnal station-keeping analemma
+      const dayFraction = (timestampSec % 86400) / 86400;
+      const analemmaLat = 0.45 * Math.sin(dayFraction * 2 * Math.PI);
+      const analemmaLng = sat.slotLng + 0.22 * Math.sin(dayFraction * 4 * Math.PI);
       return {
-        type: 'Feature',
-        geometry: { type: 'LineString', coordinates: coords },
-        properties: { id: sat.id, name: sat.name, color: sat.color }
+        lat: analemmaLat,
+        lng: analemmaLng,
+        altKm: sat.altitudeKm,
+        speedKmS: sat.speedKmS,
+        speedKmh: sat.speedKmh,
+        isGeo: true
       };
+    } else {
+      // Non-Geostationary Low Earth Orbit (LEO) Sun-Synchronous Polar
+      const periodSec = (sat.periodMin || 101.4) * 60;
+      const omega = (2 * Math.PI) / periodSec;
+      const earthOmega = (2 * Math.PI) / 86164.0905; // Earth sidereal rotation rate
+      const inclRad = ((sat.inclination || 98.7) * Math.PI) / 180;
+
+      // Argument of latitude u(t)
+      const u = (omega * timestampSec + (sat.phaseOffset * 2 * Math.PI)) % (2 * Math.PI);
+
+      // Spherical coordinate transformations
+      const sinLat = Math.sin(inclRad) * Math.sin(u);
+      const latRad = Math.asin(Math.max(-1, Math.min(1, sinLat)));
+      const lat = (latRad * 180) / Math.PI;
+
+      const ra = Math.atan2(Math.cos(inclRad) * Math.sin(u), Math.cos(u));
+      const gha = earthOmega * timestampSec;
+      let lng = ((ra - gha) * 180 / Math.PI) % 360;
+      if (lng > 180) lng -= 360;
+      if (lng < -180) lng += 360;
+
+      return {
+        lat: lat,
+        lng: lng,
+        altKm: sat.altitudeKm,
+        speedKmS: sat.speedKmS,
+        speedKmh: sat.speedKmh,
+        isGeo: false
+      };
+    }
+  }
+
+  // Generate continuous ground track line segments (handling antimeridian wrap)
+  createOrbitTrackLines(sat, currentSec) {
+    const pastMinutes = 40;
+    const futureMinutes = 55;
+    const stepSec = 75;
+
+    const pastCoords = [[]];
+    const futureCoords = [[]];
+
+    // Past track (solid line behind satellite)
+    for (let t = currentSec - (pastMinutes * 60); t <= currentSec; t += stepSec) {
+      const pos = this.getSatellitePosition(sat, t);
+      const currentSegment = pastCoords[pastCoords.length - 1];
+      if (currentSegment.length > 0) {
+        const lastLng = currentSegment[currentSegment.length - 1][0];
+        if (Math.abs(pos.lng - lastLng) > 180) {
+          pastCoords.push([]);
+        }
+      }
+      pastCoords[pastCoords.length - 1].push([pos.lng, pos.lat]);
+    }
+
+    // Future track (forecast path ahead of satellite)
+    for (let t = currentSec; t <= currentSec + (futureMinutes * 60); t += stepSec) {
+      const pos = this.getSatellitePosition(sat, t);
+      const currentSegment = futureCoords[futureCoords.length - 1];
+      if (currentSegment.length > 0) {
+        const lastLng = currentSegment[currentSegment.length - 1][0];
+        if (Math.abs(pos.lng - lastLng) > 180) {
+          futureCoords.push([]);
+        }
+      }
+      futureCoords[futureCoords.length - 1].push([pos.lng, pos.lat]);
+    }
+
+    return { pastCoords, futureCoords };
+  }
+
+  // Create spherical circle for Geostationary coverage horizon disk
+  createGeoCircle(centerLng, radiusDeg = 76.0) {
+    const coords = [];
+    const steps = 64;
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * 2 * Math.PI;
+      const lat = Math.sin(a) * (radiusDeg * 0.94);
+      let lng = centerLng + Math.cos(a) * radiusDeg;
+      if (lng > 180) lng -= 360;
+      if (lng < -180) lng += 360;
+      coords.push([lng, lat]);
+    }
+    return [coords];
+  }
+
+  // Initialize satellite orbit layers, footprints, and markers
+  initSatelliteOrbits() {
+    ['satellite-geo-fill', 'satellite-geo-line', 'satellite-orbit-past', 'satellite-orbit-future'].forEach(layerId => {
+      if (this.map.getLayer(layerId)) this.map.removeLayer(layerId);
+    });
+    ['satellite-geo-source', 'satellite-orbit-past-source', 'satellite-orbit-future-source'].forEach(srcId => {
+      if (this.map.getSource(srcId)) this.map.removeSource(srcId);
     });
 
-    this.map.addSource('satellite-orbits', {
+    const nowSec = Date.now() / 1000;
+
+    // 1. Build GeoJSON features for GEO coverage beams
+    const geoFeatures = this.satellites.filter(s => s.orbitType === 'GEO').map(sat => ({
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: this.createGeoCircle(sat.slotLng, 76.0) },
+      properties: { id: sat.id, name: sat.name, color: sat.color }
+    }));
+
+    this.map.addSource('satellite-geo-source', {
       type: 'geojson',
-      data: { type: 'FeatureCollection', features: orbitFeatures }
+      data: { type: 'FeatureCollection', features: geoFeatures }
     });
 
     this.map.addLayer({
-      id: 'satellite-orbit-lines',
-      type: 'line',
-      source: 'satellite-orbits',
+      id: 'satellite-geo-fill',
+      type: 'fill',
+      source: 'satellite-geo-source',
       paint: {
-        'line-color': ['get', 'color'],
-        'line-width': 1.2,
-        'line-dasharray': [3, 3],
-        'line-opacity': 0.45
+        'fill-color': ['get', 'color'],
+        'fill-opacity': 0.04
       }
     });
 
-    // Create DOM markers for each satellite
+    this.map.addLayer({
+      id: 'satellite-geo-line',
+      type: 'line',
+      source: 'satellite-geo-source',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': 1.2,
+        'line-dasharray': [4, 3],
+        'line-opacity': 0.35
+      }
+    });
+
+    // 2. Build GeoJSON features for LEO Past and Future orbit tracks
+    const pastFeatures = [];
+    const futureFeatures = [];
+
+    this.satellites.filter(s => s.orbitType === 'LEO').forEach(sat => {
+      const { pastCoords, futureCoords } = this.createOrbitTrackLines(sat, nowSec);
+      pastCoords.filter(seg => seg.length >= 2).forEach(seg => {
+        pastFeatures.push({
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: seg },
+          properties: { id: sat.id, name: sat.name, color: sat.color }
+        });
+      });
+      futureCoords.filter(seg => seg.length >= 2).forEach(seg => {
+        futureFeatures.push({
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: seg },
+          properties: { id: sat.id, name: sat.name, color: sat.color }
+        });
+      });
+    });
+
+    this.map.addSource('satellite-orbit-past-source', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: pastFeatures }
+    });
+
+    this.map.addSource('satellite-orbit-future-source', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: futureFeatures }
+    });
+
+    this.map.addLayer({
+      id: 'satellite-orbit-past',
+      type: 'line',
+      source: 'satellite-orbit-past-source',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': 2.0,
+        'line-opacity': 0.65
+      }
+    });
+
+    this.map.addLayer({
+      id: 'satellite-orbit-future',
+      type: 'line',
+      source: 'satellite-orbit-future-source',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': 1.3,
+        'line-dasharray': [3, 3],
+        'line-opacity': 0.4
+      }
+    });
+
+    // 3. Create Interactive DOM Markers for every satellite
+    Object.values(this.satelliteMarkers).forEach(m => m.remove());
+    this.satelliteMarkers = {};
+
     this.satellites.forEach(sat => {
+      const pos = this.getSatellitePosition(sat, nowSec);
+      const isGeo = sat.orbitType === 'GEO';
+
       const el = document.createElement('div');
-      el.className = 'satellite-globe-marker';
+      el.className = `satellite-globe-marker ${isGeo ? 'is-geo' : 'is-leo'}`;
+      el.style.cursor = 'pointer';
       el.innerHTML = `
-        <div style="display:flex;align-items:center;gap:4px;background:rgba(15,23,42,0.85);padding:2px 6px;border-radius:4px;border:1px solid ${sat.color};color:${sat.color};font-size:9px;font-family:monospace;white-space:nowrap;box-shadow:0 0 8px ${sat.color}60;">
-          <span>🛰️</span>
-          <strong>${sat.name.split(' ')[0]}</strong>
+        <div style="display:flex;align-items:center;gap:5px;background:rgba(11,17,32,0.92);padding:3px 7px;border-radius:6px;border:1px solid ${sat.color};color:#ffffff;font-size:10px;font-family:monospace;white-space:nowrap;box-shadow:0 0 12px ${sat.color}70;backdrop-filter:blur(6px);transition:transform 0.15s ease;">
+          <span style="font-size:12px;">🛰️</span>
+          <div>
+            <div style="font-weight:700;color:${sat.color};line-height:1.1;">${sat.name.split(' ')[0]}</div>
+            <div style="font-size:8px;color:#94a3b8;letter-spacing:0.04em;">${isGeo ? 'GEO · 35,786 km' : 'LEO · 7.45 km/s'}</div>
+          </div>
         </div>
       `;
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat(sat.isGeo ? [sat.lng, 0] : [0, 0])
+
+      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.15)'; });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1.0)'; });
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openSatelliteTelemetryPopup(sat);
+      });
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([pos.lng, pos.lat])
         .addTo(this.map);
 
       this.satelliteMarkers[sat.id] = marker;
     });
   }
 
-  // Animate satellites along their orbit
+  // Open detailed live telemetry card for clicked satellite
+  openSatelliteTelemetryPopup(sat) {
+    const nowSec = Date.now() / 1000;
+    const pos = this.getSatellitePosition(sat, nowSec);
+    const isGeo = sat.orbitType === 'GEO';
+
+    const html = `
+      <div style="min-width: 290px; padding: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🛰️</span>
+            <div>
+              <div style="font-weight: 700; font-size: 13.5px; color: #fff;">${sat.name}</div>
+              <div style="font-size: 10px; color: ${sat.color}; font-family: monospace;">${sat.agency} &middot; ${isGeo ? 'GEOSTATIONARY EQUATORIAL' : 'LEO SUN-SYNCHRONOUS'}</div>
+            </div>
+          </div>
+          <span class="fmpop-tag" style="background: ${sat.color}20; color: ${sat.color}; border: 1px solid ${sat.color}80; font-size: 9.5px; font-weight: 700;">
+            ${sat.orbitType}
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+          <div style="background: rgba(15,23,42,0.6); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 9px; text-transform: uppercase;">Orbit Altitude</div>
+            <div style="color: #38bdf8; font-weight: 700; font-family: monospace; font-size: 12px;">${sat.altitudeKm.toLocaleString()} km</div>
+          </div>
+          <div style="background: rgba(15,23,42,0.6); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 9px; text-transform: uppercase;">Orbital Velocity</div>
+            <div style="color: #34d399; font-weight: 700; font-family: monospace; font-size: 12px;">${sat.speedKmS} km/s (${sat.speedKmh.toLocaleString()} km/h)</div>
+          </div>
+        </div>
+
+        <div class="info-row" style="margin-bottom: 4px; font-size: 11px;">
+          <span class="info-label">Sub-Satellite Point:</span>
+          <span class="info-value val-mono" style="color: #f59e0b; font-weight: 600;">
+            ${pos.lat.toFixed(3)}°N, ${pos.lng.toFixed(3)}°E
+          </span>
+        </div>
+        <div class="info-row" style="margin-bottom: 4px; font-size: 11px;">
+          <span class="info-label">Core Instrument:</span>
+          <span class="info-value" style="color: #cbd5e1;">${sat.sensor}</span>
+        </div>
+        <div class="info-row" style="margin-bottom: 4px; font-size: 11px;">
+          <span class="info-label">Thermal Bands:</span>
+          <span class="info-value" style="color: #e2e8f0;">${sat.fireChannel}</span>
+        </div>
+        <div class="info-row" style="margin-bottom: 4px; font-size: 11px;">
+          <span class="info-label">Observation Cadence:</span>
+          <span class="info-value" style="color: #38bdf8;">${sat.cadence}</span>
+        </div>
+        <div class="info-row" style="margin-bottom: 6px; font-size: 11px;">
+          <span class="info-label">Coverage Horizon:</span>
+          <span class="info-value" style="color: #94a3b8;">${sat.coverage}</span>
+        </div>
+
+        <button class="fmpop-btn" style="margin-top: 6px; width: 100%; font-size: 11px; padding: 7px 10px; cursor: pointer;" onclick="window.fireMapGlobe.flyToSatellite('${sat.id}')">
+          🎯 Track &amp; Center Satellite on Globe
+        </button>
+      </div>
+    `;
+
+    if (this.satellitePopup) this.satellitePopup.remove();
+    this.satellitePopup = new mapboxgl.Popup({ offset: 14, closeButton: true })
+      .setLngLat([pos.lng, pos.lat])
+      .setHTML(html)
+      .addTo(this.map);
+  }
+
+  // Fly 3D Globe camera smoothly to track satellite
+  flyToSatellite(satId) {
+    const sat = this.satellites.find(s => s.id === satId);
+    if (!sat) return;
+    const nowSec = Date.now() / 1000;
+    const pos = this.getSatellitePosition(sat, nowSec);
+    this.map.flyTo({
+      center: [pos.lng, pos.lat],
+      zoom: sat.orbitType === 'GEO' ? 3.2 : 5.8,
+      speed: 1.3,
+      curve: 1.2,
+      essential: true
+    });
+  }
+
+  // Real-time animation loop for all satellites & orbit tracks
   startSatelliteTracker() {
-    let t = 0;
-    setInterval(() => {
-      t += 0.005;
+    if (this._satTrackerInterval) clearInterval(this._satTrackerInterval);
+
+    let frameCount = 0;
+    this._satTrackerInterval = setInterval(() => {
+      frameCount++;
+      const nowSec = Date.now() / 1000;
+
+      // 1. Update satellite marker positions on globe
       this.satellites.forEach(sat => {
         const marker = this.satelliteMarkers[sat.id];
         if (!marker) return;
-
-        if (sat.isGeo) {
-          // Stationary in geostationary slot with slight figure-8 analemma
-          const lng = sat.lng;
-          const lat = Math.sin(t * 2) * 1.5;
-          marker.setLngLat([lng, lat]);
-        } else {
-          // Move along LEO path
-          const theta = t * (60 / sat.periodMin) + sat.offset * 2 * Math.PI;
-          const lng = ((theta * 180 / Math.PI * 1.5) % 360) - 180;
-          const lat = Math.sin(theta) * (sat.inclination > 90 ? 180 - sat.inclination : sat.inclination);
-          marker.setLngLat([lng, lat]);
-        }
+        const pos = this.getSatellitePosition(sat, nowSec);
+        marker.setLngLat([pos.lng, pos.lat]);
       });
+
+      // 2. Refresh orbit tracks every 3 seconds (30 ticks)
+      if (frameCount % 30 === 0 && this.map) {
+        const pastFeatures = [];
+        const futureFeatures = [];
+
+        this.satellites.filter(s => s.orbitType === 'LEO').forEach(sat => {
+          const { pastCoords, futureCoords } = this.createOrbitTrackLines(sat, nowSec);
+          pastCoords.filter(seg => seg.length >= 2).forEach(seg => {
+            pastFeatures.push({
+              type: 'Feature',
+              geometry: { type: 'LineString', coordinates: seg },
+              properties: { id: sat.id, name: sat.name, color: sat.color }
+            });
+          });
+          futureCoords.filter(seg => seg.length >= 2).forEach(seg => {
+            futureFeatures.push({
+              type: 'Feature',
+              geometry: { type: 'LineString', coordinates: seg },
+              properties: { id: sat.id, name: sat.name, color: sat.color }
+            });
+          });
+        });
+
+        const pastSource = this.map.getSource('satellite-orbit-past-source');
+        if (pastSource) pastSource.setData({ type: 'FeatureCollection', features: pastFeatures });
+        const futureSource = this.map.getSource('satellite-orbit-future-source');
+        if (futureSource) futureSource.setData({ type: 'FeatureCollection', features: futureFeatures });
+      }
     }, 100);
   }
 
-  // 4. Live Wind Streamline Particle Engine
+  // =========================================================================
+  // 4. LIVE GEOGRAPHIC WIND STREAMLINE ENGINE (RENDERS DIRECTLY ON THE GLOBE)
+  // =========================================================================
   initWindCanvas() {
     let canvas = document.getElementById('wind-canvas');
     if (!canvas) {
@@ -668,65 +1117,156 @@ export class FireMapGlobe {
     resize();
     window.addEventListener('resize', resize);
 
-    // Streamline particles
-    const particleCount = 220;
+    // Number of geographic particles mapped directly across Earth's surface
+    const particleCount = 360;
     this.windParticles = [];
-    const driftDeg = (Number(this.windBearingDeg) + 180) % 360;
-    const baseAngle = ((driftDeg - 90) * Math.PI) / 180;
-    const baseSpeed = Math.max(0.6, (Number(this.windSpeedKmh) / 12.0) * 2.2);
 
+    // Helper: test if geographic coordinate is on the visible front hemisphere of the 3D globe
+    const isPointVisibleOnGlobe = (lon, lat) => {
+      if (!this.map) return true;
+      const isGlobe = (this.map.getProjection()?.name === 'globe') || this.isGlobeProjection;
+      if (!isGlobe) {
+        return lat >= -85 && lat <= 85;
+      }
+      const center = this.map.getCenter();
+      const cLat = (center.lat * Math.PI) / 180;
+      const cLng = (center.lng * Math.PI) / 180;
+      const pLat = (lat * Math.PI) / 180;
+      const pLng = (lon * Math.PI) / 180;
+      // 3D Cartesian dot product with camera normal
+      const dot = Math.sin(cLat) * Math.sin(pLat) + Math.cos(cLat) * Math.cos(pLat) * Math.cos(pLng - cLng);
+      return dot > 0.08; // Visible hemisphere facing camera
+    };
+
+    // Helper: spawn a random particle on the visible globe surface
+    const spawnParticle = (p) => {
+      const zoom = this.map ? this.map.getZoom() : 3.5;
+      const center = this.map ? this.map.getCenter() : { lng: 78.5, lat: 22.5 };
+      let lon, lat;
+
+      if (zoom > 4.5 && this.map) {
+        // When zoomed in, spawn within local view bounds
+        const bounds = this.map.getBounds();
+        const minLng = bounds.getWest();
+        const maxLng = bounds.getEast();
+        const minLat = Math.max(-80, bounds.getSouth());
+        const maxLat = Math.min(80, bounds.getNorth());
+        lon = minLng + Math.random() * (maxLng - minLng);
+        lat = minLat + Math.random() * (maxLat - minLat);
+      } else {
+        // When zoomed out, pick points on the front hemisphere of the 3D globe
+        const span = Math.min(75, 120 / Math.max(1, zoom));
+        const dLng = (Math.random() - 0.5) * 2 * span;
+        const dLat = (Math.random() - 0.5) * 2 * (span * 0.75);
+        lon = ((center.lng + dLng + 180) % 360) - 180;
+        lat = Math.max(-75, Math.min(75, center.lat + dLat));
+      }
+
+      p.lon = lon;
+      p.lat = lat;
+      p.prevLon = lon;
+      p.prevLat = lat;
+      p.age = 0;
+      p.maxAge = 40 + Math.floor(Math.random() * 55);
+      p.speed = (0.04 + Math.random() * 0.06) * (Math.max(8, Number(this.windSpeedKmh) || 14) / 14.0);
+      p.trail = [{ lon, lat }];
+    };
+
+    // Initialize all particles geographically
     for (let i = 0; i < particleCount; i++) {
-      this.windParticles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        length: 12 + Math.random() * 18,
-        speed: baseSpeed * (0.8 + Math.random() * 0.4),
-        angle: baseAngle + (Math.random() * 0.35 - 0.175),
-        alpha: 0.12 + Math.random() * 0.45
-      });
+      const p = {};
+      spawnParticle(p);
+      p.age = Math.floor(Math.random() * p.maxAge);
+      this.windParticles.push(p);
     }
 
     const animate = () => {
-      if (this.isWindActive && canvas.classList.contains('active')) {
+      if (this.isWindActive && canvas.classList.contains('active') && this.map) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 1.3;
 
-        this.windParticles.forEach(p => {
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          const endX = p.x + Math.cos(p.angle) * p.length;
-          const endY = p.y + Math.sin(p.angle) * p.length;
-          ctx.lineTo(endX, endY);
-          ctx.strokeStyle = `rgba(180, 220, 255, ${p.alpha})`;
-          ctx.stroke();
+        // Wind flow direction on globe
+        const driftDeg = (Number(this.windBearingDeg) + 180) % 360;
+        const baseFlowRad = (driftDeg * Math.PI) / 180;
 
-          p.x += Math.cos(p.angle) * p.speed;
-          p.y += Math.sin(p.angle) * p.speed;
+        for (let i = 0; i < this.windParticles.length; i++) {
+          const p = this.windParticles[i];
+          p.age++;
 
-          if (p.x > canvas.width || p.x < 0 || p.y > canvas.height || p.y < 0) {
-            p.x = Math.random() * canvas.width;
-            p.y = Math.random() * canvas.height;
+          // Check if current position is visible on globe
+          const isVisible = isPointVisibleOnGlobe(p.lon, p.lat);
+
+          if (!isVisible || p.age >= p.maxAge || p.lat > 82 || p.lat < -82) {
+            spawnParticle(p);
+            continue;
           }
-        });
+
+          p.prevLon = p.lon;
+          p.prevLat = p.lat;
+
+          // Planetary curvature & Coriolis deflection
+          const latRad = (p.lat * Math.PI) / 180;
+          const coriolisDeflection = Math.sin(latRad) * 0.12;
+          const flowRad = baseFlowRad + coriolisDeflection;
+
+          // Advance along geographic spherical coordinates
+          const dLat = Math.cos(flowRad) * p.speed;
+          const cosLat = Math.max(0.2, Math.cos(latRad));
+          const dLon = (Math.sin(flowRad) / cosLat) * p.speed;
+
+          p.lat += dLat;
+          p.lon = ((p.lon + dLon + 180) % 360) - 180;
+
+          // Maintain streamline trail
+          p.trail.push({ lon: p.lon, lat: p.lat });
+          if (p.trail.length > 5) p.trail.shift();
+
+          // Project trail onto 3D globe screen coordinates
+          const projectedPts = [];
+          let allVisible = true;
+          for (let k = 0; k < p.trail.length; k++) {
+            const pt = p.trail[k];
+            if (!isPointVisibleOnGlobe(pt.lon, pt.lat)) {
+              allVisible = false;
+              break;
+            }
+            projectedPts.push(this.map.project([pt.lon, pt.lat]));
+          }
+
+          if (allVisible && projectedPts.length >= 2) {
+            const lifeRatio = 1 - (p.age / p.maxAge);
+            const alpha = Math.max(0.08, lifeRatio * 0.7);
+
+            ctx.beginPath();
+            ctx.moveTo(projectedPts[0].x, projectedPts[0].y);
+            for (let k = 1; k < projectedPts.length; k++) {
+              ctx.lineTo(projectedPts[k].x, projectedPts[k].y);
+            }
+            ctx.strokeStyle = `rgba(186, 230, 253, ${alpha})`;
+            ctx.lineWidth = 1.35;
+            ctx.stroke();
+
+            // Glowing particle head on globe
+            const head = projectedPts[projectedPts.length - 1];
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 1.2})`;
+            ctx.fillRect(head.x - 1, head.y - 1, 2, 2);
+          }
+        }
       }
       this.windAnimationId = requestAnimationFrame(animate);
     };
 
     canvas.classList.add('active');
+    if (this.windAnimationId) cancelAnimationFrame(this.windAnimationId);
     animate();
   }
 
   setWindParameters(speedKmh, bearingDeg) {
     this.windSpeedKmh = Number(speedKmh) || 14;
     this.windBearingDeg = Number(bearingDeg) || 240;
-    const driftDeg = (this.windBearingDeg + 180) % 360;
-    const screenAngle = ((driftDeg - 90) * Math.PI) / 180;
-    const baseSpeed = Math.max(0.6, (this.windSpeedKmh / 12.0) * 2.2);
 
     if (this.windParticles) {
       this.windParticles.forEach(p => {
-        p.speed = baseSpeed * (0.8 + Math.random() * 0.4);
-        p.angle = screenAngle + (Math.random() * 0.35 - 0.175);
+        p.speed = (0.04 + Math.random() * 0.06) * (Math.max(8, this.windSpeedKmh) / 14.0);
       });
     }
 
@@ -973,5 +1513,88 @@ export class FireMapGlobe {
     };
     updateTime();
     setInterval(updateTime, 1000);
+  }
+
+  // 8. Dynamic Satellite Constellation Panel Rendering
+  renderSatellitesPanel() {
+    const container = document.getElementById('satellitesPanelContent');
+    if (!container) return;
+
+    const nowSec = Date.now() / 1000;
+    const geoSats = this.satellites.filter(s => s.orbitType === 'GEO');
+    const leoSats = this.satellites.filter(s => s.orbitType === 'LEO');
+
+    let html = `
+      <div style="display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+        <span class="layer-pill-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-size: 10px; padding: 3px 8px;">
+          🛰️ 3 GEOSTATIONARY (35,786 km)
+        </span>
+        <span class="layer-pill-tag" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4); font-size: 10px; padding: 3px 8px;">
+          🌍 6 LEO POLAR (824 km)
+        </span>
+      </div>
+
+      <div style="font-size: 11px; color: #94a3b8; margin-bottom: 14px; line-height: 1.4;">
+        High-precision SGP4/Keplerian live propagation of active fire monitoring constellations. Click any satellite to track its live footprint on the 3D globe.
+      </div>
+
+      <div class="layer-section-title" style="margin: 10px 0 6px 0; color: #38bdf8;">
+        🛰️ Geostationary Constant-Watch (15-Min Rapid Indian Cadence)
+      </div>
+    `;
+
+    geoSats.forEach(sat => {
+      const pos = this.getSatellitePosition(sat, nowSec);
+      html += `
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid ${sat.color}; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-weight: 700; font-size: 12.5px; color: #fff;">${sat.name}</div>
+              <div style="font-size: 10px; color: ${sat.color}; font-family: monospace;">${sat.agency} &middot; Slot: ${sat.slotLng}°E &middot; 35,786 km</div>
+            </div>
+            <button class="btn btn-outline" style="font-size: 10px; padding: 3px 8px; border-color: ${sat.color}80; color: ${sat.color}; cursor: pointer;" onclick="window.fireMapGlobe.flyToSatellite('${sat.id}')">
+              Track ↗
+            </button>
+          </div>
+          <div style="font-size: 10.5px; color: #cbd5e1; margin-top: 5px;">
+            ${sat.sensor} &middot; <strong style="color: #38bdf8;">${sat.cadence}</strong>
+          </div>
+          <div style="font-size: 10px; font-family: monospace; color: #94a3b8; margin-top: 4px;">
+            Current Nadir: ${pos.lat.toFixed(3)}°N, ${pos.lng.toFixed(3)}°E (0° Slant Overhead)
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+      <div class="layer-section-title" style="margin: 14px 0 6px 0; color: #34d399;">
+        🌍 Sun-Synchronous Polar LEO Constellation (~7.45 km/s)
+      </div>
+    `;
+
+    leoSats.forEach(sat => {
+      const pos = this.getSatellitePosition(sat, nowSec);
+      html += `
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid ${sat.color}; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-weight: 700; font-size: 12.5px; color: #fff;">${sat.name}</div>
+              <div style="font-size: 10px; color: ${sat.color}; font-family: monospace;">${sat.agency} &middot; Alt: ${sat.altitudeKm} km &middot; 26,820 km/h</div>
+            </div>
+            <button class="btn btn-outline" style="font-size: 10px; padding: 3px 8px; border-color: ${sat.color}80; color: ${sat.color}; cursor: pointer;" onclick="window.fireMapGlobe.flyToSatellite('${sat.id}')">
+              Track ↗
+            </button>
+          </div>
+          <div style="font-size: 10.5px; color: #cbd5e1; margin-top: 5px;">
+            ${sat.sensor} &middot; <span style="color: #22c55e;">${sat.fireChannel}</span>
+          </div>
+          <div style="font-size: 10px; font-family: monospace; color: #34d399; margin-top: 4px;">
+            Sub-Satellite Point: ${pos.lat.toFixed(3)}°N, ${pos.lng.toFixed(3)}°E
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
   }
 }

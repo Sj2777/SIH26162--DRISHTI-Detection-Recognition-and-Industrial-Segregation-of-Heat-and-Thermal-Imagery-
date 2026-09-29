@@ -90,6 +90,12 @@
         <i class="fa-solid fa-wind"></i>
       </button>
 
+      <!-- Satellite Constellation Live Tracking Button -->
+      <button class="toolbar-btn has-active-dot" id="satelliteTrackBtn" data-tip="Satellite Constellation &amp; Orbits (GEO &amp; LEO)" aria-label="Satellite Tracker" aria-pressed="true">
+        <span class="wind-indicator-dot" style="background: #38bdf8; box-shadow: 0 0 6px #38bdf8;"></span>
+        <i class="fa-solid fa-satellite"></i>
+      </button>
+
       <div class="toolbar-sep" aria-hidden="true"></div>
 
       <!-- Show on Google Maps Button -->
@@ -192,6 +198,20 @@
           <label><input type="checkbox" id="layer-wind-streamlines" checked> GFS Wind Streamlines</label>
           <span class="layer-pill-tag">22km</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Satellite Constellation & Orbits Panel -->
+    <div id="satellitesPanel" class="fm-panel satellites-panel" aria-label="Satellite Constellation Panel">
+      <div class="panel-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fa-solid fa-satellite" style="color: #38bdf8; font-size: 15px;"></i>
+          <h3 style="margin:0;font-size:14px;color:#fff;">Satellite Constellation Tracker</h3>
+        </div>
+        <button class="close-btn" aria-label="Close">&times;</button>
+      </div>
+      <div class="panel-content" id="satellitesPanelContent" style="max-height: 75vh; overflow-y: auto;">
+        <!-- Dynamic Content Rendered by window.fireMapGlobe.renderSatellitesPanel() -->
       </div>
     </div>
 

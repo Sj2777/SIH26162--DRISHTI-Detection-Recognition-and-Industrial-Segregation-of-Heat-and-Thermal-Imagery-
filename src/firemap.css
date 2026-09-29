@@ -1299,3 +1299,45 @@ html, body {
 #wind-canvas.active {
   display: block;
 }
+
+/* ==========================================================================
+   SATELLITE CONSTELLATION PANEL & GLOBE MARKERS
+   ========================================================================== */
+.satellites-panel {
+  top: 155px;
+  right: 70px;
+  width: 360px;
+}
+
+.satellite-globe-marker {
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.satellite-globe-marker:hover {
+  transform: scale(1.18);
+  z-index: 25;
+}
+
+.satellite-globe-marker.is-geo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-top: -12px;
+  margin-left: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.6);
+  animation: sat-radar-pulse 2.2s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes sat-radar-pulse {
+  0%   { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0.0; }
+}
+

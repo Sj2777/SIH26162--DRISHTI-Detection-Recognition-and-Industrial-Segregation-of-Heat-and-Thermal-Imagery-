@@ -4399,6 +4399,22 @@ function initFireMapGlobe() {
     });
   }
 
+  // Satellite Constellation Tracker Button
+  const satelliteTrackBtn = document.getElementById('satelliteTrackBtn');
+  const satellitesPanel = document.getElementById('satellitesPanel');
+  if (satelliteTrackBtn && satellitesPanel) {
+    satelliteTrackBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = satellitesPanel.classList.contains('active');
+      closeAllFloatingPanels();
+      if (!isOpen) {
+        satellitesPanel.classList.add('active');
+        satelliteTrackBtn.classList.add('active');
+        window.fireMapGlobe?.renderSatellitesPanel?.();
+      }
+    });
+  }
+
   // Show on Google Maps Button
   const showOnMapsBtn = document.getElementById('showOnMapsBtn');
   if (showOnMapsBtn) {
