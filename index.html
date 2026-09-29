@@ -31,6 +31,9 @@
     <!-- =====================================================================
          2. TOP-LEFT LOGO & LIVE CLOCK (firemap.live)
          ===================================================================== -->
+    <!-- =====================================================================
+         2. TOP-LEFT BAR: FireMap Logo + Live Clock + Nav Toolbar (Moved from Right)
+         ===================================================================== -->
     <div class="top-left-bar">
       <button class="logo-box" id="logoBtn" aria-label="FireMap - Reset View">
         <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,252 +59,291 @@
           <span class="agency-tag">AGNI-VISION &middot; NASA FIRMS &middot; ISRO</span>
         </span>
       </button>
+
+      <!-- Navigation Toolbar relocated next to Logo & Live Clock -->
+      <div class="top-nav-toolbar" id="topNavToolbar">
+        <!-- Locate Me Button -->
+        <button class="topbar-btn" id="locateMeBtn" data-tip="Locate Me / India Center" aria-label="Locate Me">
+          <i class="fa-solid fa-location-crosshairs"></i>
+        </button>
+
+        <!-- Wind Streamlines Toggle Button -->
+        <button class="topbar-btn has-active-dot" id="windBtn" data-tip="Wind Particle Streamlines" aria-label="Wind" aria-pressed="true">
+          <span class="wind-indicator-dot"></span>
+          <i class="fa-solid fa-wind"></i>
+        </button>
+
+        <!-- Flagged Anomalies / Bookmarks Button -->
+        <button class="topbar-btn" id="flaggedAnomaliesBtn" data-tip="View Flagged Anomalies &amp; Bookmarks" aria-label="Flagged Anomalies">
+          <i class="fa-solid fa-bookmark" style="color: #38bdf8;"></i>
+          <span id="flaggedBadgeCount" class="flagged-count-badge" style="display: none;">0</span>
+        </button>
+
+        <!-- System Modules Hub -->
+        <button class="topbar-btn" id="modulesBtn" data-tip="System Modules Hub (All Tools)" aria-label="Modules Hub" style="color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
+          <i class="fa-solid fa-cubes"></i>
+        </button>
+      </div>
     </div>
 
     <!-- =====================================================================
-         3. FIXED RIGHT VERTICAL TOOLBAR (firemap.live)
+         3. FLOATING TOP-RIGHT SEARCH BAR (Dual Mode: District/State vs Industry)
          ===================================================================== -->
-    <div class="vertical-toolbar" aria-label="Map Toolbar">
-      <!-- Search Button -->
-      <button class="toolbar-btn" id="searchBtn" data-tip="Search Fires &amp; Locations" aria-label="Search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
-
-      <!-- Locate Me Button -->
-      <button class="toolbar-btn" id="locateMeBtn" data-tip="Locate Me / India Center" aria-label="Locate Me">
-        <i class="fa-solid fa-location-crosshairs"></i>
-      </button>
-
-      <div class="toolbar-sep" aria-hidden="true"></div>
-
-      <!-- Toggle Layers Button -->
-      <button class="toolbar-btn" id="toggleLayersBtn" data-tip="Toggle Layers &amp; Sensors" aria-label="Toggle Layers">
-        <i class="fa-solid fa-layer-group"></i>
-      </button>
-
-      <!-- Change Basemap / 3D Globe Button -->
-      <button class="toolbar-btn" id="basemapBtn" data-tip="Basemap &amp; 3D Globe" aria-label="Change Basemap">
-        <i class="fa-solid fa-map"></i>
-      </button>
-
-      <!-- Wind Layer Toggle Button (active green dot) -->
-      <button class="toolbar-btn has-active-dot" id="windBtn" data-tip="Wind Particle Streamlines" aria-label="Wind" aria-pressed="true">
-        <span class="wind-indicator-dot"></span>
-        <i class="fa-solid fa-wind"></i>
-      </button>
-
-      <!-- Satellite Constellation Live Tracking Button -->
-      <button class="toolbar-btn has-active-dot" id="satelliteTrackBtn" data-tip="Satellite Constellation &amp; Orbits (GEO &amp; LEO)" aria-label="Satellite Tracker" aria-pressed="true">
-        <span class="wind-indicator-dot" style="background: #38bdf8; box-shadow: 0 0 6px #38bdf8;"></span>
-        <i class="fa-solid fa-satellite"></i>
-      </button>
-
-      <div class="toolbar-sep" aria-hidden="true"></div>
-
-      <!-- Show on Google Maps Button -->
-      <button class="toolbar-btn" id="showOnMapsBtn" data-tip="Show on Google Maps" aria-label="Show on Google Maps">
-        <i class="fa-solid fa-map-location-dot"></i>
-      </button>
-
-      <div class="toolbar-sep" aria-hidden="true"></div>
-
-      <!-- Fire List / Hotspots Feed Button -->
-      <button class="toolbar-btn" id="fireListBtn" data-tip="Fire Feed &amp; Deep Dossier" aria-label="Fire Feed">
-        <i class="fa-solid fa-fire"></i>
-      </button>
-
-      <!-- Legend Button -->
-      <button class="toolbar-btn" id="legendBtn" data-tip="Map Legend" aria-label="Map Legend">
-        <i class="fa-solid fa-list-ul"></i>
-      </button>
-
-      <div class="toolbar-sep" aria-hidden="true"></div>
-
-      <!-- System Modules Hub (All Prototype Tools Preserved) -->
-      <button class="toolbar-btn" id="modulesBtn" data-tip="System Modules Hub (All Tools)" aria-label="Modules Hub" style="color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
-        <i class="fa-solid fa-cubes"></i>
-      </button>
+    <div id="topRightSearchBar" class="floating-search-container">
+      <div class="search-mode-selector">
+        <button id="searchModeDistrict" class="search-mode-pill active">
+          <i class="fa-solid fa-map-location-dot"></i> <span>District / State</span>
+        </button>
+        <button id="searchModeIndustry" class="search-mode-pill">
+          <i class="fa-solid fa-industry"></i> <span>Industry</span>
+        </button>
+      </div>
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-glass-icon"></i>
+        <input type="text" id="topSearchInput" placeholder="Search by district or state (e.g. Korba, Raigarh, Singrauli)..." autocomplete="off" />
+        <button id="clearTopSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
+      </div>
+      <ul id="topSearchResults" class="search-results-floating-list" style="display: none;"></ul>
     </div>
 
     <!-- =====================================================================
-         4. FLOATING PANELS & DRAWERS
+         4. BOTTOM-LEFT: MAP LEGEND & SENSORS (Merged with Actual Map Logos & Satellites)
          ===================================================================== -->
+    <div class="bottom-left-controls">
+      <button id="btnBottomLegendSensors" class="btn-bottom-legend-sensors btn-34" data-tip="Map Legend &amp; Sensor Constellations">
+        <i class="fa-solid fa-layer-group" style="color: #38bdf8;"></i>
+        <span>Map Legend &amp; Sensors</span>
+      </button>
+    </div>
 
-    <!-- Search Panel -->
-    <div id="searchPanel" class="fm-panel search-panel" aria-label="Search Fires">
+    <!-- Bottom-Left Merged Legend & Sensors Panel -->
+    <div id="bottomLegendSensorsPanel" class="bottom-legend-sensors-panel" style="display: none;">
       <div class="panel-header">
-        <h3><i class="fa-solid fa-magnifying-glass"></i> Search Active Fires</h3>
-        <button class="close-btn" aria-label="Close">&times;</button>
-      </div>
-      <div class="panel-content">
-        <div class="search-input-box">
-          <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
-          <input type="text" id="searchInput" placeholder="Search by facility, city, state, or operator..." autocomplete="off">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-layer-group" style="color: #38bdf8;"></i>
+          <h3 style="margin: 0; font-size: 14px; color: #fff;">Map Legend &amp; Sensors</h3>
         </div>
-        <ul id="searchResults" class="search-results-list"></ul>
+        <button class="close-btn" id="closeBottomLegendSensorsBtn">&times;</button>
+      </div>
+      <div class="panel-content" style="max-height: 72vh; overflow-y: auto;">
+        
+        <!-- A. Actual Logos Used on the Map -->
+        <div class="layer-section-title" style="margin-top: 2px;">Map Symbol Logos</div>
+        <div class="legend-logos-list">
+          <!-- 1. Factory / Industrial Stack -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-orange">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#f97316" stroke-width="3"/>
+                <path d="M13 35 L13 22 L21 27 L21 22 L29 27 L29 14 L37 14 L37 35 Z" fill="#ffffff"/>
+                <circle cx="33" cy="10" r="1.5" fill="#f97316"/>
+                <circle cx="34.5" cy="7" r="1.8" fill="#f97316"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">🏭 Industrial Stack / Routine Flare</div>
+              <div class="legend-logo-sub">Refineries, steel plants, power plants</div>
+            </div>
+          </div>
+
+          <!-- 2. Critical Accidental Fire -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-red">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#ef4444" stroke-width="3"/>
+                <path d="M25 10 C21 16 16 20 16 27 C16 33.5 20 37 25 37 C30 37 34 33.5 34 27 C34 20 29 16 25 10 Z" fill="#ef4444"/>
+                <path d="M25 19 C23 23 20 26 20 30 C20 34 22.5 35.5 25 35.5 C27.5 35.5 30 34 30 30 C30 26 27 23 25 19 Z" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">🔴 Critical Industrial Accidental Fire</div>
+              <div class="legend-logo-sub">Uncontrolled blaze exceeding baseline (&ge;4&sigma;)</div>
+            </div>
+          </div>
+
+          <!-- 3. Stubble Burning / Agricultural -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-amber">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#eab308" stroke-width="3"/>
+                <path d="M25 36 L25 14 M25 18 C28 15 31 16 32 18 C31 20 28 20 25 21 M25 24 C28 21 31 22 32 24 C31 26 28 26 25 27 M25 18 C22 15 19 16 18 18 C19 20 22 20 25 21 M25 24 C22 21 19 22 18 24 C19 26 22 26 25 27" stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">🌾 Agricultural Stubble Burning</div>
+              <div class="legend-logo-sub">Crop residue fires in open farmland</div>
+            </div>
+          </div>
+
+          <!-- 4. Wildfire / Forest Canopy -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-green">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#22c55e" stroke-width="3"/>
+                <path d="M25 10 L33 19 L29 19 L36 29 L14 29 L21 19 L17 19 Z" fill="#ffffff"/>
+                <rect x="23" y="29" width="4" height="6" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">🌲 Wildfire / Forest Canopy Fire</div>
+              <div class="legend-logo-sub">Protected reserves and dense tree cover</div>
+            </div>
+          </div>
+
+          <!-- 5. Open-Cast Mining Thermal Emission -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-purple">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#a855f7" stroke-width="3"/>
+                <path d="M15 35 L35 15 M33 12 L38 17 M35 35 L15 15 M17 12 L12 17" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">♨️ Open-Cast Mining Thermal Emission</div>
+              <div class="legend-logo-sub">Registered coalfield excavation &amp; flares</div>
+            </div>
+          </div>
+
+          <!-- 6. Bookmarked Anomaly -->
+          <div class="legend-logo-item">
+            <div class="legend-badge-icon badge-cyan">
+              <svg viewBox="0 0 50 50" width="22" height="22">
+                <circle cx="25" cy="25" r="21" fill="rgba(15,23,42,0.95)" stroke="#38bdf8" stroke-width="3"/>
+                <path d="M18 12 L32 12 L32 37 L25 31 L18 37 Z" fill="#38bdf8"/>
+              </svg>
+            </div>
+            <div class="legend-logo-meta">
+              <div class="legend-logo-name">📌 Bookmarked / Flagged Hotspot</div>
+              <div class="legend-logo-sub">Saved in your flagged anomalies registry</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. Merged Satellite Constellation (Track Option Only - No Clutter) -->
+        <div class="layer-section-title" style="margin-top: 14px; color: #38bdf8;">
+          🛰️ Active Satellite Constellations
+        </div>
+        <div class="satellites-merged-list" id="satellitesMergedList">
+          <!-- 1. NOAA-20 -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">NOAA-20 (JPSS-1)</span>
+              <span class="sat-meta">VIIRS 375m &middot; NASA/NOAA</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-noaa-20')">
+              Track ↗
+            </button>
+          </div>
+
+          <!-- 2. Suomi-NPP -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">Suomi-NPP</span>
+              <span class="sat-meta">VIIRS 375m &middot; NASA/NOAA</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-suomi-npp')">
+              Track ↗
+            </button>
+          </div>
+
+          <!-- 3. NOAA-21 -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">NOAA-21 (JPSS-2)</span>
+              <span class="sat-meta">VIIRS C2 &middot; NASA/NOAA</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-noaa-21')">
+              Track ↗
+            </button>
+          </div>
+
+          <!-- 4. Sentinel-3A/B -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">Sentinel-3 SLSTR</span>
+              <span class="sat-meta">SLSTR 1km &middot; Copernicus ESA</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-sentinel-3a')">
+              Track ↗
+            </button>
+          </div>
+
+          <!-- 5. Meteosat-11 -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">Meteosat-11 SEVIRI</span>
+              <span class="sat-meta">SEVIRI 15-min &middot; EUMETSAT</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-meteosat-11')">
+              Track ↗
+            </button>
+          </div>
+
+          <!-- 6. INSAT-3DR -->
+          <div class="sat-item-compact">
+            <div class="sat-item-info">
+              <span class="sat-name">INSAT-3DR</span>
+              <span class="sat-meta">IMAGER 15-min &middot; ISRO</span>
+            </div>
+            <button class="btn btn-outline btn-34 sat-track-btn" onclick="window.fireMapGlobe?.flyToSatellite('sat-insat-3dr')">
+              Track ↗
+            </button>
+          </div>
+        </div>
+
+        <!-- C. Sensor & Layer Toggles -->
+        <div class="layer-section-title" style="margin-top: 14px;">Toggle Layers &amp; Sensors</div>
+        <div class="layer-toggles-grid">
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-sat-viirs" checked> VIIRS 375m (NOAA/NPP)</label>
+            <span class="layer-pill-tag">LEO</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-sat-sentinel3" checked> Sentinel-3 SLSTR (1km)</label>
+            <span class="layer-pill-tag">ESA</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-sat-seviri" checked> Meteosat SEVIRI (15m)</label>
+            <span class="layer-pill-tag">GEO</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-sat-insat" checked> INSAT-3DR (ISRO)</label>
+            <span class="layer-pill-tag">ISRO</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-prithvi" checked> NASA/IBM Prithvi-100M</label>
+            <span class="layer-pill-tag" style="color:#a855f7;">AI</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-tropomi" checked> Sentinel-5P TROPOMI Gases</label>
+            <span class="layer-pill-tag">S5P</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-sat-tracks" checked> Satellite Orbits</label>
+            <span class="layer-pill-tag">Orbit</span>
+          </div>
+          <div class="layer-item">
+            <label><input type="checkbox" id="layer-wind-streamlines" checked> GFS Wind Streamlines</label>
+            <span class="layer-pill-tag">Wind</span>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <!-- Layer List Panel -->
-    <div id="layerListPanel" class="fm-panel layer-list-panel" aria-label="Layer List">
+    <!-- =====================================================================
+         5. FLAGGED ANOMALIES & BOOKMARKS DRAWER
+         ===================================================================== -->
+    <div id="flaggedAnomaliesDrawer" class="fm-panel flagged-anomalies-drawer" style="display: none;">
       <div class="panel-header">
-        <h3><i class="fa-solid fa-layer-group"></i> Satellite &amp; Intelligence Layers</h3>
-        <button class="close-btn" aria-label="Close">&times;</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-bookmark" style="color: #38bdf8;"></i>
+          <h3 style="margin: 0; font-size: 14px; color: #fff;">Flagged Anomalies &amp; Bookmarks</h3>
+        </div>
+        <button class="close-btn" id="closeFlaggedDrawerBtn">&times;</button>
       </div>
-      <div class="panel-content">
-        <div class="layer-section-title">Constellation Sensors</div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-sat-viirs" checked> VIIRS 375m (NOAA-20 / NPP)</label>
-          <span class="layer-pill-tag">LEO</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-sat-sentinel3" checked> Sentinel-3 SLSTR (1km)</label>
-          <span class="layer-pill-tag">Copernicus</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-sat-seviri" checked> Meteosat SEVIRI (15-min)</label>
-          <span class="layer-pill-tag">EUMETSAT</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-sat-insat" checked> INSAT-3DR Geostationary</label>
-          <span class="layer-pill-tag">ISRO</span>
-        </div>
-
-        <div class="layer-section-title">Deep Context &amp; Analytics</div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-prithvi" checked> NASA/IBM Prithvi-100M ViT</label>
-          <span class="layer-pill-tag" style="color:#a855f7;">AI Model</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-nbr" checked> Sentinel-2 &Delta;NBR Burn Scars</label>
-          <span class="layer-pill-tag">10m</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-tropomi" checked> Sentinel-5P TROPOMI Gases</label>
-          <span class="layer-pill-tag">NO₂/SO₂/CO</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-ghsl" checked> GHSL Settlement Density</label>
-          <span class="layer-pill-tag">Exposure</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-osm" checked> OSM Industrial Perimeters</label>
-          <span class="layer-pill-tag">Ground</span>
-        </div>
-
-        <div class="layer-section-title">Atmospheric Dynamics</div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-sat-tracks" checked> Satellite Orbit Trajectories</label>
-          <span class="layer-pill-tag">Orbits</span>
-        </div>
-        <div class="layer-item">
-          <label><input type="checkbox" id="layer-wind-streamlines" checked> GFS Wind Streamlines</label>
-          <span class="layer-pill-tag">22km</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Satellite Constellation & Orbits Panel -->
-    <div id="satellitesPanel" class="fm-panel satellites-panel" aria-label="Satellite Constellation Panel">
-      <div class="panel-header">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <i class="fa-solid fa-satellite" style="color: #38bdf8; font-size: 15px;"></i>
-          <h3 style="margin:0;font-size:14px;color:#fff;">Satellite Constellation Tracker</h3>
-        </div>
-        <button class="close-btn" aria-label="Close">&times;</button>
-      </div>
-      <div class="panel-content" id="satellitesPanelContent" style="max-height: 75vh; overflow-y: auto;">
-        <!-- Dynamic Content Rendered by window.fireMapGlobe.renderSatellitesPanel() -->
-      </div>
-    </div>
-
-    <!-- Basemap & 3D Globe Panel -->
-    <div id="basemapPanel" class="fm-panel basemap-panel" aria-label="Basemap Selector">
-      <div class="panel-header">
-        <h3><i class="fa-solid fa-map"></i> Basemap &amp; View</h3>
-        <button class="close-btn" aria-label="Close">&times;</button>
-      </div>
-      <div class="panel-content">
-        <div class="projection-switch-row">
-          <span style="font-size: 11px; font-weight: 600; color: #cbd5e1;">Projection:</span>
-          <div style="display: flex; gap: 4px;">
-            <button class="proj-btn active" id="btn-proj-globe">3D Globe</button>
-            <button class="proj-btn" id="btn-proj-flat">2D Flat</button>
-          </div>
-        </div>
-
-        <div class="basemap-option selected" data-style="satellite">
-          <i class="fa-solid fa-satellite" style="color: #38bdf8;"></i>
-          <span>Satellite Streets 3D</span>
-        </div>
-        <div class="basemap-option" data-style="dark">
-          <i class="fa-solid fa-moon" style="color: #a855f7;"></i>
-          <span>Tactical Dark Canvas</span>
-        </div>
-        <div class="basemap-option" data-style="firemap">
-          <i class="fa-solid fa-fire" style="color: #f97316;"></i>
-          <span>FireMap.live BaseMap V1</span>
-        </div>
-        <div class="basemap-option" data-style="outdoors">
-          <i class="fa-solid fa-mountain" style="color: #22c55e;"></i>
-          <span>Outdoors Topo Terrain</span>
-        </div>
-      </div>
-    </div>
-
-
-
-    <!-- Map Legend Panel -->
-    <div id="legendPanel" class="fm-panel" style="top: 60px; right: 70px; width: 310px;" aria-label="Map Legend">
-      <div class="panel-header">
-        <h3><i class="fa-solid fa-list-ul"></i> Map Legend &amp; Sensors</h3>
-        <button class="close-btn" aria-label="Close">&times;</button>
-      </div>
-      <div class="panel-content">
-        <div class="layer-section-title">Fire Activity &amp; Status</div>
-        <div style="font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#ff0000;border:1px solid #8b0000;"></span>
-            <span>Thermal Blowout / High Alert (&ge;4.0&sigma;)</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#ff4500;border:1px solid #8b0000;"></span>
-            <span>Industrial Flare / Flare Stack</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#ff7f50;border:1px solid #eab308;"></span>
-            <span>Coal Mine / Persistent Thermal</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#84cc16;border:1px solid #4d7c0f;"></span>
-            <span>Agricultural Stubble Burning</span>
-          </div>
-        </div>
-
-        <div class="layer-section-title" style="margin-top:12px;">Satellite Constellations</div>
-        <div style="font-size: 11.5px; display: flex; flex-direction: column; gap: 5px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:10px;height:10px;border-radius:2px;background:#34d399;"></span>
-            <span>VIIRS &mdash; NOAA-20, NOAA-21, Suomi NPP (375m)</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span>
-            <span>SLSTR &mdash; Sentinel-3A, Sentinel-3B (1km)</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:10px;height:10px;border-radius:2px;background:#c084fc;"></span>
-            <span>SEVIRI &mdash; Meteosat-11 MSG-IODC (15-min Geo)</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:10px;height:10px;border-radius:2px;background:#38bdf8;"></span>
-            <span>IMAGER &mdash; ISRO INSAT-3DR (15-min Geo)</span>
-          </div>
-        </div>
-
-        <div class="layer-section-title" style="margin-top:12px;">Wind Streamlines</div>
-        <div style="font-size: 11px; color:#94a3b8; line-height: 1.5;">
-          Dynamic particles driven by NOAA Global Forecast System (GFS) 22km wind grid, indicating downwind smoke and gas plume dispersion.
-        </div>
+      <div class="panel-content" id="flaggedAnomaliesList" style="max-height: 75vh; overflow-y: auto;">
+        <!-- Dynamic Bookmarks Rendered by window.renderFlaggedAnomaliesList() -->
       </div>
     </div>
 

@@ -66,21 +66,28 @@ def get_copernicus_token():
         now = datetime.datetime.utcnow().timestamp()
         if _token_cache['token'] and now < _token_cache['expires_at'] - 30:
             return _token_cache['token']
-        resp = requests.post(COPERNICUS_TOKEN_URL, data={
-            'grant_type':    'client_credentials',
-            'client_id':     COPERNICUS_CLIENT_ID,
-            'client_secret': COPERNICUS_CLIENT_SECRET,
-        }, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        _token_cache['token']      = data['access_token']
-        _token_cache['expires_at'] = now + data.get('expires_in', 3600)
-        print(f"[auth] New Copernicus token obtained (expires in {data.get('expires_in',3600)}s)")
-        return _token_cache['token']
+        try:
+            resp = requests.post(COPERNICUS_TOKEN_URL, data={
+                'grant_type':    'client_credentials',
+                'client_id':     COPERNICUS_CLIENT_ID,
+                'client_secret': COPERNICUS_CLIENT_SECRET,
+            }, timeout=3.0)
+            if resp.ok:
+                data = resp.json()
+                _token_cache['token']      = data.get('access_token')
+                _token_cache['expires_at'] = now + data.get('expires_in', 3600)
+                print(f"[auth] New Copernicus token obtained (expires in {data.get('expires_in',3600)}s)")
+                return _token_cache['token']
+        except Exception as e:
+            print(f"[auth] Copernicus token request error: {e}")
+        return None
 
 
 def sh_headers():
-    return {'Authorization': f'Bearer {get_copernicus_token()}', 'Content-Type': 'application/json'}
+    tok = get_copernicus_token()
+    if not tok:
+        return {}
+    return {'Authorization': f'Bearer {tok}', 'Content-Type': 'application/json'}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -348,8 +355,11 @@ function evaluatePixel(samples) {{
                 },
                 "calculations": {"default": {"statistics": {"default": {"percentiles": {"k": [50]}}}}}
             }
+            headers = sh_headers()
+            if not headers or 'Authorization' not in headers:
+                return None
             try:
-                resp = requests.post(SENTINEL_HUB_STATS_URL, json=payload, headers=sh_headers(), timeout=20)
+                resp = requests.post(SENTINEL_HUB_STATS_URL, json=payload, headers=headers, timeout=3.5)
                 if resp.ok:
                     d = resp.json()
                     val = d.get('data', [{}])[0].get('outputs', {}).get('default', {}).get('bands', {}).get('B0', {}).get('stats', {}).get('percentiles', {}).get('50.0', None)
@@ -363,7 +373,6 @@ function evaluatePixel(samples) {{
                 else:
                     return None
             except Exception as e:
-                print(f"[TROPOMI {product}] error: {e}")
                 return None
 
         # Execute 4 atmospheric queries concurrently for 4x faster response (< 1.5s)

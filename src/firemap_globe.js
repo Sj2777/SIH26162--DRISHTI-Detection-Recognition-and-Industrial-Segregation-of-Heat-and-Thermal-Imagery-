@@ -9,6 +9,7 @@
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { INDIAN_DISTRICTS, getDistrictPolygon } from './districts.js';
 
 // Public token used by firemap.live
 mapboxgl.accessToken = 'pk.eyJ1IjoiZGlzYXN0ZXJkYiIsImEiOiJjbTB5NmkwdGgwam9lMnFweWRpaHV6cHlsIn0.w0q_y36YDqPW4yrr675Baw';
@@ -226,6 +227,7 @@ export class FireMapGlobe {
     this.map.on('style.load', () => {
       this.configureAtmosphere();
       this.initHazardZoneLayer();
+      this.initDistrictLayers();
       this.initHotspotLayers();
       this.initSatelliteOrbits();
       this.updateHotspots(this.activeHotspots);
@@ -237,6 +239,164 @@ export class FireMapGlobe {
     this.initWindCanvas();
     this.startSatelliteTracker();
     this.startClock();
+  }
+
+  // 1a. Interactive Clickable Districts & Boundaries Layer
+  initDistrictLayers() {
+    if (!this.map || this.map.getSource('india-districts-source')) return;
+
+    const districtPoints = {
+      type: 'FeatureCollection',
+      features: INDIAN_DISTRICTS.map(d => ({
+        type: 'Feature',
+        properties: {
+          name: d.name,
+          state: d.state,
+          lat: d.lat,
+          lon: d.lon,
+          bounds: JSON.stringify(d.bounds),
+          zoom: d.zoom || 8.8
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [d.lon, d.lat]
+        }
+      }))
+    };
+
+    this.map.addSource('india-districts-source', {
+      type: 'geojson',
+      data: districtPoints
+    });
+
+    this.map.addSource('district-boundary-source', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+
+    this.map.addLayer({
+      id: 'district-boundary-fill',
+      type: 'fill',
+      source: 'district-boundary-source',
+      paint: {
+        'fill-color': '#0284c7',
+        'fill-opacity': 0.12
+      }
+    });
+
+    this.map.addLayer({
+      id: 'district-boundary-line',
+      type: 'line',
+      source: 'district-boundary-source',
+      paint: {
+        'line-color': '#38bdf8',
+        'line-width': 2.8,
+        'line-opacity': 0.95
+      }
+    });
+
+    this.map.addLayer({
+      id: 'district-labels',
+      type: 'symbol',
+      source: 'india-districts-source',
+      minzoom: 3.5,
+      maxzoom: 10.5,
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+        'text-size': [
+          'interpolate', ['linear'], ['zoom'],
+          4, 10,
+          7, 12,
+          9, 13
+        ],
+        'text-offset': [0, 1.1],
+        'text-anchor': 'top',
+        'text-allow-overlap': false
+      },
+      paint: {
+        'text-color': '#e0f2fe',
+        'text-halo-color': 'rgba(15, 23, 42, 0.95)',
+        'text-halo-width': 1.8
+      }
+    });
+
+    this.map.addLayer({
+      id: 'district-points',
+      type: 'circle',
+      source: 'india-districts-source',
+      minzoom: 4,
+      maxzoom: 10,
+      paint: {
+        'circle-radius': 3.5,
+        'circle-color': '#38bdf8',
+        'circle-stroke-width': 1.5,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    const handleDistrictClick = (e) => {
+      const feat = e.features?.[0];
+      if (!feat) return;
+      const p = feat.properties;
+      const district = {
+        name: p.name,
+        state: p.state,
+        lat: Number(p.lat),
+        lon: Number(p.lon),
+        bounds: p.bounds ? JSON.parse(p.bounds) : null,
+        zoom: Number(p.zoom) || 8.8
+      };
+      this.focusDistrict(district);
+    };
+
+    this.map.on('click', 'district-labels', handleDistrictClick);
+    this.map.on('click', 'district-points', handleDistrictClick);
+    this.map.on('mouseenter', 'district-labels', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+    this.map.on('mouseleave', 'district-labels', () => { this.map.getCanvas().style.cursor = ''; });
+  }
+
+  focusDistrict(district) {
+    if (!district || !this.map) return;
+    const polygonFeature = getDistrictPolygon(district);
+    const boundarySource = this.map.getSource('district-boundary-source');
+    if (boundarySource) {
+      boundarySource.setData({
+        type: 'FeatureCollection',
+        features: [polygonFeature]
+      });
+    }
+
+    const b = district.bounds;
+    const firesInDistrict = this.activeHotspots.filter(h => {
+      const lat = Number(h.latitude);
+      const lon = Number(h.longitude);
+      if (b) {
+        return lon >= b[0] && lat >= b[1] && lon <= b[2] && lat <= b[3];
+      }
+      const dx = (lat - district.lat) * 111;
+      const dy = (lon - district.lon) * 111 * Math.cos(district.lat * Math.PI / 180);
+      return Math.sqrt(dx * dx + dy * dy) <= 40;
+    });
+
+    this.map.flyTo({
+      center: [district.lon, district.lat],
+      zoom: district.zoom || 8.8,
+      pitch: 42,
+      bearing: 0,
+      duration: 1800
+    });
+
+    if (window.showDistrictNotification) {
+      window.showDistrictNotification(district, firesInDistrict);
+    }
+
+    if (firesInDistrict.length > 0) {
+      const topFire = firesInDistrict.reduce((max, cur) => (cur.frp > max.frp ? cur : max), firesInDistrict[0]);
+      setTimeout(() => {
+        this.onHotspotSelect(topFire);
+      }, 900);
+    }
   }
 
   // 1. Configure 3D Globe Deep Space & Atmosphere Glow
@@ -625,9 +785,6 @@ export class FireMapGlobe {
           </div>
           <button class="fmpop-btn" onclick="window.inspectHotspotFromPopup('${p.id}'); if(window.event){window.event.stopPropagation();}">
             Inspect Full Dossier &rarr;
-          </button>
-          <button class="fmpop-btn" style="margin-top: 6px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;" onclick="window.openIndustryHistoryModal('${(title).replace(/'/g, "\\'")}', '${p.id || ''}', ${Number(coords[1])}, ${Number(coords[0])}); if(window.event){window.event.stopPropagation();}">
-            📊 Historical Telemetry &amp; Satellite Archives &rarr;
           </button>
         </div>
       `;

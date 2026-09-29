@@ -334,9 +334,9 @@ export function classifyHotspotXGBoost(h, facilities = []) {
   } else if (predictedClass === 'MINE') {
     isTrueFire = true;
     fireVerificationStatus = 'CONFIRMED_FIRE';
-    verificationBadge = '🟣 COAL SEAM SMOLDERING / PIT FLARE';
+    verificationBadge = '🏭 INDUSTRIAL / OPEN-CAST THERMAL EMISSION';
     verificationConfidence = 95;
-    verificationReason = `Coal Basin Thermal Detection: Sub-surface coal seam smoldering / active pit flare (${frp} MW, ${Math.round(brightness)}K) within registered mining perimeter: ${nearestFacility?.name || beltMatch?.label || 'Coalfield'}. Persistent thermal signature characteristic of coal spontaneous combustion.`;
+    verificationReason = `Industrial Mining Thermal Detection: Active thermal signature (${frp} MW, ${Math.round(brightness)}K) within registered industrial/mining perimeter: ${nearestFacility?.name || 'Industrial Facility'}. Persistent high-temperature thermal signature.`;
 
   } else if (frp >= 20 || brightness >= 355 || (isNight && frp >= 5)) {
     isTrueFire = true;
