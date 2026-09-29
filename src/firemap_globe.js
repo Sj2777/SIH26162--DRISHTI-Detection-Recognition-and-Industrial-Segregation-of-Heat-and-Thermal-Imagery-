@@ -399,6 +399,167 @@ export class FireMapGlobe {
     }
   }
 
+  focusIndustry(facility) {
+    if (!facility || !this.map) return;
+    const lat = Number(facility.lat ?? facility.latitude);
+    const lon = Number(facility.lon ?? facility.longitude);
+    if (!lat || !lon) return;
+
+    // 1. If facility has polygon boundary, render it; otherwise create a circular buffer boundary
+    let polygonFeature = null;
+    if (facility.boundary && Array.isArray(facility.boundary) && facility.boundary.length >= 3) {
+      // GeoJSON expects [lon, lat]
+      const coords = facility.boundary.map(pt => [pt[1], pt[0]]);
+      if (coords[0][0] !== coords[coords.length - 1][0] || coords[0][1] !== coords[coords.length - 1][1]) {
+        coords.push(coords[0]);
+      }
+      polygonFeature = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords]
+        },
+        properties: { name: facility.name }
+      };
+    } else {
+      // 1.5 km circular boundary around plant
+      const points = 32;
+      const coords = [];
+      const dLat = 1.5 / 111.0;
+      const dLon = 1.5 / (111.0 * Math.cos(lat * Math.PI / 180));
+      for (let i = 0; i <= points; i++) {
+        const theta = (i / points) * (2 * Math.PI);
+        coords.push([lon + dLon * Math.cos(theta), lat + dLat * Math.sin(theta)]);
+      }
+      polygonFeature = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords]
+        },
+        properties: { name: facility.name }
+      };
+    }
+
+    // Reuse district-boundary-source to show glowing boundary
+    const boundarySource = this.map.getSource('district-boundary-source');
+    if (boundarySource && polygonFeature) {
+      boundarySource.setData({
+        type: 'FeatureCollection',
+        features: [polygonFeature]
+      });
+    }
+
+    // 2. Find any active thermal hotspots within 4 km of this industry
+    const nearbyHotspots = this.activeHotspots.filter(h => {
+      const hLat = Number(h.latitude);
+      const hLon = Number(h.longitude);
+      const dx = (hLat - lat) * 111;
+      const dy = (hLon - lon) * 111 * Math.cos(lat * Math.PI / 180);
+      return Math.sqrt(dx * dx + dy * dy) <= 4.0;
+    });
+
+    // 3. Smooth dramatic 3D fly to facility
+    this.map.flyTo({
+      center: [lon, lat],
+      zoom: 14.2,
+      pitch: 48,
+      bearing: -20,
+      duration: 2000,
+      essential: true
+    });
+
+    // 4. Show Industry Notification HUD
+    if (window.showIndustryNotification) {
+      window.showIndustryNotification(facility, nearbyHotspots);
+    }
+
+    // 5. Show Mapbox Popup & details drawer
+    if (nearbyHotspots.length > 0) {
+      const topFire = nearbyHotspots.reduce((max, cur) => (cur.frp > max.frp ? cur : max), nearbyHotspots[0]);
+      topFire.facility_name = facility.name;
+      topFire.operator = facility.operator || topFire.operator;
+      setTimeout(() => {
+        this.onHotspotSelect(topFire);
+      }, 1000);
+    } else {
+      setTimeout(() => {
+        const isMine = facility.type === 'mine' || facility.name.toLowerCase().includes('mine');
+        const badgeColor = isMine ? '#a855f7' : '#f97316';
+        const badgeLabel = isMine ? 'OPEN-CAST COAL MINE' : 'REGISTERED INDUSTRY';
+
+        const popupContent = `
+          <div style="min-width: 280px; padding: 4px;">
+            <div class="fmpop-header" style="margin-bottom: 8px;">
+              <span class="fmpop-tag" style="background: ${badgeColor}25; color: ${badgeColor}; border: 1px solid ${badgeColor}80; font-weight: 700;">
+                ${isMine ? '♨️' : '🏭'} ${badgeLabel}
+              </span>
+              <span style="font-size: 11px; color: #34d399; font-weight: 600;">CPCB ${facility.cpcb_category || 'Red'} Category</span>
+            </div>
+            <div class="fmpop-title" style="font-size: 15px; color: #fff; font-weight: 700; margin-bottom: 6px;">
+              ${facility.name}
+            </div>
+            <div class="info-row" style="padding: 4px 0;">
+              <span class="info-label">Operator:</span>
+              <span class="info-value" style="color: #cbd5e1;">${facility.operator || 'Operating Corporation'}</span>
+            </div>
+            <div class="info-row" style="padding: 4px 0;">
+              <span class="info-label">Location:</span>
+              <span class="info-value">${facility.district || ''}, ${facility.state || ''}</span>
+            </div>
+            <div class="info-row" style="padding: 4px 0; border-bottom: none;">
+              <span class="info-label">Coordinates:</span>
+              <a href="https://maps.google.com/?q=${lat},${lon}" target="_blank" rel="noopener" class="gmaps-coord-link">
+                📍 ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E ↗
+              </a>
+            </div>
+            <div style="margin-top: 10px;">
+              <button class="btn btn-primary btn-34" style="width: 100%; height: 34px !important; line-height: 34px !important; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border: none; cursor: pointer;"
+                onclick="window.openIndustryOverviewModal('${facility.name.replace(/'/g, "\\'")}', '${facility.id || ''}', ${lat}, ${lon})">
+                🏭 VIEW INDUSTRY
+              </button>
+            </div>
+          </div>
+        `;
+
+        if (this.currentPopup) {
+          this.currentPopup.remove();
+        }
+        if (window.mapboxgl) {
+          this.currentPopup = new window.mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '360px',
+            className: 'custom-mapbox-popup'
+          })
+            .setLngLat([lon, lat])
+            .setHTML(popupContent)
+            .addTo(this.map);
+        }
+      }, 1000);
+    }
+  }
+
+  flyToHotspot(h) {
+    if (!h || !this.map) return;
+    const lat = Number(h.latitude);
+    const lon = Number(h.longitude);
+    if (!lat || !lon) return;
+
+    this.map.flyTo({
+      center: [lon, lat],
+      zoom: 14.5,
+      pitch: 45,
+      bearing: -15,
+      duration: 1800,
+      essential: true
+    });
+
+    setTimeout(() => {
+      this.onHotspotSelect(h);
+    }, 900);
+  }
+
   // 1. Configure 3D Globe Deep Space & Atmosphere Glow
   configureAtmosphere() {
     try {

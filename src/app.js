@@ -4425,26 +4425,68 @@ function initFireMapGlobe() {
         topSearchResults.style.display = 'block';
 
       } else {
-        // Industry search
-        const matches = state.hotspots.filter(h =>
-          (h.facility_name && h.facility_name.toLowerCase().includes(q)) ||
-          (h.operator && h.operator.toLowerCase().includes(q)) ||
-          (h.region && h.region.toLowerCase().includes(q)) ||
-          (h.fire_type && h.fire_type.toLowerCase().includes(q))
-        ).slice(0, 10);
+        // Industry search: Search registered facilities & active industrial hotspots
+        const facilities = state.facilities || MOCK_FACILITIES;
+        const matchedFacs = facilities.filter(f =>
+          (f.name && f.name.toLowerCase().includes(q)) ||
+          (f.operator && f.operator.toLowerCase().includes(q)) ||
+          (f.district && f.district.toLowerCase().includes(q)) ||
+          (f.state && f.state.toLowerCase().includes(q)) ||
+          (f.type && f.type.toLowerCase().includes(q))
+        ).slice(0, 8);
 
-        if (matches.length === 0) {
+        const matchedHotspots = state.hotspots.filter(h =>
+          !matchedFacs.some(f => f.name.toLowerCase() === (h.facility_name || '').toLowerCase()) && (
+            (h.facility_name && h.facility_name.toLowerCase().includes(q)) ||
+            (h.operator && h.operator.toLowerCase().includes(q)) ||
+            (h.region && h.region.toLowerCase().includes(q))
+          )
+        ).slice(0, 6);
+
+        if (matchedFacs.length === 0 && matchedHotspots.length === 0) {
           topSearchResults.innerHTML = '<li style="color:#64748b;padding:10px 12px;font-size:12px;">No matching industries found</li>';
           topSearchResults.style.display = 'block';
           return;
         }
 
-        topSearchResults.innerHTML = matches.map(m => `
-          <li onclick="window.selectHotspotFromSearch('${m.id}')">
-            <div style="font-weight:700;font-size:13px;color:#fff;">🏭 ${m.facility_name || m.region || 'Industrial Thermal Source'}</div>
-            <div style="font-size:10.5px;color:#cbd5e1;margin-top:2px;">${m.operator || 'Operator'} &middot; <span style="color:#ff7f50;">${m.frp} MW</span> &middot; ${Number(m.latitude).toFixed(3)}°N, ${Number(m.longitude).toFixed(3)}°E</div>
-          </li>
-        `).join('');
+        let resultsHtml = '';
+
+        if (matchedFacs.length > 0) {
+          resultsHtml += matchedFacs.map(f => {
+            const isMine = f.type === 'mine' || f.name.toLowerCase().includes('mine');
+            const tagLabel = isMine ? 'COAL MINE' : (f.type ? f.type.toUpperCase() : 'INDUSTRY');
+            const tagBg = isMine ? 'rgba(168,85,247,0.2)' : 'rgba(249,115,22,0.2)';
+            const tagColor = isMine ? '#c084fc' : '#f97316';
+            const tagBorder = isMine ? 'rgba(168,85,247,0.4)' : 'rgba(249,115,22,0.4)';
+            return `
+              <li onclick="window.focusIndustryFromSearch('${(f.id || f.name).replace(/'/g, "\\'")}')">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-weight:700;font-size:13px;color:#fff;">${isMine ? '♨️' : '🏭'} ${f.name}</div>
+                  <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${tagBg};color:${tagColor};border:1px solid ${tagBorder};font-weight:600;">${tagLabel}</span>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                  <span style="color:#cbd5e1;">${f.operator || 'Operator'}</span> &middot; <span style="color:#38bdf8;">${f.district || ''}, ${f.state || ''}</span> &middot; <span style="font-family:monospace;color:#64748b;">${Number(f.lat).toFixed(3)}°N, ${Number(f.lon).toFixed(3)}°E</span>
+                </div>
+              </li>
+            `;
+          }).join('');
+        }
+
+        if (matchedHotspots.length > 0) {
+          resultsHtml += matchedHotspots.map(m => `
+            <li onclick="window.selectHotspotFromSearch('${m.id}')">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-weight:700;font-size:13px;color:#fff;">🔥 ${m.facility_name || m.region || 'Industrial Thermal Source'}</div>
+                <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:600;">${m.frp} MW</span>
+              </div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                <span style="color:#cbd5e1;">${m.operator || 'Thermal Hotspot'}</span> &middot; <span style="font-family:monospace;color:#64748b;">${Number(m.latitude).toFixed(3)}°N, ${Number(m.longitude).toFixed(3)}°E</span>
+              </div>
+            </li>
+          `).join('');
+        }
+
+        topSearchResults.innerHTML = resultsHtml;
         topSearchResults.style.display = 'block';
       }
     });
@@ -4477,6 +4519,17 @@ function initFireMapGlobe() {
     }
   };
 
+  window.focusIndustryFromSearch = function(facilityKey) {
+    const facilities = state.facilities || MOCK_FACILITIES;
+    const fac = facilities.find(f => f.id === facilityKey || f.name.toLowerCase() === facilityKey.toLowerCase());
+    if (!fac) return;
+    if (topSearchResults) topSearchResults.style.display = 'none';
+    if (topSearchInput) topSearchInput.value = fac.name;
+    if (window.fireMapGlobe) {
+      window.fireMapGlobe.focusIndustry(fac);
+    }
+  };
+
   window.selectHotspotFromSearch = function(hotspotId) {
     const h = state.hotspots.find(x => String(x.id) === String(hotspotId));
     if (!h) return;
@@ -4503,6 +4556,30 @@ function initFireMapGlobe() {
       <span style="font-size:12.5px;font-weight:700;color:#fff;">${district.name} (${district.state})</span>
       <span style="height:12px;width:1px;background:rgba(255,255,255,0.2);"></span>
       <span style="font-size:12px;font-weight:600;color:#38bdf8;">${fires.length} Active Thermal Detections Mapped</span>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer;margin-left:4px;">&times;</button>
+    `;
+    setTimeout(() => {
+      hud?.remove();
+    }, 6000);
+  };
+
+  window.showIndustryNotification = function(facility, nearbyFires) {
+    let hud = document.getElementById('industryFocusHUD');
+    if (!hud) {
+      hud = document.createElement('div');
+      hud.id = 'industryFocusHUD';
+      hud.style.cssText = 'position:fixed;top:72px;left:50%;transform:translateX(-50%);background:rgba(14,17,23,0.92);backdrop-filter:blur(14px);border:1px solid rgba(249,115,22,0.5);border-radius:30px;padding:8px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6);z-index:2000;animation:panel-fade-in 0.25s ease;font-family:var(--fm-font-display);';
+      document.body.appendChild(hud);
+    }
+    const fireMsg = nearbyFires && nearbyFires.length > 0 
+      ? `<span style="font-size:12px;font-weight:600;color:#ef4444;">🔥 ${nearbyFires.length} Active Thermal Detection(s) Nearby</span>`
+      : `<span style="font-size:12px;font-weight:600;color:#22c55e;">✓ Nominal Baseline (No Flaring Exceedance)</span>`;
+
+    hud.innerHTML = `
+      <span style="font-size:16px;">🏭</span>
+      <span style="font-size:12.5px;font-weight:700;color:#fff;">${facility.name} (${facility.district || ''}, ${facility.state || ''})</span>
+      <span style="height:12px;width:1px;background:rgba(255,255,255,0.2);"></span>
+      ${fireMsg}
       <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer;margin-left:4px;">&times;</button>
     `;
     setTimeout(() => {
