@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ast-01",
+    "name": "Flare Stack 01",
+    "type": "Combustion Unit",
+    "status": "NORMAL",
+    "risk": "LOW",
+    "latitude": 22.3185,
+    "longitude": 73.1712,
+    "condition": "Nominal flare combustion, pilot temperature optimal",
+    "isThermalEvent": false
+  },
+  {
+    "id": "ast-02",
+    "name": "Tank Farm 04",
+    "type": "Storage Terminal",
+    "status": "CRITICAL",
+    "risk": "HIGH",
+    "latitude": 22.3138,
+    "longitude": 73.1782,
+    "condition": "Thermal deviation detected (2.7× facility baseline)",
+    "isThermalEvent": true
+  },
+  {
+    "id": "ast-03",
+    "name": "Compressor C-17",
+    "type": "Gas Compression",
+    "status": "WARNING",
+    "risk": "MEDIUM",
+    "latitude": 22.3162,
+    "longitude": 73.1745,
+    "condition": "Vibration elevated on secondary stage shaft",
+    "isThermalEvent": false
+  },
+  {
+    "id": "ast-04",
+    "name": "Boiler B-02",
+    "type": "Steam Generation",
+    "status": "NORMAL",
+    "risk": "LOW",
+    "latitude": 22.3115,
+    "longitude": 73.1720,
+    "condition": "Steam pressure and exhaust flue gases nominal",
+    "isThermalEvent": false
+  },
+  {
+    "id": "ast-05",
+    "name": "Pipeline P-08",
+    "type": "Hydrocarbon Conduit",
+    "status": "WARNING",
+    "risk": "MEDIUM",
+    "latitude": 22.3170,
+    "longitude": 73.1790,
+    "condition": "Transient pressure oscillation at junction manifold",
+    "isThermalEvent": false
+  },
+  {
+    "id": "ast-06",
+    "name": "Loading Bay 02",
+    "type": "Distribution Terminal",
+    "status": "NORMAL",
+    "risk": "LOW",
+    "latitude": 22.3102,
+    "longitude": 73.1765,
+    "condition": "Vapor recovery active, static grounding verified",
+    "isThermalEvent": false
+  }
+]

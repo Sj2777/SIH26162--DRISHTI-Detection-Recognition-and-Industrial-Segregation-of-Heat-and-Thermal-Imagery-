@@ -1,0 +1,27 @@
+{
+  "facilityName": "AGNI Demo Petrochemical Facility",
+  "facilityType": "Petrochemical Processing Complex",
+  "location": "Industrial Sector 7, Western Corridor (Demo Zone)",
+  "operatingMode": "NORMAL",
+  "overallRisk": "HIGH",
+  "activeThermalEvents": 2,
+  "openMaintenanceAnomalies": 3,
+  "unresolvedAlerts": 1,
+  "satelliteUpdate": "2 min ago",
+  "telemetryUpdate": "8 sec ago",
+  "dataQuality": 94,
+  "wind": {
+    "direction": "SE",
+    "speed": "14 km/h"
+  },
+  "coordinates": {
+    "center": [22.3150, 73.1750],
+    "zoom": 16,
+    "boundary": [
+      [22.3215, 73.1685],
+      [22.3215, 73.1815],
+      [22.3085, 73.1815],
+      [22.3085, 73.1685]
+    ]
+  }
+}

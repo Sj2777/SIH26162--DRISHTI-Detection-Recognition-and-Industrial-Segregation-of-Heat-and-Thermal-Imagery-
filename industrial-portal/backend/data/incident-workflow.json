@@ -1,0 +1,61 @@
+[
+  {
+    "id": "ALT-2026-0891",
+    "alertId": "ALT-2026-0891",
+    "assetId": "TF-04",
+    "assetName": "Tank Farm 04",
+    "assetType": "STORAGE_TANK",
+    "severity": "HIGH",
+    "state": "ALERTED",
+    "detection": {
+      "type": "THERMAL_ANOMALY",
+      "intensity": "2.7× baseline",
+      "baseline": "1.0× baseline",
+      "locationShift": "320m SE",
+      "detectedAt": "14:32:08 UTC"
+    },
+    "telemetry": {
+      "temperature": "86.4 °C",
+      "temperatureStatus": "HIGH",
+      "gas": "18.7 ppm",
+      "gasStatus": "HIGH",
+      "pressure": "3.8 bar — NORMAL",
+      "vibration": "2.1 mm/s — NORMAL",
+      "scadaAlarm": "HIGH TEMPERATURE",
+      "smokeFlame": "NOT_DETECTED"
+    },
+    "createdAt": "2026-09-29T14:32:08Z",
+    "lastUpdated": "2026-09-29T14:36:00Z",
+    "acknowledgedAt": null,
+    "investigationStartedAt": null,
+    "inspectionStartedAt": null,
+    "escalatedAt": null,
+    "resolvedAt": null,
+    "closedAt": null,
+    "resolutionDetails": null,
+    "closureDetails": null,
+    "feedbackAction": null,
+    "escalationDetails": null,
+    "evidenceList": [],
+    "auditTrail": [
+      {
+        "id": "aud-001",
+        "timestamp": "14:32:08 UTC",
+        "isoTimestamp": "2026-09-29T14:32:08Z",
+        "actor": "SATELLITE_ORBITAL_RADAR",
+        "type": "DETECTION",
+        "title": "Satellite thermal anomaly detected",
+        "description": "Orbital radiometric pass recorded 2.7× thermal intensity anomaly displaced 320m SE of Flare Stack 01."
+      },
+      {
+        "id": "aud-002",
+        "timestamp": "14:36:12 UTC",
+        "isoTimestamp": "2026-09-29T14:36:12Z",
+        "actor": "GOV_MONITORING_NETWORK",
+        "type": "ALERT_DISPATCH",
+        "title": "Government regulatory alert received",
+        "description": "Alert ALT-2026-0891 routed to AGNI Demo Petrochemical Facility control room console."
+      }
+    ]
+  }
+]

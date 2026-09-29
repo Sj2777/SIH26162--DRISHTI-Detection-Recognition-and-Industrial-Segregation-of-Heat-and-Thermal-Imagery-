@@ -1,0 +1,238 @@
+{
+  "summary": {
+    "assetsMonitored": 6,
+    "normal": 4,
+    "attention": 2,
+    "critical": 0,
+    "highAnomalyIndex": 78,
+    "inspectionDue": 2,
+    "evaluationTime": "14:32:08 UTC",
+    "disclaimer": "Simulated multi-signal condition evaluation. Demo anomaly assessment only."
+  },
+  "assets": [
+    {
+      "assetId": "TF-04",
+      "assetName": "Tank Farm 04",
+      "assetType": "STORAGE_TANK",
+      "healthStatus": "ATTENTION",
+      "healthScore": 68,
+      "anomalyScore": 78,
+      "primarySignal": "THERMAL + GAS",
+      "maintenanceState": "INSPECTION_DUE",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "2.7× baseline", "status": "HIGH", "isAnomaly": true },
+        { "parameter": "TEMPERATURE", "value": "86.4 °C", "status": "HIGH", "isAnomaly": true },
+        { "parameter": "GAS", "value": "18.7 ppm", "status": "HIGH", "isAnomaly": true },
+        { "parameter": "PRESSURE", "value": "3.8 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "2.1 mm/s", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "SCADA", "value": "HIGH TEMPERATURE", "status": "ACTIVE", "isAnomaly": true },
+        { "parameter": "MAINTENANCE", "value": "INSPECTION DUE", "status": "DUE", "isAnomaly": true }
+      ],
+      "contributingSignals": [
+        "Thermal intensity 2.7× baseline",
+        "Temperature above configured envelope (86.4 °C vs 70 °C max)",
+        "Gas concentration above threshold (18.7 ppm vs 10 ppm max)",
+        "SCADA high-temperature alarm active",
+        "Inspection due on scheduled maintenance interval"
+      ],
+      "mitigatingSignals": [
+        "Pressure within configured range (3.8 bar vs 2.5–4.2 bar limit)",
+        "Vibration within configured range (2.1 mm/s vs 3.0 mm/s limit)",
+        "Smoke/flame optical detection: NOT DETECTED"
+      ],
+      "likelyCondition": "ABNORMAL THERMAL / GAS ACTIVITY",
+      "supportingObservation": "Elevated thermal intensity and gas concentration are present concurrently, while pressure and vibration remain within configured operating ranges. Pattern is consistent with conditions that warrant inspection of the tank and associated thermal source area.",
+      "suggestedInspection": "Inspect Tank Farm Zone 04 and associated thermal source area",
+      "inspectionPriority": "HIGH",
+      "inspectionReason": "Thermal deviation + elevated temperature + elevated gas + active SCADA alarm.",
+      "checklist": [
+        "Verify thermal source location with handheld radiometer",
+        "Inspect Tank Farm 04 perimeter & seal flange integrity",
+        "Check fixed gas detection sensors and cross-verify with portable sniffers",
+        "Verify pressure/vacuum relief valve and vapor venting state",
+        "Review recent maintenance activity and transfer line staging"
+      ]
+    },
+    {
+      "assetId": "CP-17",
+      "assetName": "Compressor C-17",
+      "assetType": "COMPRESSOR",
+      "healthStatus": "ATTENTION",
+      "healthScore": 74,
+      "anomalyScore": 61,
+      "primarySignal": "VIBRATION",
+      "maintenanceState": "INSPECTION_DUE",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "1.0× baseline", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "TEMPERATURE", "value": "68.2 °C", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "GAS", "value": "2.8 ppm", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "PRESSURE", "value": "14.2 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "3.4 mm/s", "status": "HIGH", "isAnomaly": true },
+        { "parameter": "SCADA", "value": "HIGH VIBRATION", "status": "ACTIVE", "isAnomaly": true },
+        { "parameter": "MAINTENANCE", "value": "INSPECTION DUE", "status": "DUE", "isAnomaly": true }
+      ],
+      "contributingSignals": [
+        "Vibration amplitude elevated (3.4 mm/s vs 3.0 mm/s limit)",
+        "SCADA high-vibration alarm active on stage-2 shaft bearing",
+        "Bearing lubrication interval inspection due"
+      ],
+      "mitigatingSignals": [
+        "Operating temperature within normal margin (68.2 °C vs 75 °C max)",
+        "Delivery pressure steady (14.2 bar)",
+        "Gas containment nominal (<3 ppm)",
+        "Smoke/flame optical detection: NOT DETECTED"
+      ],
+      "likelyCondition": "ROTATING SHAFT MECHANICAL IMBALANCE",
+      "supportingObservation": "Vibration signature indicates harmonic elevation on stage-2 drive assembly without thermal excursion. Pattern warrants mechanical inspection of coupling and bearing housing.",
+      "suggestedInspection": "Inspect drive shaft alignment and stage-2 bearing assembly",
+      "inspectionPriority": "MEDIUM",
+      "inspectionReason": "Elevated vibration + active SCADA vibration alarm.",
+      "checklist": [
+        "Perform dynamic vibration spectrum analysis on bearing 2B",
+        "Check coupling alignment and flexible element wear",
+        "Inspect lube oil filter differential pressure",
+        "Verify foundation hold-down bolt torque"
+      ]
+    },
+    {
+      "assetId": "FS-01",
+      "assetName": "Flare Stack 01",
+      "assetType": "FLARE_SYSTEM",
+      "healthStatus": "NORMAL",
+      "healthScore": 96,
+      "anomalyScore": 12,
+      "primarySignal": "NOMINAL",
+      "maintenanceState": "CURRENT",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "1.0× baseline", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "TEMPERATURE", "value": "412.0 °C", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "GAS", "value": "1.4 ppm", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "PRESSURE", "value": "1.2 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "0.8 mm/s", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "SCADA", "value": "NONE", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "MAINTENANCE", "value": "CURRENT", "status": "NORMAL", "isAnomaly": false }
+      ],
+      "contributingSignals": [],
+      "mitigatingSignals": [
+        "Pilot flame temperature stable (412 °C)",
+        "Gas purge flow rate normal (850 m³/h)",
+        "Combustion efficiency within environmental compliance targets",
+        "No SCADA alarms active"
+      ],
+      "likelyCondition": "STABLE CONTINUOUS COMBUSTION",
+      "supportingObservation": "All process variables conform to routine flare operation envelope.",
+      "suggestedInspection": "Routine quarterly tip inspection (scheduled)",
+      "inspectionPriority": "LOW",
+      "inspectionReason": "Routine monitoring; all signals nominal.",
+      "checklist": [
+        "Verify optical flame monitor alignment",
+        "Check thermocouple reading redundancy"
+      ]
+    },
+    {
+      "assetId": "BL-02",
+      "assetName": "Boiler B-02",
+      "assetType": "BOILER",
+      "healthStatus": "NORMAL",
+      "healthScore": 94,
+      "anomalyScore": 15,
+      "primarySignal": "NOMINAL",
+      "maintenanceState": "CURRENT",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "1.0× baseline", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "TEMPERATURE", "value": "242.0 °C", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "GAS", "value": "0.8 ppm", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "PRESSURE", "value": "18.5 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "1.1 mm/s", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "SCADA", "value": "NONE", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "MAINTENANCE", "value": "CURRENT", "status": "NORMAL", "isAnomaly": false }
+      ],
+      "contributingSignals": [],
+      "mitigatingSignals": [
+        "Steam header pressure 18.5 bar (target 18.0–19.0 bar)",
+        "Flue gas exhaust temperature 242 °C (nominal)",
+        "Feedwater pump vibration and flow normal",
+        "No SCADA alarms active"
+      ],
+      "likelyCondition": "BALANCED STEAM GENERATION",
+      "supportingObservation": "Combustion stoichiometry and pressure boundaries operate without variance.",
+      "suggestedInspection": "Routine bi-weekly burner tune inspection",
+      "inspectionPriority": "LOW",
+      "inspectionReason": "All telemetry parameters within design envelope.",
+      "checklist": [
+        "Log oxygen analyzer calibration",
+        "Check blowdown valve timing"
+      ]
+    },
+    {
+      "assetId": "PL-08",
+      "assetName": "Pipeline P-08",
+      "assetType": "PIPELINE",
+      "healthStatus": "NORMAL",
+      "healthScore": 92,
+      "anomalyScore": 18,
+      "primarySignal": "NOMINAL",
+      "maintenanceState": "CURRENT",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "1.0× baseline", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "TEMPERATURE", "value": "38.6 °C", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "GAS", "value": "0.4 ppm", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "PRESSURE", "value": "8.9 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "0.6 mm/s", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "SCADA", "value": "NONE", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "MAINTENANCE", "value": "CURRENT", "status": "NORMAL", "isAnomaly": false }
+      ],
+      "contributingSignals": [],
+      "mitigatingSignals": [
+        "Line pressure 8.9 bar (well below 12.0 bar maximum allowance)",
+        "Zero fugitive methane detection (<0.5 ppm)",
+        "Transient pulse damping functioning properly",
+        "Cathodic protection active"
+      ],
+      "likelyCondition": "UNIMPEDED HYDROCARBON TRANSFER",
+      "supportingObservation": "Pressure wave differential minimal; transmission line operating normally.",
+      "suggestedInspection": "Quarterly cathodic survey",
+      "inspectionPriority": "LOW",
+      "inspectionReason": "Nominal throughput telemetry.",
+      "checklist": [
+        "Inspect test stations along pipeline route",
+        "Verify block valve telemetry heartbeat"
+      ]
+    },
+    {
+      "assetId": "LB-02",
+      "assetName": "Loading Bay 02",
+      "assetType": "LOADING_TERMINAL",
+      "healthStatus": "NORMAL",
+      "healthScore": 97,
+      "anomalyScore": 10,
+      "primarySignal": "NOMINAL",
+      "maintenanceState": "CURRENT",
+      "evidenceRows": [
+        { "parameter": "THERMAL", "value": "1.0× baseline", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "TEMPERATURE", "value": "33.1 °C", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "GAS", "value": "1.1 ppm", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "PRESSURE", "value": "2.1 bar", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "VIBRATION", "value": "0.4 mm/s", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "SCADA", "value": "NONE", "status": "NORMAL", "isAnomaly": false },
+        { "parameter": "MAINTENANCE", "value": "CURRENT", "status": "NORMAL", "isAnomaly": false }
+      ],
+      "contributingSignals": [],
+      "mitigatingSignals": [
+        "Vapor recovery efficiency >99%",
+        "Static discharge ground clamp verified closed loop",
+        "Overfill protection sensor test passed",
+        "Zero active interlock trips"
+      ],
+      "likelyCondition": "SAFE LOGISTICS STAGING",
+      "supportingObservation": "Terminal interlocks and vapor containment operate at optimal safety baseline.",
+      "suggestedInspection": "Monthly emergency stop verification",
+      "inspectionPriority": "LOW",
+      "inspectionReason": "All safety interlocks satisfied.",
+      "checklist": [
+        "Test emergency break-away couplings",
+        "Verify bonding cable continuity"
+      ]
+    }
+  ]
+}

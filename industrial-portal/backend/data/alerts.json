@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ALT-2026-0891",
+    "type": "THERMAL ANOMALY",
+    "severity": "HIGH",
+    "assetId": "ast-02",
+    "assetName": "Tank Farm 04",
+    "thermalIntensity": "2.7× baseline",
+    "detectedAt": "14:32",
+    "status": "UNRESOLVED",
+    "description": "Thermal activity exceeds the facility baseline and requires inspection.",
+    "locationCoordinates": [22.3138, 73.1782]
+  }
+]

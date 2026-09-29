@@ -1,0 +1,62 @@
+[
+  {
+    "caseId": "INC-2025-014",
+    "asset": "Tank Farm 03",
+    "applicableAssetIds": ["TF-04"],
+    "incidentType": "Thermal excursion",
+    "similarity": 0.82,
+    "patternSimilarity": "82%",
+    "observedPattern": "Elevated thermal intensity + gas concentration increase while pressure remained normal",
+    "rootCause": "Seal degradation on primary tank vapor barrier",
+    "correctiveAction": "Seal inspection and replacement with fluoropolymer barrier",
+    "resolutionOutcome": "Thermal and gas readings returned to 1.0× baseline within 2 hours post-repair"
+  },
+  {
+    "caseId": "INC-2026-007",
+    "asset": "Tank Farm 02",
+    "applicableAssetIds": ["TF-04"],
+    "incidentType": "Thermal deviation",
+    "similarity": 0.71,
+    "patternSimilarity": "71%",
+    "observedPattern": "Elevated thermal intensity (2.4×) with moderate localized gas accumulation",
+    "rootCause": "Pressure-vacuum valve seating irregularity and debris accumulation",
+    "correctiveAction": "P/V valve inspection, cleaning, and reseating",
+    "resolutionOutcome": "Eliminated vapor release path; nominal baseline restored"
+  },
+  {
+    "caseId": "INC-2024-052",
+    "asset": "Tank Farm 05",
+    "applicableAssetIds": ["TF-04"],
+    "incidentType": "Floating roof vapor leak",
+    "similarity": 0.68,
+    "patternSimilarity": "68%",
+    "observedPattern": "Elevated hydrocarbon gas near perimeter with moderate solar thermal gain",
+    "rootCause": "Secondary rim seal wear due to lateral roof drift",
+    "correctiveAction": "Secondary seal guide shoe alignment and seal gap closure",
+    "resolutionOutcome": "Fugitive emission drops below 2 ppm threshold"
+  },
+  {
+    "caseId": "INC-2025-031",
+    "asset": "Compressor C-12",
+    "applicableAssetIds": ["CP-17"],
+    "incidentType": "Vibration anomaly",
+    "similarity": 0.76,
+    "patternSimilarity": "76%",
+    "observedPattern": "Elevated vibration (3.6 mm/s) on stage-2 shaft while temperature remained nominal",
+    "rootCause": "Coupling element angular misalignment and wear",
+    "correctiveAction": "Laser coupling alignment and flexible disc pack replacement",
+    "resolutionOutcome": "Vibration reduced to 1.2 mm/s baseline"
+  },
+  {
+    "caseId": "INC-2024-099",
+    "asset": "Compressor C-08",
+    "applicableAssetIds": ["CP-17"],
+    "incidentType": "Bearing fatigue warning",
+    "similarity": 0.65,
+    "patternSimilarity": "65%",
+    "observedPattern": "Harmonic vibration spike on inboard drive bearing with nominal oil pressure",
+    "rootCause": "Lubricant thermal shear and micro-particle contamination",
+    "correctiveAction": "Bearing cartridge inspection and complete synthetic oil charge flush",
+    "resolutionOutcome": "Vibration harmonic cleared"
+  }
+]
