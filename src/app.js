@@ -101,7 +101,6 @@ function startApp() {
     ['IndustryPortal', initIndustryPortal],
     ['ThermalFingerprint', initThermalFingerprint],
     ['SimilarityEngine', initSimilarityEngine],
-    ['AgenticEscalation', initAgenticEscalation],
     ['RegulatoryESG', initRegulatoryESG],
     ['FireMapGlobe', initFireMapGlobe],
     ['Tactical3D', initTactical3D],
@@ -5551,7 +5550,6 @@ window.openPrototypeModule = function(tabId, title) {
     if (titleEl) titleEl.textContent = title;
   }
   // Initialize specific tab content if needed
-  if (tabId === 'tab-agentic') initAgenticEscalation();
   if (tabId === 'tab-regulatory') initRegulatoryESG();
   if (tabId === 'tab-similarity') initSimilarityEngine();
   if (tabId === 'tab-api') initApiFeeds();
