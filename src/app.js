@@ -263,81 +263,84 @@ function initDashboard() {
   });
   const topStates = Object.entries(stateCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
 
-  // Dynamic Priority Selection: Find highest-severity thermal event across all live hotspots
-  // Filter for genuine anomalies first (critical industrial, coal smoldering, or highest FRP)
+  // Dynamic Priority Selection: Find top 10 highest-severity thermal events across India
   const sortedFires = [...hs].sort((a, b) => {
-    const aCrit = (a.classification && (a.classification.includes('INDUSTRIAL') || a.classification.includes('CRITICAL') || a.classification.includes('ANOMALY'))) ? 1 : 0;
-    const bCrit = (b.classification && (b.classification.includes('INDUSTRIAL') || b.classification.includes('CRITICAL') || b.classification.includes('ANOMALY'))) ? 1 : 0;
+    const aCrit = (a.classification && (a.classification.includes('INDUSTRIAL') || a.classification.includes('CRITICAL') || a.classification.includes('ANOMALY') || a.classification.includes('COAL'))) ? 1 : 0;
+    const bCrit = (b.classification && (b.classification.includes('INDUSTRIAL') || b.classification.includes('CRITICAL') || b.classification.includes('ANOMALY') || b.classification.includes('COAL'))) ? 1 : 0;
     if (bCrit !== aCrit) return bCrit - aCrit;
     return (b.frp || 0) - (a.frp || 0);
   });
 
-  const topFire = sortedFires[0] || hs[0] || {};
-
-  let districtObj = null;
-  if (topFire.latitude && topFire.longitude && Array.isArray(INDIAN_DISTRICTS)) {
-    for (const d of INDIAN_DISTRICTS) {
-      if (d.bounds && topFire.longitude >= d.bounds[0] && topFire.latitude >= d.bounds[1] && topFire.longitude <= d.bounds[2] && topFire.latitude <= d.bounds[3]) {
-        districtObj = d;
-        break;
-      }
-    }
-    if (!districtObj) {
-      let minDist = Infinity;
+  const top10Incidents = sortedFires.slice(0, 10).map((h, idx) => {
+    let districtObj = null;
+    if (h.latitude && h.longitude && Array.isArray(INDIAN_DISTRICTS)) {
       for (const d of INDIAN_DISTRICTS) {
-        const dist = Math.hypot(d.lat - topFire.latitude, d.lon - topFire.longitude);
-        if (dist < minDist) {
-          minDist = dist;
-          if (dist < 1.5) districtObj = d;
+        if (d.bounds && h.longitude >= d.bounds[0] && h.latitude >= d.bounds[1] && h.longitude <= d.bounds[2] && h.latitude <= d.bounds[3]) {
+          districtObj = d;
+          break;
+        }
+      }
+      if (!districtObj) {
+        let minDist = Infinity;
+        for (const d of INDIAN_DISTRICTS) {
+          const dist = Math.hypot(d.lat - h.latitude, d.lon - h.longitude);
+          if (dist < minDist) {
+            minDist = dist;
+            if (dist < 1.5) districtObj = d;
+          }
         }
       }
     }
-  }
 
-  const districtName = districtObj ? districtObj.name : (topFire.district || 'Regional');
-  const stateName = districtObj ? districtObj.state : ((topFire.region ? topFire.region.split('/')[0].trim() : null) || getStateFromCoords(topFire.latitude, topFire.longitude) || 'India');
+    const distName = districtObj ? districtObj.name : (h.district || 'Regional');
+    const stName = districtObj ? districtObj.state : ((h.region ? h.region.split('/')[0].trim() : null) || getStateFromCoords(h.latitude, h.longitude) || 'India');
+    const frp = Number(h.frp) || 20;
+    const isCritical = frp >= 35 || (h.classification && (h.classification.includes('CRITICAL') || h.classification.includes('INDUSTRIAL')));
+    const priority = isCritical ? 'CRITICAL' : (frp >= 20 ? 'HIGH' : 'ELEVATED');
+    const priorityColor = priority === 'CRITICAL' ? '#ef4444' : (priority === 'HIGH' ? '#f97316' : '#f59e0b');
+    const priorityBadgeClass = priority === 'CRITICAL' ? 'badge-critical' : 'badge-warning';
 
-  const frpVal = Number(topFire.frp) || 25;
-  const isHighAlert = frpVal >= 35 || (topFire.classification && topFire.classification.includes('CRITICAL'));
-  const priorityLabel = isHighAlert ? 'PRIORITY: CRITICAL' : (frpVal >= 20 ? 'PRIORITY: HIGH' : 'PRIORITY: ELEVATED');
-  const priorityBadgeStyle = isHighAlert ? 'badge-critical' : 'badge-warning';
-  const ackStatus = (frpVal >= 30) ? 'IMMEDIATE ACTION REQUIRED' : 'AWAITING ACKNOWLEDGEMENT';
+    const title = h.facility_name 
+      ? h.facility_name 
+      : `${distName} (${stName}) Active Thermal Hotspot`;
 
-  const locationTitle = topFire.facility_name
-    ? topFire.facility_name
-    : `${districtName} (${stateName}) Active Thermal Hotspot`;
+    const sector = h.classification || h.fire_type || 'Satellite Thermal Detection';
+    const dev = Math.max(1.2, (frp / 11.5)).toFixed(1);
+    const pop = h.context_dossier?.population?.density_km2 
+      ? Math.round(h.context_dossier.population.density_km2 * 12.5) 
+      : Math.round(Math.max(1200, frp * 190));
 
-  const sectorText = topFire.classification || topFire.fire_type || 'Satellite Thermal Detection';
-  const confText = topFire.confidence || topFire.confidence_score || 94;
-  const devRatio = Math.max(1.2, (frpVal / 11.5)).toFixed(1);
+    const ackStatus = frp >= 30 ? 'IMMEDIATE ACTION REQUIRED' : 'AWAITING ACKNOWLEDGEMENT';
 
-  const popRisk = topFire.context_dossier?.population?.density_km2 
-    ? Math.round(topFire.context_dossier.population.density_km2 * 12.5) 
-    : Math.round(Math.max(1200, frpVal * 190));
+    const explanation = h.classification_explanation || (
+      h.facility_name
+        ? `Within operational bounds of ${h.facility_name} (${frp.toFixed(1)} MW FRP). Deviation ${dev}× above 90d baseline.`
+        : `Multi-sensor satellite radiometry detected ${frp.toFixed(1)} MW FRP in ${distName}, ${stName} (${dev}× baseline).`
+    );
 
-  const demoEvt = {
-    id: topFire.id || 'EVT-LIVE-01',
-    priority: priorityLabel,
-    facility: locationTitle,
-    sector: sectorText,
-    maxFrp: frpVal.toFixed(1),
-    avgFrp: (frpVal * 0.72).toFixed(1),
-    firstDetected: topFire.acq_date ? `${topFire.acq_date} ${topFire.acq_time || 'Recent Orbit'}` : 'Recent Pass',
-    latestDetected: topFire.satellite || 'Live Satellite Feed',
-    deviation: `${devRatio}×`,
-    confidence: confText,
-    popRisk: popRisk,
-    districtAction: ackStatus,
-    lat: Number(topFire.latitude) || 22.5,
-    lon: Number(topFire.longitude) || 78.5,
-    opticalStatus: `🛰️ ${topFire.satellite || 'Sentinel-2 L2A'} Available`
-  };
-
-  const dynamicExplanation = topFire.classification_explanation || (
-    topFire.facility_name
-      ? `Classified as ${sectorText} because radiometric thermal radiance (${demoEvt.maxFrp} MW FRP, ${topFire.brightness || 345} K) was detected within the operational perimeter of ${topFire.facility_name} in ${districtName}, ${stateName} by ${topFire.satellite || 'NASA VIIRS'}. Thermal energy is ${demoEvt.deviation} above regional 90-day baseline with ${confText}% algorithm confidence. Automated regulatory escalation protocol initiated.`
-      : `Classified as ${sectorText} by multi-sensor satellite radiometry (${demoEvt.maxFrp} MW FRP) in ${districtName}, ${stateName}. Thermal intensity is ${demoEvt.deviation} above regional 90-day background. Real-time atmospheric dispersion model indicates an estimated downwind impact zone with ~${popRisk.toLocaleString()} population at risk. Human verification advised.`
-  );
+    return {
+      rank: idx + 1,
+      id: h.id,
+      lat: Number(h.latitude) || 22.5,
+      lon: Number(h.longitude) || 78.5,
+      facility: title,
+      district: distName,
+      state: stName,
+      sector: sector,
+      frp: frp.toFixed(1),
+      deviation: `${dev}×`,
+      confidence: h.confidence || h.confidence_score || 94,
+      satellite: h.satellite || 'NASA VIIRS',
+      acqDate: h.acq_date || 'Today',
+      acqTime: h.acq_time || 'Recent Orbit',
+      priority: priority,
+      priorityColor: priorityColor,
+      priorityBadgeClass: priorityBadgeClass,
+      districtAction: ackStatus,
+      popRisk: pop,
+      explanation: explanation
+    };
+  });
 
   const now = new Date();
   const freshness = now.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
@@ -387,40 +390,62 @@ function initDashboard() {
       </div>
 
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
-        <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.22);border-radius:10px;padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="pulse-dot pulse-dot-red"></span>
-              <span style="font-size:0.7rem;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.05em;">ACTIVE HIGH-PRIORITY INCIDENT</span>
+              <span style="font-size:0.75rem;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.05em;">ACTIVE HIGH-PRIORITY INCIDENTS — TOP 10 ACROSS INDIA</span>
             </div>
-            <div style="display:flex;gap:6px;">
-              <span class="badge ${priorityBadgeStyle}" style="font-size:0.62rem;">${demoEvt.priority}</span>
-              <span class="badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);font-size:0.62rem;">${demoEvt.districtAction}</span>
-            </div>
+            <span class="badge badge-critical" style="font-size:0.62rem;">10 CRITICAL DETECTIONS</span>
           </div>
-          <div style="display:flex;align-items:flex-start;gap:16px;">
-            <div style="flex:1;">
-              <div style="font-size:0.62rem;color:#64748b;font-family:monospace;margin-bottom:2px;">${demoEvt.id}</div>
-              <div style="font-size:1rem;font-weight:700;color:#f1f5f9;margin-bottom:6px;">${demoEvt.facility}</div>
-              <div style="font-size:0.74rem;color:#94a3b8;margin-bottom:10px;">Sector: ${demoEvt.sector} · Confidence: ${demoEvt.confidence}% · Dynamic Satellite Classification</div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-                ${[['Max FRP','#f97316',demoEvt.maxFrp+' MW'],['Deviation','#ef4444',demoEvt.deviation],['Pop. At Risk','#fbbf24',demoEvt.popRisk.toLocaleString()],['Optical','#f59e0b',demoEvt.opticalStatus]].map(([l,c,v])=>`
-                  <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:8px;text-align:center;">
-                    <div style="font-size:0.6rem;color:#64748b;text-transform:uppercase;">${l}</div>
-                    <div style="font-size:${l==='Optical'?'0.65rem':'1.1rem'};font-weight:700;color:${c};font-family:monospace;">${v}</div>
-                  </div>`).join('')}
+
+          <div class="top10-incidents-scroll" style="max-height: 520px; overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 10px;">
+            ${top10Incidents.map(inc => `
+              <div style="background:rgba(15,23,42,0.65);border:1px solid rgba(255,255,255,0.06);border-left:3px solid ${inc.priorityColor};border-radius:8px;padding:12px 14px;transition:all 0.18s ease;"
+                   onmouseenter="this.style.background='rgba(30,41,59,0.8)';this.style.borderColor='rgba(56,189,248,0.4)';"
+                   onmouseleave="this.style.background='rgba(15,23,42,0.65)';this.style.borderColor='rgba(255,255,255,0.06)';">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="background:${inc.rank === 1 ? 'linear-gradient(135deg, #ef4444, #f97316)' : 'rgba(255,255,255,0.08)'};color:${inc.rank === 1 ? '#fff' : '#94a3b8'};font-weight:800;font-size:0.65rem;padding:2px 7px;border-radius:4px;font-family:monospace;">#${inc.rank}</span>
+                    <span style="font-size:0.65rem;color:#64748b;font-family:monospace;">${inc.id}</span>
+                    <span style="font-size:0.65rem;color:#94a3b8;">· ${inc.satellite} (${inc.acqTime})</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span class="badge ${inc.priorityBadgeClass}" style="font-size:0.58rem;padding:2px 6px;">${inc.priority}</span>
+                    <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);font-size:0.58rem;padding:2px 6px;">${inc.districtAction}</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.86rem;font-weight:700;color:#f1f5f9;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${inc.facility}">
+                      ${inc.facility}
+                    </div>
+                    <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:8px;">
+                      Sector: <span style="color:#cbd5e1;">${inc.sector}</span> · Confidence: <span style="color:#38bdf8;">${inc.confidence}%</span> · 📍 <span style="color:#94a3b8;">${inc.district}, ${inc.state}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;font-size:0.68rem;font-family:monospace;">
+                      <span style="color:#f97316;">🔥 Max FRP: <strong>${inc.frp} MW</strong></span>
+                      <span style="color:#ef4444;">📈 Dev: <strong>${inc.deviation}</strong></span>
+                      <span style="color:#fbbf24;">👥 Pop. at Risk: <strong>${inc.popRisk.toLocaleString()}</strong></span>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+                    <button class="btn btn-primary" style="font-size:0.68rem;padding:5px 10px;height:28px !important;line-height:28px !important;" onclick="window.selectHotspot('${inc.id}');window.scrollToGlobe();">
+                      View on Map →
+                    </button>
+                    <a href="https://maps.google.com/?q=${inc.lat},${inc.lon}" target="_blank" style="text-decoration:none;">
+                      <button class="btn btn-outline" style="font-size:0.66rem;padding:4px 8px;width:100%;height:26px !important;line-height:26px !important;">📍 Google Maps</button>
+                    </a>
+                  </div>
+                </div>
+
+                <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.04);font-size:0.67rem;color:#94a3b8;line-height:1.4;">
+                  <strong style="color:#cbd5e1;">AI Diagnosis:</strong> ${inc.explanation}
+                </div>
               </div>
-            </div>
-            <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
-              <button class="btn btn-primary" style="font-size:0.72rem;padding:7px 14px;" onclick="window.selectHotspot('${demoEvt.id}');window.scrollToGlobe();">View on Map →</button>
-              <a href="https://maps.google.com/?q=${demoEvt.lat},${demoEvt.lon}" target="_blank" style="text-decoration:none;">
-                <button class="btn btn-outline" style="font-size:0.72rem;padding:7px 14px;width:100%;">📍 Google Maps</button>
-              </a>
-              <button class="btn btn-outline" style="font-size:0.72rem;padding:7px 14px;border-color:rgba(239,68,68,0.4);color:#ef4444;" onclick="window.focusTopLiveFire()">🚨 Assign District</button>
-            </div>
-          </div>
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);font-size:0.72rem;color:#94a3b8;line-height:1.5;">
-            <strong style="color:#e2e8f0;">Model Explanation:</strong> ${dynamicExplanation}
+            `).join('')}
           </div>
         </div>
 
@@ -475,7 +500,7 @@ function initDashboard() {
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;">
           <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">📊 Classification Breakdown</div>
           ${[['Industrial Anomaly',anomalies,'#ef4444'],['Known Industrial',Math.max(0,industrial-anomalies),'#f59e0b'],['Forest Wildfire',wildfires,'#10b981'],['Agricultural',agro,'#eab308'],['Unregistered',unreg,'#8b5cf6']].map(([label,count,color])=>`
@@ -489,19 +514,6 @@ function initDashboard() {
             </div>`).join('')}
         </div>
 
-        <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;">
-          <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">⚡ Incident Queue</div>
-          ${[['EVT-IND-000184','CRITICAL','Demo Refinery A · Gujarat','Awaiting District Ack','#ef4444'],['EVT-IND-000091','HIGH','Singrauli Thermal · MP','Under Review','#f59e0b'],['EVT-IND-000047','MEDIUM','Punjab Agro Fires · PB','Closed — Agricultural','#94a3b8'],['EVT-IND-000012','HIGH','Unregistered Kiln · UP','Field Verification','#8b5cf6']].map(([id,priority,loc,status,color])=>`
-            <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;" onclick="switchTab('tab-map')">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                <span style="font-size:0.62rem;color:#64748b;font-family:monospace;">${id}</span>
-                <span style="font-size:0.6rem;font-weight:700;color:${color};">${priority}</span>
-              </div>
-              <div style="font-size:0.72rem;color:#e2e8f0;">${loc}</div>
-              <div style="font-size:0.66rem;color:#64748b;margin-top:2px;">${status}</div>
-            </div>`).join('')}
-        </div>
-
         <div style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.18);border-radius:10px;padding:16px;">
           <div style="font-size:0.7rem;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">⚠️ Analyst Guidance</div>
           <ul style="font-size:0.72rem;color:#94a3b8;line-height:1.7;padding-left:14px;margin:0;">
@@ -512,7 +524,7 @@ function initDashboard() {
             <li>Model classification is probabilistic — human override always available.</li>
           </ul>
           <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
-            <button class="btn btn-primary" style="width:100%;font-size:0.72rem;padding:7px;" onclick="switchTab('tab-map')">→ Open GIS Operations Map</button>
+            <button class="btn btn-primary" style="width:100%;font-size:0.72rem;padding:7px;" onclick="window.scrollToGlobe()">→ Back to 3D Globe Operations</button>
           </div>
         </div>
       </div>
