@@ -750,24 +750,96 @@ export class FireMapGlobe {
     });
   }
 
-  // 3. Initialize Hotspot Direct Symbol and Pulse Layers (Zero Clustering - Direct Category Symbols)
+  // 3. Initialize Hotspot Clustered and Direct Category Layers
   initHotspotLayers() {
-    if (this.map.getSource('fire-hotspots')) return;
+    if (this.map.getSource('fire-hotspots-clustered')) return;
 
     this.initFireTypeIcons();
 
-    // Disable clustering entirely: render all affected industries and categories directly
-    this.map.addSource('fire-hotspots', {
+    // Source 1: Clustered Nationwide Hotspots (Active by default for ALL fire types)
+    this.map.addSource('fire-hotspots-clustered', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+      cluster: true,
+      clusterMaxZoom: 13,
+      clusterRadius: 40
+    });
+
+    // Source 2: Direct Category Hotspots (Active when a specific fire category like FACTORY, WILDFIRE, etc. is selected)
+    this.map.addSource('fire-hotspots-direct', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: [] },
       cluster: false
     });
 
-    // A. Direct Individual Fire Outer Pulse
+    // ==========================================
+    // A. Clustered Nationwide Layers (Default ALL view)
+    // ==========================================
     this.map.addLayer({
-      id: 'unclustered-pulse',
+      id: 'clusters-glow',
       type: 'circle',
-      source: 'fire-hotspots',
+      source: 'fire-hotspots-clustered',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': [
+          'step', ['get', 'point_count'],
+          'rgba(245, 158, 11, 0.4)',
+          10, 'rgba(249, 115, 22, 0.45)',
+          50, 'rgba(239, 68, 68, 0.55)'
+        ],
+        'circle-radius': [
+          'step', ['get', 'point_count'],
+          18,
+          10, 24,
+          50, 32
+        ],
+        'circle-blur': 0.4
+      }
+    });
+
+    this.map.addLayer({
+      id: 'clusters',
+      type: 'circle',
+      source: 'fire-hotspots-clustered',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': [
+          'step', ['get', 'point_count'],
+          '#f59e0b',
+          10, '#f97316',
+          50, '#ef4444'
+        ],
+        'circle-radius': [
+          'step', ['get', 'point_count'],
+          10,
+          10, 14,
+          50, 18
+        ],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    this.map.addLayer({
+      id: 'cluster-count',
+      type: 'symbol',
+      source: 'fire-hotspots-clustered',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': '{point_count_abbreviated}',
+        'text-font': ['DIN Offc Pro Bold', 'Arial Unicode MS Bold'],
+        'text-size': 11
+      },
+      paint: {
+        'text-color': '#ffffff'
+      }
+    });
+
+    this.map.addLayer({
+      id: 'cluster-unclustered-pulse',
+      type: 'circle',
+      source: 'fire-hotspots-clustered',
+      filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': ['get', 'color'],
         'circle-radius': [
@@ -782,11 +854,11 @@ export class FireMapGlobe {
       }
     });
 
-    // B. Direct Individual Fire Core Base Ring
     this.map.addLayer({
-      id: 'unclustered-point',
+      id: 'cluster-unclustered-point',
       type: 'circle',
-      source: 'fire-hotspots',
+      source: 'fire-hotspots-clustered',
+      filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': ['get', 'color'],
         'circle-radius': [
@@ -801,11 +873,49 @@ export class FireMapGlobe {
       }
     });
 
-    // C. Direct Fire Distinct Logo Emblem Layer (renders direct category symbol for every point!)
+    // ==========================================
+    // B. Direct Category Layers (Visible when specific fire category selected)
+    // ==========================================
     this.map.addLayer({
-      id: 'unclustered-symbol',
+      id: 'direct-pulse',
+      type: 'circle',
+      source: 'fire-hotspots-direct',
+      paint: {
+        'circle-color': ['get', 'color'],
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          3, 6,
+          6, 9,
+          9, 14,
+          13, 20
+        ],
+        'circle-opacity': 0.42,
+        'circle-blur': 0.45
+      }
+    });
+
+    this.map.addLayer({
+      id: 'direct-point',
+      type: 'circle',
+      source: 'fire-hotspots-direct',
+      paint: {
+        'circle-color': ['get', 'color'],
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          3, 3,
+          6, 5,
+          9, 7.5,
+          13, 10.5
+        ],
+        'circle-stroke-width': 1.2,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    this.map.addLayer({
+      id: 'direct-symbol',
       type: 'symbol',
-      source: 'fire-hotspots',
+      source: 'fire-hotspots-direct',
       layout: {
         'icon-image': ['get', 'icon_id'],
         'icon-size': [
@@ -821,9 +931,38 @@ export class FireMapGlobe {
       }
     });
 
-    // Click individual hotspot: smoothly fly to point and open detailed dossier
+    // Click cluster: smoothly zoom in to break apart cluster points
+    const handleClusterClick = (e) => {
+      const features = this.map.queryRenderedFeatures(e.point, { layers: ['clusters', 'clusters-glow'] });
+      if (!features || !features.length) return;
+      const clusterId = features[0].properties.cluster_id;
+      const coords = features[0].geometry.coordinates;
+      const src = this.map.getSource('fire-hotspots-clustered');
+      if (src && typeof src.getClusterExpansionZoom === 'function') {
+        src.getClusterExpansionZoom(clusterId, (err, zoom) => {
+          if (err) return;
+          const targetZoom = Math.max(zoom + 1.8, 12);
+          this.map.flyTo({
+            center: coords,
+            zoom: targetZoom,
+            speed: 1.4,
+            curve: 1.1,
+            essential: true
+          });
+        });
+      }
+    };
+    this.map.on('click', 'clusters', handleClusterClick);
+    this.map.on('click', 'clusters-glow', handleClusterClick);
+
+    // Click individual hotspot (both in direct category mode and unclustered points)
     const handlePointClick = (e) => {
-      const features = this.map.queryRenderedFeatures(e.point, { layers: ['unclustered-symbol', 'unclustered-point', 'unclustered-pulse'] });
+      const features = this.map.queryRenderedFeatures(e.point, {
+        layers: [
+          'direct-symbol', 'direct-point', 'direct-pulse',
+          'cluster-unclustered-point', 'cluster-unclustered-pulse'
+        ]
+      });
       if (!features || !features.length) return;
       const f = features[0];
       const p = f.properties;
@@ -888,24 +1027,47 @@ export class FireMapGlobe {
       this.onHotspotSelect(raw);
     };
 
-    this.map.on('click', 'unclustered-symbol', handlePointClick);
-    this.map.on('click', 'unclustered-point', handlePointClick);
-    this.map.on('click', 'unclustered-pulse', handlePointClick);
+    this.map.on('click', 'direct-symbol', handlePointClick);
+    this.map.on('click', 'direct-point', handlePointClick);
+    this.map.on('click', 'direct-pulse', handlePointClick);
+    this.map.on('click', 'cluster-unclustered-point', handlePointClick);
+    this.map.on('click', 'cluster-unclustered-pulse', handlePointClick);
 
     // Pointer cursors
-    this.map.on('mouseenter', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-    this.map.on('mouseleave', 'unclustered-symbol', () => { this.map.getCanvas().style.cursor = ''; });
-    this.map.on('mouseenter', 'unclustered-point', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-    this.map.on('mouseleave', 'unclustered-point', () => { this.map.getCanvas().style.cursor = ''; });
-    this.map.on('mouseenter', 'unclustered-pulse', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-    this.map.on('mouseleave', 'unclustered-pulse', () => { this.map.getCanvas().style.cursor = ''; });
+    ['clusters', 'clusters-glow', 'direct-symbol', 'direct-point', 'cluster-unclustered-point'].forEach(layerId => {
+      this.map.on('mouseenter', layerId, () => { this.map.getCanvas().style.cursor = 'pointer'; });
+      this.map.on('mouseleave', layerId, () => { this.map.getCanvas().style.cursor = ''; });
+    });
   }
 
-  // Update hotspots dataset with authentic category colors
-  updateHotspots(hotspots = []) {
+  // Toggle visibility of clustered layers
+  setClusteredLayersVisibility(visible) {
+    const val = visible ? 'visible' : 'none';
+    ['clusters-glow', 'clusters', 'cluster-count', 'cluster-unclustered-pulse', 'cluster-unclustered-point'].forEach(layerId => {
+      if (this.map && this.map.getLayer(layerId)) {
+        this.map.setLayoutProperty(layerId, 'visibility', val);
+      }
+    });
+  }
+
+  // Toggle visibility of direct category symbol layers
+  setDirectLayersVisibility(visible) {
+    const val = visible ? 'visible' : 'none';
+    ['direct-pulse', 'direct-point', 'direct-symbol'].forEach(layerId => {
+      if (this.map && this.map.getLayer(layerId)) {
+        this.map.setLayoutProperty(layerId, 'visibility', val);
+      }
+    });
+  }
+
+  // Update hotspots dataset: clusters present for ALL, direct category symbols visible only when specific category selected
+  updateHotspots(hotspots = [], filterType = null) {
     this.activeHotspots = hotspots;
-    const source = this.map && this.map.getSource('fire-hotspots');
-    if (!source) return;
+    const currentFilter = (filterType || (window.state && window.state.filterType) || 'ALL').toUpperCase();
+
+    const clusteredSource = this.map && this.map.getSource('fire-hotspots-clustered');
+    const directSource = this.map && this.map.getSource('fire-hotspots-direct');
+    if (!clusteredSource || !directSource) return;
 
     const features = hotspots.map(h => {
       const typeKey = (h.fire_type || h.classification || 'WILDFIRE').toUpperCase();
@@ -959,10 +1121,26 @@ export class FireMapGlobe {
       };
     });
 
-    source.setData({
-      type: 'FeatureCollection',
-      features: features
-    });
+    const emptyFC = { type: 'FeatureCollection', features: [] };
+    const dataFC = { type: 'FeatureCollection', features: features };
+
+    const isSpecificCategory = currentFilter !== 'ALL';
+
+    if (isSpecificCategory) {
+      // Particular fire type selected:
+      // Show ALL individual points of this category with their direct symbol emblems (no clusters!)
+      clusteredSource.setData(emptyFC);
+      directSource.setData(dataFC);
+      this.setClusteredLayersVisibility(false);
+      this.setDirectLayersVisibility(true);
+    } else {
+      // ALL fire types selected (default view):
+      // Clusters are present, individual category symbols are hidden
+      directSource.setData(emptyFC);
+      clusteredSource.setData(dataFC);
+      this.setDirectLayersVisibility(false);
+      this.setClusteredLayersVisibility(true);
+    }
   }
 
   // =========================================================================

@@ -84,6 +84,7 @@ const state = {
   plumeLayer: null,
   bufferLayer: null
 };
+window.state = state;
 
 // ==========================================
 // INITIALIZATION
@@ -1407,7 +1408,7 @@ function renderMapLayers() {
   if (countLabel) countLabel.innerText = filtered.length;
 
   if (window.fireMapGlobe) {
-    window.fireMapGlobe.updateHotspots(filtered);
+    window.fireMapGlobe.updateHotspots(filtered, state.filterType);
   }
   const timelineCount = document.getElementById('timelineCountLabel');
   if (timelineCount) timelineCount.textContent = `Syncing ${filtered.length} active anomalies`;
