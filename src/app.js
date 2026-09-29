@@ -100,6 +100,8 @@ function startApp() {
     ['DemoFacility', initDemoFacility],
     ['IndustryPortal', initIndustryPortal],
     ['ThermalFingerprint', initThermalFingerprint],
+    ['PlumeTool', initPlumeTool],
+    ['SatelliteTool', initSatelliteTool],
     ['IoTTelemetry', initIoTTelemetry],
     ['SimilarityEngine', initSimilarityEngine],
     ['AgenticEscalation', initAgenticEscalation],
@@ -639,45 +641,6 @@ function initDashboard() {
           <!-- Dynamic Facility Historical Summary Card -->
         </div>
       </div>
-
-      <!-- EXPANDED DRISHTI NATIONAL INTELLIGENCE & OPERATIONAL TOOLS SUITE -->
-      <div id="dash-intelligence-tools-section" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.15rem;">🛠️</span>
-              <span style="font-size: 0.88rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--fm-font-display, var(--font-main));">DRISHTI National Intelligence &amp; Operational Decision Support Tools</span>
-              <span class="badge badge-cyan" style="font-size: 0.62rem; font-family: var(--fm-font-mono, var(--font-mono));">COMMAND DECISION SUITE</span>
-            </div>
-            <p style="font-size: 0.74rem; color: #94a3b8; margin: 4px 0 0 0; font-family: var(--fm-font-body, var(--font-main));">
-              Direct command access to atmospheric plume dispersion physics, statutory CPCB damage liabilities, multi-sensor constellation health, industrial IoT SCADA telemetry, and automated emergency escalation protocols.
-            </p>
-          </div>
-          <!-- Intelligence Tool Selection Tabs -->
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;" id="dashIntelToolPills">
-            <button class="btn ${state.dashIntelTool === 'plume' || !state.dashIntelTool ? 'btn-primary' : 'btn-outline'} btn-34 dash-tool-pill" onclick="window.switchDashIntelTool('plume')" style="font-size: 0.7rem; padding: 4px 11px; height: 28px; font-family: var(--fm-font-body, var(--font-main));">
-              💨 Plume Dispersion
-            </button>
-            <button class="btn ${state.dashIntelTool === 'cpcb' ? 'btn-primary' : 'btn-outline'} btn-34 dash-tool-pill" onclick="window.switchDashIntelTool('cpcb')" style="font-size: 0.7rem; padding: 4px 11px; height: 28px; font-family: var(--fm-font-body, var(--font-main));">
-              ⚖️ CPCB EC Calculator
-            </button>
-            <button class="btn ${state.dashIntelTool === 'satellite' ? 'btn-primary' : 'btn-outline'} btn-34 dash-tool-pill" onclick="window.switchDashIntelTool('satellite')" style="font-size: 0.7rem; padding: 4px 11px; height: 28px; font-family: var(--fm-font-body, var(--font-main));">
-              🛰️ Constellation Health
-            </button>
-            <button class="btn ${state.dashIntelTool === 'scada' ? 'btn-primary' : 'btn-outline'} btn-34 dash-tool-pill" onclick="window.switchDashIntelTool('scada')" style="font-size: 0.7rem; padding: 4px 11px; height: 28px; font-family: var(--fm-font-body, var(--font-main));">
-              ⚡ IoT SCADA Sensors
-            </button>
-            <button class="btn ${state.dashIntelTool === 'escalation' ? 'btn-primary' : 'btn-outline'} btn-34 dash-tool-pill" onclick="window.switchDashIntelTool('escalation')" style="font-size: 0.7rem; padding: 4px 11px; height: 28px; font-family: var(--fm-font-body, var(--font-main));">
-              🚨 Incident Escalation
-            </button>
-          </div>
-        </div>
-
-        <!-- Active Tool Dynamic Content Container -->
-        <div id="dash-intel-tool-content">
-          <!-- Populated dynamically by window.renderDashIntelTool() -->
-        </div>
-      </div>
     </div>
   `;
 
@@ -694,11 +657,6 @@ function initDashboard() {
   // Populate All Affected Incidents List with direct category badges
   if (typeof window.renderDashboardIncidentCards === 'function') {
     window.renderDashboardIncidentCards(state.dashIncidentFilter || 'FACTORY');
-  }
-
-  // Render initial intelligence tool
-  if (typeof window.switchDashIntelTool === 'function') {
-    window.switchDashIntelTool(state.dashIntelTool || 'plume');
   }
 }
 
@@ -4496,398 +4454,216 @@ window.updateDashboardIndustryCard = async function(selectedFacId) {
             <div style="font-size: 1.3rem; font-weight: 700; color: #f97316; font-family: var(--fm-font-mono, var(--font-mono));">${livePeakFrp > 0 ? livePeakFrp.toFixed(1) + ' MW' : baseline.toFixed(1) + ' MW'}</div>
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-            <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Baseline Flaring Ratio</div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: ${ratio > 1.8 ? '#ef4444' : '#34d399'}; font-family: var(--fm-font-mono, var(--font-mono));">${ratio}× Baseline</div>
+            <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Facility Flare Status</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #10b981; font-family: var(--fm-font-mono, var(--font-mono));">Nominal</div>
           </div>
         </div>
       `;
     }
   }
-};
+}
 
 // ==========================================
-// 12B. EXPANDED DRISHTI INTELLIGENCE TOOLS SUITE
+// 12B. DEDICATED INTELLIGENCE TOOLS (MODULES HUB)
 // ==========================================
-window.switchDashIntelTool = function(toolKey) {
-  state.dashIntelTool = toolKey;
+export function initPlumeTool() {
+  const container = document.getElementById('plume-container');
+  if (!container) return;
+  const windSpeed = state.windSpeed || 14;
+  const windBearing = state.windBearing || 240;
+  const emissionQ = 35; // MW / g/s proxy
+  const stackH = 45; // meters
 
-  // Update tab pill styles
-  const pills = document.querySelectorAll('#dashIntelToolPills .dash-tool-pill');
-  pills.forEach(p => {
-    p.classList.remove('btn-primary');
-    p.classList.add('btn-outline');
-  });
+  const downwindKm = ((emissionQ / Math.max(1, windSpeed)) * 2.8).toFixed(1);
+  const evacKm = (downwindKm * 0.65).toFixed(1);
+  const hazardBearing = ((windBearing + 180) % 360).toFixed(0);
+  const peakPpm = ((emissionQ * 12.5) / Math.max(5, windSpeed)).toFixed(1);
 
-  const activePill = Array.from(pills).find(p => p.getAttribute('onclick')?.includes(`'${toolKey}'`));
-  if (activePill) {
-    activePill.classList.remove('btn-outline');
-    activePill.classList.add('btn-primary');
-  }
+  container.innerHTML = `
+    <!-- Page Header -->
+    <div class="page-header" style="margin-bottom: 20px;">
+      <div class="page-title-group">
+        <div class="page-title-badge-row">
+          <span class="badge badge-cyan">ATMOSPHERIC DISPERSION ENGINE</span>
+          <span class="badge badge-success">OPEN-METEO GFS REAL-TIME</span>
+        </div>
+        <h2 class="page-title" style="font-family: var(--fm-font-display, var(--font-main));">💨 Atmospheric Gaussian Plume &amp; Toxic Smoke Dispersion Model</h2>
+        <p class="page-subtitle" style="font-family: var(--fm-font-body, var(--font-main));">
+          Simulate chemical vapor and thermal smoke plume dispersion downwind using real-time atmospheric wind fields, effective stack height, and Pasquill-Gifford turbulence classes.
+        </p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary" style="font-family: var(--fm-font-body, var(--font-main));" onclick="window.projectDashPlumeOnGlobe()">
+          <i class="fa-solid fa-earth-asia"></i> Project Plume Vector on 3D Globe
+        </button>
+      </div>
+    </div>
 
-  window.renderDashIntelTool(toolKey);
-};
+    <!-- 4 KPI Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 0.68rem; color: #94a3b8; text-transform: uppercase;">Downwind Plume Length</div>
+        <div id="dashPlumeLengthVal" style="font-size: 1.6rem; font-weight: 700; color: #f97316; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
+          ${downwindKm} km
+        </div>
+        <div style="font-size: 0.66rem; color: #64748b;">Ground Level 50 µg/m³ boundary</div>
+      </div>
 
-window.renderDashIntelTool = function(toolKey) {
-  const container = document.getElementById('dash-intel-tool-content');
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 0.68rem; color: #94a3b8; text-transform: uppercase;">Downwind Hazard Axis</div>
+        <div id="dashPlumeBearingVal" style="font-size: 1.6rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
+          ${hazardBearing}° (${windBearing}° wind)
+        </div>
+        <div style="font-size: 0.66rem; color: #34d399;">Direct downstream vector</div>
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 0.68rem; color: #94a3b8; text-transform: uppercase;">Peak Ground Concentration</div>
+        <div id="dashPlumeConcVal" style="font-size: 1.6rem; font-weight: 700; color: #ef4444; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
+          ${peakPpm} µg/m³
+        </div>
+        <div style="font-size: 0.66rem; color: #f59e0b;">CPCB NAAQS Exceedance Threshold</div>
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 0.68rem; color: #94a3b8; text-transform: uppercase;">Evacuation Safety Perimeter</div>
+        <div id="dashPlumeEvacVal" style="font-size: 1.6rem; font-weight: 700; color: #e11d48; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
+          ${evacKm} km Radius
+        </div>
+        <div style="font-size: 0.66rem; color: #cbd5e1;">Immediate human shelter perimeter</div>
+      </div>
+    </div>
+
+    <!-- Interactive Physics Sliders -->
+    <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 20px;">
+      <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; margin-bottom: 14px; font-family: var(--fm-font-display, var(--font-main));">
+        ⚙️ Atmospheric Plume Dispersion Parameters
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.76rem; margin-bottom: 6px;">
+            <span style="color: #94a3b8;">Thermal Release / FRP Intensity:</span>
+            <strong id="dashPlumeEmissionLabel" style="color: #f97316; font-family: var(--fm-font-mono, var(--font-mono));">${emissionQ} MW</strong>
+          </div>
+          <input type="range" min="5" max="120" step="5" value="${emissionQ}" id="dash-plume-emission" style="width: 100%; accent-color: #f97316;" oninput="window.updateDashPlumeModel()">
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.76rem; margin-bottom: 6px;">
+            <span style="color: #94a3b8;">Effective Stack Release Height:</span>
+            <strong id="dashPlumeHeightLabel" style="color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono));">${stackH} m</strong>
+          </div>
+          <input type="range" min="10" max="150" step="5" value="${stackH}" id="dash-plume-height" style="width: 100%; accent-color: #38bdf8;" oninput="window.updateDashPlumeModel()">
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.76rem; margin-bottom: 6px;">
+            <span style="color: #94a3b8;">Atmospheric Stability:</span>
+            <strong id="dashPlumeStabilityLabel" style="color: #34d399; font-family: var(--fm-font-mono, var(--font-mono));">Class D (Neutral)</strong>
+          </div>
+          <select id="dash-plume-stability" class="form-input" style="width: 100%; font-size: 0.74rem; padding: 6px 10px; background: #020617; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;" onchange="window.updateDashPlumeModel()">
+            <option value="A">Class A (Extremely Unstable / High Turbulence)</option>
+            <option value="B">Class B (Moderately Unstable)</option>
+            <option value="C">Class C (Slightly Unstable)</option>
+            <option value="D" selected>Class D (Neutral / Moderate Wind)</option>
+            <option value="E">Class E (Slightly Stable / Inversion)</option>
+            <option value="F">Class F (Moderately Stable / Night Clamping)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function initSatelliteTool() {
+  const container = document.getElementById('satellite-container');
   if (!container) return;
 
-  if (toolKey === 'plume') {
-    const windSpeed = state.windSpeed || 14;
-    const windBearing = state.windBearing || 240;
-    const emissionQ = 35; // MW / g/s proxy
-    const stackH = 45; // meters
-
-    const downwindKm = ((emissionQ / Math.max(1, windSpeed)) * 2.8).toFixed(1);
-    const evacKm = (downwindKm * 0.65).toFixed(1);
-    const hazardBearing = ((windBearing + 180) % 360).toFixed(0);
-    const peakPpm = ((emissionQ * 12.5) / Math.max(5, windSpeed)).toFixed(1);
-
-    container.innerHTML = `
-      <div style="background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 18px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-display, var(--font-main));">
-              💨 Atmospheric Gaussian Plume &amp; Toxic Smoke Dispersion Model
-            </span>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              Coupled with real-time Open-Meteo boundary layer wind fields and Pasquill-Gifford dispersion coefficients.
-            </div>
-          </div>
-          <button class="btn btn-primary btn-34" style="font-size: 0.7rem; padding: 6px 14px; font-family: var(--fm-font-body, var(--font-main));" onclick="window.projectDashPlumeOnGlobe()">
-            🚀 Project Plume Vector on 3D Globe
-          </button>
+  container.innerHTML = `
+    <!-- Page Header -->
+    <div class="page-header" style="margin-bottom: 20px;">
+      <div class="page-title-group">
+        <div class="page-title-badge-row">
+          <span class="badge badge-success">6 ORBITAL PLATFORMS ONLINE</span>
+          <span class="badge badge-cyan">NASA &middot; ISRO &middot; EUMETSAT &middot; COPERNICUS</span>
         </div>
+        <h2 class="page-title" style="font-family: var(--fm-font-display, var(--font-main));">🛰️ Multi-Sensor Satellite Radiometry &amp; Constellation Telemetry</h2>
+        <p class="page-subtitle" style="font-family: var(--fm-font-body, var(--font-main));">
+          Real-time orbital tracking, sensor health, and radiometric band coverage over the Indian subcontinent.
+        </p>
+      </div>
+    </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 16px;">
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-            <div style="font-size: 0.66rem; color: #94a3b8; text-transform: uppercase;">Downwind Plume Length</div>
-            <div id="dashPlumeLengthVal" style="font-size: 1.4rem; font-weight: 700; color: #f97316; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
-              ${downwindKm} km
-            </div>
-            <div style="font-size: 0.64rem; color: #64748b;">Ground Level 50 µg/m³ boundary</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-            <div style="font-size: 0.66rem; color: #94a3b8; text-transform: uppercase;">Downwind Hazard Axis</div>
-            <div id="dashPlumeBearingVal" style="font-size: 1.4rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
-              ${hazardBearing}° (${windBearing}° wind)
-            </div>
-            <div style="font-size: 0.64rem; color: #34d399;">Direct downstream vector</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-            <div style="font-size: 0.66rem; color: #94a3b8; text-transform: uppercase;">Peak Ground Concentration</div>
-            <div id="dashPlumeConcVal" style="font-size: 1.4rem; font-weight: 700; color: #ef4444; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
-              ${peakPpm} µg/m³
-            </div>
-            <div style="font-size: 0.64rem; color: #f59e0b;">CPCB NAAQS Exceedance Threshold</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
-            <div style="font-size: 0.66rem; color: #94a3b8; text-transform: uppercase;">Evacuation Safety Perimeter</div>
-            <div id="dashPlumeEvacVal" style="font-size: 1.4rem; font-weight: 700; color: #e11d48; font-family: var(--fm-font-mono, var(--font-mono)); margin: 4px 0 2px 0;">
-              ${evacKm} km Radius
-            </div>
-            <div style="font-size: 0.64rem; color: #cbd5e1;">Immediate human shelter perimeter</div>
-          </div>
+    <!-- Constellation Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;">
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #38bdf8; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">NASA NOAA-20 (JPSS-1)</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
         </div>
-
-        <!-- Interactive Physics Sliders -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; background: rgba(0,0,0,0.3); padding: 12px 14px; border-radius: 6px;">
-          <div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px;">
-              <span style="color: #94a3b8;">Thermal Release / FRP Intensity:</span>
-              <strong id="dashPlumeEmissionLabel" style="color: #f97316; font-family: var(--fm-font-mono, var(--font-mono));">${emissionQ} MW</strong>
-            </div>
-            <input type="range" min="5" max="120" step="5" value="${emissionQ}" id="dash-plume-emission" style="width: 100%; accent-color: #f97316;" oninput="window.updateDashPlumeModel()">
-          </div>
-
-          <div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px;">
-              <span style="color: #94a3b8;">Effective Stack Release Height:</span>
-              <strong id="dashPlumeHeightLabel" style="color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono));">${stackH} m</strong>
-            </div>
-            <input type="range" min="10" max="150" step="5" value="${stackH}" id="dash-plume-height" style="width: 100%; accent-color: #38bdf8;" oninput="window.updateDashPlumeModel()">
-          </div>
-
-          <div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px;">
-              <span style="color: #94a3b8;">Atmospheric Stability:</span>
-              <strong id="dashPlumeStabilityLabel" style="color: #34d399; font-family: var(--fm-font-mono, var(--font-mono));">Class D (Neutral)</strong>
-            </div>
-            <select id="dash-plume-stability" class="form-input" style="width: 100%; font-size: 0.72rem; padding: 4px 8px; background: #020617; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;" onchange="window.updateDashPlumeModel()">
-              <option value="A">Class A (Extremely Unstable / High Turbulence)</option>
-              <option value="B">Class B (Moderately Unstable)</option>
-              <option value="C">Class C (Slightly Unstable)</option>
-              <option value="D" selected>Class D (Neutral / Moderate Wind)</option>
-              <option value="E">Class E (Slightly Stable / Inversion)</option>
-              <option value="F">Class F (Moderately Stable / Night Clamping)</option>
-            </select>
-          </div>
+        <div style="font-size: 0.76rem; color: #cbd5e1;">VIIRS 375m I-Band (I4: 3.74µm, I5: 11.45µm)</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          Orbit: Sun-Synchronous Polar 824 km &middot; Local Passes: ~13:30 / ~01:30 IST &middot; FRP Radiance Precision &plusmn;5%
         </div>
       </div>
-    `;
 
-  } else if (toolKey === 'cpcb') {
-    const inputs = state.cpcbInputs || {
-      pollutionIndex: 80,
-      violationDaysN: 24,
-      rupeeFactorR: 250,
-      scaleFactorS: 1.5,
-      locationFactorLF: 1.25,
-    };
-    const cpcbResult = calculateCPCBExposure(inputs);
-
-    container.innerHTML = `
-      <div style="background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 18px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #c084fc; font-family: var(--fm-font-display, var(--font-main));">
-              ⚖️ Statutory CPCB Environmental Compensation (EC) Liability Calculator
-            </span>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              Statutory NGT O.A. 593/2017 &amp; Section 15 Environment (Protection) Act, 1986: <code>EC = PI &times; N &times; R &times; S &times; LF</code>
-            </div>
-          </div>
-          <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); font-size: 0.65rem; font-family: var(--fm-font-mono, var(--font-mono));">
-            NGT PRINCIPAL BENCH STANDARD
-          </span>
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #38bdf8; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">NASA NOAA-21 (JPSS-2)</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; align-items: center; margin-bottom: 14px;">
-          <!-- Big Output Display -->
-          <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; text-align: center;">
-            <div style="font-size: 0.68rem; color: #94a3b8; text-transform: uppercase;">Statutory Assessed Penalty</div>
-            <div id="dashCpcbFormattedINR" style="font-size: 1.8rem; font-weight: 800; color: #4ade80; font-family: var(--fm-font-mono, var(--font-mono)); margin: 6px 0;">
-              ${cpcbResult.formattedINR}
-            </div>
-            <div style="font-size: 0.66rem; color: #64748b;">Direct financial liability for SPCB summons</div>
-          </div>
-
-          <!-- Formula Variable Sliders -->
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 3px;">
-                <span style="color: #94a3b8;">Pollution Index (PI) — Red=80, Orange=50, Green=30:</span>
-                <strong id="dashCpcbPiVal" style="color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono));">${inputs.pollutionIndex}</strong>
-              </div>
-              <input type="range" min="30" max="80" step="10" value="${inputs.pollutionIndex}" id="dash-cpcb-pi" style="width: 100%; accent-color: #38bdf8;" oninput="window.updateDashCpcbCalc()">
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 3px;">
-                <span style="color: #94a3b8;">Violation Days (N) [Satellite Verified Persistence]:</span>
-                <strong id="dashCpcbNVal" style="color: #f97316; font-family: var(--fm-font-mono, var(--font-mono));">${inputs.violationDaysN} days</strong>
-              </div>
-              <input type="range" min="1" max="90" value="${inputs.violationDaysN}" id="dash-cpcb-n" style="width: 100%; accent-color: #f97316;" oninput="window.updateDashCpcbCalc()">
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 3px;">
-                <span style="color: #94a3b8;">Scale Factor (S) — Large=1.5, Medium=1.0, Small=0.5:</span>
-                <strong id="dashCpcbSVal" style="color: #10b981; font-family: var(--fm-font-mono, var(--font-mono));">${inputs.scaleFactorS}</strong>
-              </div>
-              <input type="range" min="0.5" max="1.5" step="0.5" value="${inputs.scaleFactorS}" id="dash-cpcb-s" style="width: 100%; accent-color: #10b981;" oninput="window.updateDashCpcbCalc()">
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 3px;">
-                <span style="color: #94a3b8;">Location Factor (LF) — Pop >1M=1.5, 0.5-1M=1.25, <0.5M=1.0:</span>
-                <strong id="dashCpcbLfVal" style="color: #c084fc; font-family: var(--fm-font-mono, var(--font-mono));">${inputs.locationFactorLF}</strong>
-              </div>
-              <input type="range" min="1.0" max="1.5" step="0.25" value="${inputs.locationFactorLF}" id="dash-cpcb-lf" style="width: 100%; accent-color: #c084fc;" oninput="window.updateDashCpcbCalc()">
-            </div>
-          </div>
+        <div style="font-size: 0.76rem; color: #cbd5e1;">VIIRS 375m High-Resolution Thermal</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          Orbit: 50-minute staggered half-orbit &middot; Dual-sensor cross-validation active with NOAA-20
         </div>
       </div>
-    `;
 
-  } else if (toolKey === 'satellite') {
-    container.innerHTML = `
-      <div style="background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 18px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-display, var(--font-main));">
-              🛰️ Multi-Sensor Satellite Radiometry &amp; Constellation Telemetry
-            </span>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              Active orbital assets providing near-real-time thermal radiance feeds over India.
-            </div>
-          </div>
-          <span class="badge badge-success" style="font-size: 0.65rem; font-family: var(--fm-font-mono, var(--font-mono));">
-            6 CONSTELLATIONS SYNCED
-          </span>
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #f97316; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">ISRO INSAT-3DR</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
         </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #38bdf8; font-size: 0.78rem;">NASA NOAA-20 (JPSS-1)</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">VIIRS 375m I-Band (I4: 3.74µm, I5: 11.45µm)</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">Orbit: Polar 824 km &middot; Local Pass: ~13:30 / ~01:30 IST &middot; FRP Precision &plusmn;5%</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #38bdf8; font-size: 0.78rem;">NASA NOAA-21 (JPSS-2)</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">VIIRS 375m High-Resolution Thermal</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">Orbit: 50-minute staggered half-orbit &middot; Dual-sensor cross-validation active</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #f97316; font-size: 0.78rem;">ISRO INSAT-3DR</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Imager 4km MIR (3.80–4.00 µm)</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">Geostationary: 74.0°E Equatorial &middot; 15-Minute Continuous Flash Cadence</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #a855f7; font-size: 0.78rem;">EUMETSAT SEVIRI (Meteosat-9)</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">High-Rate SEVIRI 3km MIR (IR3.9)</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">Geostationary: 45.5°E IODC Slot &middot; 15-Minute Thermal Radiance Stream</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #34d399; font-size: 0.78rem;">Copernicus Sentinel-2 MSI</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Multi-Spectral 10m L2A B8A/B11/B12</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">Optical validation chip &middot; NBR Burn Severity &middot; Microsoft Planetary Computer STAC</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #ef4444; font-size: 0.78rem;">Suomi-NPP VIIRS</strong>
-              <span class="badge badge-success" style="font-size: 0.58rem;">ONLINE</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Baseline 375m Active Fire Detection</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px;">12-year continuous historical baseline reference dataset for India</div>
-          </div>
+        <div style="font-size: 0.76rem; color: #cbd5e1;">Imager 4km MIR (3.80–4.00 µm)</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          Geostationary: 74.0°E Equatorial Slot &middot; 15-Minute Continuous Flash Cadence across India
         </div>
       </div>
-    `;
 
-  } else if (toolKey === 'scada') {
-    container.innerHTML = `
-      <div style="background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 18px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #f59e0b; font-family: var(--fm-font-display, var(--font-main));">
-              ⚡ Industrial IoT &amp; Process Safety SCADA Telemetry Stream
-            </span>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              Continuous Emission Monitoring System (OCEMS) live feed interface for high-temperature stacks.
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="pulse-dot pulse-dot-green"></span>
-            <span style="font-size: 0.68rem; color: #34d399; font-family: var(--fm-font-mono, var(--font-mono));">OCEMS UPLINK CONNECTED</span>
-          </div>
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #a855f7; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">EUMETSAT SEVIRI (Meteosat-9)</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
         </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Flare Header Pressure</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">2.42 bar</div>
-            <div style="font-size: 0.62rem; color: #34d399;">Normal Operating Range (1.5–3.0)</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Combustion Zone Temp</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #f97316; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">1,142 °C</div>
-            <div style="font-size: 0.62rem; color: #34d399;">Optimal Thermal Destruction</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Stack Flue SO₂</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #eab308; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">184 mg/Nm³</div>
-            <div style="font-size: 0.62rem; color: #cbd5e1;">CPCB Norm: &lt;200 mg/Nm³</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Flue Gas NOx</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #34d399; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">142 mg/Nm³</div>
-            <div style="font-size: 0.62rem; color: #cbd5e1;">CPCB Norm: &lt;300 mg/Nm³</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Stack Smoke Opacity</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #a855f7; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">14.2%</div>
-            <div style="font-size: 0.62rem; color: #34d399;">Optical Limit: &lt;20% Ringelmann</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="font-size: 0.64rem; color: #94a3b8; text-transform: uppercase;">Perimeter Combustible LEL</div>
-            <div style="font-size: 1.35rem; font-weight: 700; color: #38bdf8; font-family: var(--fm-font-mono, var(--font-mono)); margin: 3px 0;">4.1% LEL</div>
-            <div style="font-size: 0.62rem; color: #34d399;">Safe Atmosphere (&lt;10% Alert)</div>
-          </div>
+        <div style="font-size: 0.76rem; color: #cbd5e1;">High-Rate SEVIRI 3km MIR (IR3.9)</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          Geostationary: 45.5°E Indian Ocean Data Coverage (IODC) Slot &middot; 15-Minute Thermal Radiance Stream
         </div>
       </div>
-    `;
 
-  } else if (toolKey === 'escalation') {
-    container.innerHTML = `
-      <div style="background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 18px; font-family: var(--fm-font-body, var(--font-main));">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #ef4444; font-family: var(--fm-font-display, var(--font-main));">
-              🚨 Automated Incident Escalation Protocols &amp; Zonal Summons
-            </span>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              Multi-agency notification hierarchy with automated CAP-XML dispatch and emergency audit logging.
-            </div>
-          </div>
-          <button class="btn btn-primary" style="font-size: 0.72rem; padding: 6px 14px; background: #dc2626; border-color: #ef4444;" onclick="window.triggerDashEscalationSim()">
-            ⚡ Trigger Simulated Zonal Dispatch
-          </button>
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #34d399; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">Copernicus Sentinel-2 MSI</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
         </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-bottom: 12px;">
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #f97316; font-size: 0.76rem;">Tier 1: SPCB Zonal Office</strong>
-              <span class="badge badge-warning" style="font-size: 0.58rem;">DISPATCH READY</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Air Act 1981 Section 31A Inspection Order</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 3px;">Auto-dispatches satellite coordinates &amp; thermal persistence curve to regional field officer.</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #ef4444; font-size: 0.76rem;">Tier 2: District Magistrate &amp; Collector</strong>
-              <span class="badge badge-critical" style="font-size: 0.58rem;">PRIORITY HIGH</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Disaster Management Act 2005 Section 30</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 3px;">Issues immediate evacuation advisory for 2.5 km perimeter if smoke plume exceeds NAAQS.</div>
-          </div>
-
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <strong style="color: #38bdf8; font-size: 0.76rem;">Tier 3: NDRF 8th Battalion Hazmat</strong>
-              <span class="badge badge-cyan" style="font-size: 0.58rem;">STANDBY</span>
-            </div>
-            <div style="font-size: 0.7rem; color: #cbd5e1;">Chemical / Industrial Contingency Team</div>
-            <div style="font-size: 0.64rem; color: #64748b; margin-top: 3px;">Pre-authorized chemical hazard containment unit mobilized on confirmation of exceedance.</div>
-          </div>
-        </div>
-
-        <div id="dashEscalationLog" style="background: rgba(0, 0, 0, 0.35); border-radius: 6px; padding: 8px 12px; font-size: 0.68rem; color: #94a3b8; font-family: var(--fm-font-mono, var(--font-mono));">
-          [ESCALATION AUDIT LOG] Automated dispatch engines standing by &middot; Silence-trigger countdown: 180s on unacknowledged critical anomalies.
+        <div style="font-size: 0.76rem; color: #cbd5e1;">Multi-Spectral 10m L2A B8A/B11/B12</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          Optical validation chip &middot; NBR Burn Severity &middot; Microsoft Planetary Computer STAC
         </div>
       </div>
-    `;
-  }
-};
+
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #ef4444; font-size: 0.95rem; font-family: var(--fm-font-display, var(--font-main));">Suomi-NPP VIIRS</strong>
+          <span class="badge badge-success" style="font-size: 0.62rem;">ONLINE</span>
+        </div>
+        <div style="font-size: 0.76rem; color: #cbd5e1;">Baseline 375m Active Fire Detection</div>
+        <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+          12-year continuous historical baseline reference dataset for India
+        </div>
+      </div>
+    </div>
+  `;
+}
 
 window.updateDashPlumeModel = function() {
   const emissionEl = document.getElementById('dash-plume-emission');
@@ -6029,6 +5805,15 @@ window.openPrototypeModule = function(tabId, title) {
     const titleEl = document.getElementById('module-overlay-title');
     if (titleEl) titleEl.textContent = title;
   }
+  // Initialize specific tab content if needed
+  if (tabId === 'tab-plume') initPlumeTool();
+  if (tabId === 'tab-satellite') initSatelliteTool();
+  if (tabId === 'tab-iot') initIoTTelemetry();
+  if (tabId === 'tab-agentic') initAgenticEscalation();
+  if (tabId === 'tab-regulatory') initRegulatoryESG();
+  if (tabId === 'tab-similarity') initSimilarityEngine();
+  if (tabId === 'tab-api') initApiFeeds();
+
   // Trigger existing tab click logic
   const tabBtn = document.querySelector(`.nav-tab-btn[data-tab="${tabId}"]`);
   if (tabBtn) tabBtn.click();

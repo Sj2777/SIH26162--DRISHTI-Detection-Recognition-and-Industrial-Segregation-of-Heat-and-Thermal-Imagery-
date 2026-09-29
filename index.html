@@ -513,11 +513,11 @@
           <button class="close-btn" id="closeModulesHubBtn">&times;</button>
         </div>
         <div class="modules-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-          <!-- 1. Disaster SOPs & Incident Similarity -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-similarity', 'NDMA Disaster SOPs & Incident Matching')">
-            <div class="module-icon-wrap" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);"><i class="fa-solid fa-book-medical"></i></div>
-            <h4>Disaster SOPs &amp; Matching</h4>
-            <p>Historical industrial disaster similarity engine and NDMA standardized emergency response protocols.</p>
+          <!-- 1. Atmospheric Plume & Dispersion Model -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-plume', 'Atmospheric Plume & Smoke Dispersion Model')">
+            <div class="module-icon-wrap" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15);"><i class="fa-solid fa-smog"></i></div>
+            <h4>Atmospheric Plume Dispersion</h4>
+            <p>Gaussian plume dispersion model coupled with real-time Open-Meteo wind vectors, Pasquill-Gifford stability, and hazard perimeter.</p>
           </div>
 
           <!-- 2. CPCB & ESG Statutory Penalty Calculator -->
@@ -527,7 +527,35 @@
             <p>Section 15 EPA formula (EC = PI &times; N &times; R &times; S &times; LF), BRSR disclosures, and statutory damage audit.</p>
           </div>
 
-          <!-- 3. REST API Explorer -->
+          <!-- 3. Multi-Sensor Satellite Constellation Telemetry -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-satellite', 'Multi-Sensor Satellite Constellation Health & Radiometry')">
+            <div class="module-icon-wrap" style="color: #10b981; background: rgba(16, 185, 129, 0.15);"><i class="fa-solid fa-satellite"></i></div>
+            <h4>Constellation Health &amp; Telemetry</h4>
+            <p>Live multi-sensor radiometry feeds from VIIRS NOAA-20/21/Suomi-NPP, INSAT-3DR, SEVIRI, and Sentinel-2 STAC.</p>
+          </div>
+
+          <!-- 4. Industrial IoT & SCADA Sensors -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-iot', 'Synthetic IoT Sensor Stream & Controlled Anomaly')">
+            <div class="module-icon-wrap" style="color: #f59e0b; background: rgba(245, 158, 11, 0.15);"><i class="fa-solid fa-gauge-high"></i></div>
+            <h4>IoT &amp; SCADA Process Sensors</h4>
+            <p>Real-time flare header pressure, combustion zone thermocouple, flue gas SO₂/NOx, and pressure spike simulation.</p>
+          </div>
+
+          <!-- 5. Agentic Incident Escalation Protocols -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-agentic', 'Agentic Incident Response & Automated Escalation Chains')">
+            <div class="module-icon-wrap" style="color: #ef4444; background: rgba(239, 68, 68, 0.15);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h4>Incident Escalation &amp; Response</h4>
+            <p>Automated SOP escalation chains with NDMA CAP broadcast gates, silence-countdown trigger, and two-way bot terminal.</p>
+          </div>
+
+          <!-- 6. Disaster SOPs & Incident Similarity -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-similarity', 'NDMA Disaster SOPs & Incident Matching')">
+            <div class="module-icon-wrap" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);"><i class="fa-solid fa-book-medical"></i></div>
+            <h4>Disaster SOPs &amp; Matching</h4>
+            <p>Historical industrial disaster similarity engine and NDMA standardized emergency response protocols.</p>
+          </div>
+
+          <!-- 7. REST API Explorer -->
           <div class="module-card" onclick="window.openPrototypeModule('tab-api', 'REST API Gateway & Telemetry Docs')">
             <div class="module-icon-wrap" style="color: #64748b; background: rgba(100, 116, 139, 0.15);"><i class="fa-solid fa-code"></i></div>
             <h4>REST API Explorer</h4>
@@ -546,17 +574,37 @@
           <i class="fa-solid fa-arrow-left"></i>
           <span>&larr; Back to 3D FireMap Globe</span>
         </button>
-        <div id="module-overlay-title" style="font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 700; color: #ffffff;">
+        <div id="module-overlay-title" style="font-family: var(--fm-font-display, 'Lexend', sans-serif); font-size: 1rem; font-weight: 700; color: #ffffff;">
           National Dashboard
         </div>
-        <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">
+        <div style="font-size: 0.72rem; color: #94a3b8; font-family: var(--fm-font-mono, monospace);">
           AGNI-VISION Enterprise Suite
         </div>
       </div>
       <div class="module-view-container" id="module-view-container">
+        <!-- TAB: ATMOSPHERIC PLUME DISPERSION -->
+        <section id="tab-plume" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="plume-container"></div>
+        </section>
+
+        <!-- TAB: SATELLITE CONSTELLATION HEALTH -->
+        <section id="tab-satellite" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="satellite-container"></div>
+        </section>
+
+        <!-- TAB 5: IOT TELEMETRY -->
+        <section id="tab-iot" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="iot-container"></div>
+        </section>
+
         <!-- TAB 6: DISASTER SOPS & SIMILARITY -->
         <section id="tab-similarity" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
           <div id="similarity-container"></div>
+        </section>
+
+        <!-- TAB 7: AGENTIC ESCALATION -->
+        <section id="tab-agentic" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
+          <div id="agentic-container"></div>
         </section>
 
         <!-- TAB 8: REGULATORY CPCB & ESG -->
@@ -578,6 +626,8 @@
       <button class="nav-tab-btn" data-tab="tab-showcase"></button>
       <button class="nav-tab-btn" data-tab="tab-portal"></button>
       <button class="nav-tab-btn" data-tab="tab-fingerprint"></button>
+      <button class="nav-tab-btn" data-tab="tab-plume"></button>
+      <button class="nav-tab-btn" data-tab="tab-satellite"></button>
       <button class="nav-tab-btn" data-tab="tab-iot"></button>
       <button class="nav-tab-btn" data-tab="tab-similarity"></button>
       <button class="nav-tab-btn" data-tab="tab-agentic"></button>
