@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import babel from '@babel/core';
+import * as babel from '@babel/core';
 
 async function walk(dir, callback) {
   const files = await fs.readdir(dir);
@@ -24,8 +24,9 @@ async function run() {
       }
       const code = await fs.readFile(p, 'utf-8');
       const result = await babel.transformAsync(code, {
+        plugins: ['@babel/plugin-syntax-jsx'],
         presets: [
-          ['@babel/preset-typescript', { isTSX: true, allExtensions: true }]
+          ['@babel/preset-typescript', { ignoreExtensions: true }]
         ],
         filename: p,
         retainLines: true,
