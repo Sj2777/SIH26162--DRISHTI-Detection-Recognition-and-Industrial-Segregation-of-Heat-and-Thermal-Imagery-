@@ -282,21 +282,27 @@ function initDashboard() {
   const now = new Date();
   const freshness = now.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' });
 
+  // Sync peek bar quick stats
+  const peekActive = document.getElementById('peek-active-fires');
+  const peekCritical = document.getElementById('peek-critical-anomalies');
+  if (peekActive) peekActive.innerText = total;
+  if (peekCritical) peekCritical.innerText = anomalies;
+
   container.innerHTML = `
     <div style="max-width:1440px;margin:0 auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
             <span class="badge badge-critical" style="font-size:0.65rem;">NATIONAL COMMAND CENTRE</span>
-            <span class="badge badge-cyan" style="font-size:0.65rem;">CLASSIFIED — NTRO USE ONLY</span>
+            <span class="badge badge-cyan" style="font-size:0.65rem;">CLASSIFIED — NTRO / NDMA USE ONLY</span>
           </div>
-          <h2 style="font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:0;">🔥 AGNI-VISION Thermal Intelligence Dashboard</h2>
+          <h2 style="font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:0;">👁️ DRISHTI National Command Intelligence Hub</h2>
           <p style="font-size:0.76rem;color:#64748b;margin:4px 0 0 0;">Satellite thermal detections are indicators requiring human validation — not proof of fire, violation, or incident.</p>
         </div>
         <div style="text-align:right;flex-shrink:0;">
           <div style="font-size:0.68rem;color:#64748b;">Data Freshness (IST)</div>
           <div style="font-size:0.85rem;font-weight:700;color:#34d399;font-family:monospace;">${freshness}</div>
-          <div style="font-size:0.62rem;color:#64748b;">NASA FIRMS · INSAT-3DR · SEVIRI</div>
+          <div style="font-size:0.62rem;color:#64748b;">NASA FIRMS &middot; INSAT-3DR &middot; SEVIRI</div>
         </div>
       </div>
 
@@ -4587,10 +4593,11 @@ function initFireMapGlobe() {
     }, 6000);
   };
 
-  // 4. Locate Me Button (Flies to India Center)
-  const locateMeBtn = document.getElementById('locateMeBtn');
-  if (locateMeBtn) {
-    locateMeBtn.addEventListener('click', () => {
+  // 1. Navigation Toolbar: Option 1 (3D Globe)
+  const btnNavGlobe = document.getElementById('btnNavGlobe');
+  if (btnNavGlobe) {
+    btnNavGlobe.addEventListener('click', () => {
+      window.scrollToGlobe();
       if (window.fireMapGlobe && window.fireMapGlobe.map) {
         window.fireMapGlobe.map.flyTo({
           center: [78.9629, 20.5937],
@@ -4603,13 +4610,56 @@ function initFireMapGlobe() {
     });
   }
 
-  // 5. Wind Streamlines Toggle Button
+  // 2. Navigation Toolbar: Option 2 (National Command Dashboard)
+  const btnNavCommand = document.getElementById('btnNavCommand');
+  if (btnNavCommand) {
+    btnNavCommand.addEventListener('click', () => {
+      window.scrollToCommandDashboard();
+    });
+  }
+
+  // Scroll Helpers for Main Page (3D Globe <-> National Command Dashboard)
+  window.scrollToCommandDashboard = function() {
+    const scrollContainer = document.getElementById('mainPageScroll');
+    const commandSec = document.getElementById('nationalCommandSection');
+    if (scrollContainer && commandSec) {
+      scrollContainer.scrollTo({
+        top: commandSec.offsetTop,
+        behavior: 'smooth'
+      });
+    }
+    document.getElementById('btnNavCommand')?.classList.add('active');
+    document.getElementById('btnNavGlobe')?.classList.remove('active');
+  };
+
+  window.scrollToGlobe = function() {
+    const scrollContainer = document.getElementById('mainPageScroll');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+    document.getElementById('btnNavGlobe')?.classList.add('active');
+    document.getElementById('btnNavCommand')?.classList.remove('active');
+  };
+
+  // Scroll spy to sync active portal buttons
+  const mainScroll = document.getElementById('mainPageScroll');
+  if (mainScroll) {
+    mainScroll.addEventListener('scroll', () => {
+      const isDown = mainScroll.scrollTop > window.innerHeight * 0.35;
+      document.getElementById('btnNavCommand')?.classList.toggle('active', isDown);
+      document.getElementById('btnNavGlobe')?.classList.toggle('active', !isDown);
+    });
+  }
+
+  // 3. Navigation Toolbar: Option 3 (Wind Streamlines Toggle Button)
   const windBtn = document.getElementById('windBtn');
   if (windBtn) {
     windBtn.addEventListener('click', () => {
       const active = window.fireMapGlobe ? window.fireMapGlobe.toggleWind() : true;
-      windBtn.classList.toggle('has-active-dot', active);
-      windBtn.classList.toggle('active-green', active);
+      windBtn.classList.toggle('active', active);
     });
   }
 
@@ -4623,13 +4673,20 @@ function initFireMapGlobe() {
     });
   }
 
-  // Modules Hub Button & Modal
+  // Modules Hub Helper & Modal
+  window.openModulesHub = function() {
+    const modal = document.getElementById('modulesHubModal');
+    if (modal) {
+      closeAllFloatingPanels();
+      modal.classList.add('active');
+    }
+  };
+
   const modulesBtn = document.getElementById('modulesBtn');
   const modulesHubModal = document.getElementById('modulesHubModal');
   if (modulesBtn && modulesHubModal) {
     modulesBtn.addEventListener('click', () => {
-      closeAllFloatingPanels();
-      modulesHubModal.classList.add('active');
+      window.openModulesHub();
     });
   }
   const closeModulesBtn = document.getElementById('closeModulesHubBtn');

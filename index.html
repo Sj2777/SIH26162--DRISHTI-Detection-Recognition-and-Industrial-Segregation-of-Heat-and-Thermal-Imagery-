@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/flame.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FireMap · AGNI-VISION | 3D Global Real-Time Wildfire &amp; Industrial Thermal Intelligence</title>
-    <meta name="description" content="Real-time 3D planetary tracking of wildfires and industrial thermal anomalies with NASA FIRMS, VIIRS, Sentinel-3, Meteosat SEVIRI, Sentinel-5P TROPOMI, Sentinel-2 NBR, and NASA/IBM Prithvi-100M foundation model." />
+    <title>DRISHTI | 3D Global Real-Time Wildfire &amp; Industrial Thermal Intelligence</title>
+    <meta name="description" content="DRISHTI: Real-time 3D planetary tracking of wildfires and industrial thermal anomalies with NASA FIRMS, VIIRS, Sentinel-3, Meteosat SEVIRI, Sentinel-5P TROPOMI, Sentinel-2 NBR, and NASA/IBM Prithvi-100M foundation model." />
 
     <!-- Google Fonts: Lexend & Nunito (FireMap typography) + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -24,64 +24,118 @@
   </head>
   <body>
     <!-- =====================================================================
-         1. PRIMARY VIEWPORT: 3D GLOBE (firemap.live)
+         1. PRIMARY VIEWPORT: 3D GLOBE HERO & NATIONAL COMMAND DASHBOARD (Scrollable)
          ===================================================================== -->
-    <div id="map"></div>
+    <div class="main-page-scroll" id="mainPageScroll">
+      
+      <!-- Top Viewport: 3D Globe Hero -->
+      <div class="hero-map-viewport" id="heroMapViewport">
+        <div id="map"></div>
+
+        <!-- Half-Visible Command Dashboard Teaser Bar at the Bottom -->
+        <div class="command-dashboard-peek" id="commandDashboardPeek" onclick="window.scrollToCommandDashboard()">
+          <div class="peek-grab-handle"></div>
+          <div class="peek-content">
+            <div class="peek-left">
+              <div class="peek-badge"><span class="live-dot"></span> LIVE COMMAND</div>
+              <div class="peek-title">National Command Dashboard</div>
+            </div>
+            <div class="peek-stats" id="peekQuickStats">
+              <span class="peek-stat"><i class="fa-solid fa-fire" style="color: #f97316;"></i> <strong id="peek-active-fires">355</strong> Active Events</span>
+              <span class="peek-stat-sep">&middot;</span>
+              <span class="peek-stat"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> <strong id="peek-critical-anomalies">14</strong> Critical Anomalies</span>
+              <span class="peek-stat-sep">&middot;</span>
+              <span class="peek-stat"><i class="fa-solid fa-satellite" style="color: #38bdf8;"></i> <strong>3</strong> Satellites Synced</span>
+            </div>
+            <div class="peek-action">
+              <span>Scroll Down for Full Dashboard</span>
+              <i class="fa-solid fa-chevron-down peek-chevron"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Viewport: Full National Command Dashboard on Main Page -->
+      <section class="national-command-main-section" id="nationalCommandSection">
+        <div class="command-section-topbar">
+          <button class="btn btn-outline btn-34" id="btnBackToGlobe" onclick="window.scrollToGlobe()">
+            <i class="fa-solid fa-arrow-up"></i>
+            <span>&uarr; Back to 3D Globe</span>
+          </button>
+          <div class="command-section-breadcrumbs">
+            <span style="color: #38bdf8; font-weight: 700;">DRISHTI</span> &middot; Pan-India Thermal Telemetry &amp; Anomaly Command Hub
+          </div>
+          <button class="btn btn-outline btn-34" style="color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="window.openModulesHub()">
+            <i class="fa-solid fa-cubes"></i>
+            <span>Intelligence Tools</span>
+          </button>
+        </div>
+        <div id="dashboard-container"></div>
+      </section>
+
+    </div>
 
     <!-- =====================================================================
-         2. TOP-LEFT LOGO & LIVE CLOCK (firemap.live)
-         ===================================================================== -->
-    <!-- =====================================================================
-         2. TOP-LEFT BAR: FireMap Logo + Live Clock + Nav Toolbar (Moved from Right)
+         2. TOP-LEFT BAR: DRISHTI Logo + 4 Main Portal Options (Icon Above, Name Below)
          ===================================================================== -->
     <div class="top-left-bar">
-      <button class="logo-box" id="logoBtn" aria-label="FireMap - Reset View">
-        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM8.5 14.5A2.5 2.5 0 0 1 11 12C11 10.62 10.5 10 10 9C8.93 6.86 9.78 4.95 12 3C12.5 5.5 14 7.9 16 9.5C18 11.1 19 13 19 15A7 7 0 1 1 5 15C5 13.85 5.43 12.71 6 12A2.5 2.5 0 0 1 8.5 14.5Z" fill="#FF4500"/>
+      <!-- DRISHTI Eye Logo Box -->
+      <button class="logo-box" id="logoBtn" aria-label="DRISHTI - Reset View">
+        <svg class="logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 32px; flex-shrink: 0;">
+          <defs>
+            <linearGradient id="drishtiGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/>
+              <stop offset="0.5" stop-color="#06b6d4"/>
+              <stop offset="1" stop-color="#f97316"/>
+            </linearGradient>
+            <linearGradient id="drishtiCore" x1="12" y1="12" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#f97316"/>
+              <stop offset="1" stop-color="#ef4444"/>
+            </linearGradient>
+          </defs>
+          <path d="M3 18C8 10 16 6 27 9C31 10.5 33 13 33 18C28 26 20 30 9 27C5 25.5 3 23 3 18Z" stroke="url(#drishtiGrad)" stroke-width="2.4" stroke-linecap="round" fill="rgba(14,23,42,0.7)"/>
+          <ellipse cx="18" cy="18" rx="14" ry="6" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.65" transform="rotate(-25 18 18)"/>
+          <circle cx="18" cy="18" r="6.5" stroke="#38bdf8" stroke-width="2" fill="rgba(6, 182, 212, 0.25)"/>
+          <circle cx="18" cy="18" r="3.2" fill="url(#drishtiCore)"/>
+          <line x1="18" y1="8" x2="18" y2="12" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="18" y1="24" x2="18" y2="28" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="8" y1="18" x2="12" y2="18" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="24" y1="18" x2="28" y2="18" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
         <span class="logo-stack">
-          <span class="logo-text">FireMap</span>
-          <span class="live-clock" id="liveClock">
-            <span class="live-dot" aria-hidden="true"></span>
-            <span class="live-label">LIVE</span>
-            <span class="live-clock-times">
-              <span class="clock-entry clock-entry-primary">
-                <span class="clock-time" id="clockLocalTime">--:--</span>
-                <span class="clock-zone" id="clockLocalZone">IST</span>
-              </span>
-              <span class="clock-sep" aria-hidden="true">&middot;</span>
-              <span class="clock-entry clock-entry-secondary">
-                <span class="clock-time" id="clockUtcTime">--:--</span>
-                <span class="clock-zone">UTC</span>
-              </span>
-            </span>
-          </span>
-          <span class="agency-tag">AGNI-VISION &middot; NASA FIRMS &middot; ISRO</span>
+          <span class="logo-text" style="font-family: var(--fm-font-display); font-size: 19px; font-weight: 800; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 16px rgba(56,189,248,0.5);">DRISHTI</span>
         </span>
       </button>
 
-      <!-- Navigation Toolbar relocated next to Logo & Live Clock -->
+      <!-- Navigation Toolbar: The Four Main Options of the Portal with Name Below Icon -->
       <div class="top-nav-toolbar" id="topNavToolbar">
-        <!-- Locate Me Button -->
-        <button class="topbar-btn" id="locateMeBtn" data-tip="Locate Me / India Center" aria-label="Locate Me">
-          <i class="fa-solid fa-location-crosshairs"></i>
+        <!-- Option 1: 3D Globe -->
+        <button class="portal-nav-btn active" id="btnNavGlobe" data-tip="3D Interactive Satellite Globe" aria-label="3D Globe">
+          <div class="btn-icon"><i class="fa-solid fa-earth-asia"></i></div>
+          <span class="btn-label">3D Globe</span>
         </button>
 
-        <!-- Wind Streamlines Toggle Button -->
-        <button class="topbar-btn has-active-dot" id="windBtn" data-tip="Wind Particle Streamlines" aria-label="Wind" aria-pressed="true">
-          <span class="wind-indicator-dot"></span>
-          <i class="fa-solid fa-wind"></i>
+        <!-- Option 2: National Command Dashboard -->
+        <button class="portal-nav-btn" id="btnNavCommand" data-tip="Scroll Down to National Command Dashboard" aria-label="Command Dashboard">
+          <div class="btn-icon"><i class="fa-solid fa-chart-pie" style="color: #f59e0b;"></i></div>
+          <span class="btn-label">Command</span>
         </button>
 
-        <!-- Flagged Anomalies / Bookmarks Button -->
-        <button class="topbar-btn" id="flaggedAnomaliesBtn" data-tip="View Flagged Anomalies &amp; Bookmarks" aria-label="Flagged Anomalies">
-          <i class="fa-solid fa-bookmark" style="color: #38bdf8;"></i>
-          <span id="flaggedBadgeCount" class="flagged-count-badge" style="display: none;">0</span>
+        <!-- Option 3: Wind Particle Streamlines -->
+        <button class="portal-nav-btn" id="windBtn" data-tip="Toggle Wind Particle Vectors" aria-label="Wind Vectors" aria-pressed="true">
+          <div class="btn-icon">
+            <i class="fa-solid fa-wind" style="color: #34d399;"></i>
+          </div>
+          <span class="btn-label">Wind</span>
         </button>
 
-        <!-- System Modules Hub -->
-        <button class="topbar-btn" id="modulesBtn" data-tip="System Modules Hub (All Tools)" aria-label="Modules Hub" style="color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
-          <i class="fa-solid fa-cubes"></i>
+        <!-- Option 4: Flagged Anomalies / Bookmarks -->
+        <button class="portal-nav-btn" id="flaggedAnomaliesBtn" data-tip="Saved Anomaly Bookmarks" aria-label="Bookmarks">
+          <div class="btn-icon" style="position: relative;">
+            <i class="fa-solid fa-bookmark" style="color: #38bdf8;"></i>
+            <span id="flaggedBadgeCount" class="flagged-count-badge" style="display: none;">0</span>
+          </div>
+          <span class="btn-label">Bookmarks</span>
         </button>
       </div>
     </div>
@@ -390,75 +444,26 @@
     <div id="modulesHubModal" class="modules-hub-modal" aria-label="System Modules Hub">
       <div class="modules-hub-content">
         <div class="panel-header">
-          <h3><i class="fa-solid fa-cubes" style="color: #38bdf8;"></i> AGNI-VISION Enterprise Intelligence Modules</h3>
+          <h3><i class="fa-solid fa-cubes" style="color: #38bdf8;"></i> DRISHTI Enterprise Intelligence Tools</h3>
           <button class="close-btn" id="closeModulesHubBtn">&times;</button>
         </div>
-        <div class="modules-grid">
-          <!-- 1. National Command Dashboard -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-dashboard', 'National Command Dashboard')">
-            <div class="module-icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
-            <h4>National Command Dashboard</h4>
-            <p>Pan-India thermal telemetry, blowout anomaly distribution, active flare counters, and high-risk alerts.</p>
-          </div>
-
-          <!-- 2. 2D Tactical GIS Map -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-map', '2D Tactical GIS Map')">
-            <div class="module-icon-wrap" style="color: #34d399; background: rgba(52, 211, 153, 0.15);"><i class="fa-solid fa-map-location-dot"></i></div>
-            <h4>2D Tactical GIS Map</h4>
-            <p>Leaflet high-zoom 2D tactical view with polygon buffers, plume dispersion overlays, and sector focus.</p>
-          </div>
-
-          <!-- 3. Facility Topology & Showcase -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-showcase', 'Facility Digital Twin')">
-            <div class="module-icon-wrap" style="color: #f97316; background: rgba(249, 115, 22, 0.15);"><i class="fa-solid fa-industry"></i></div>
-            <h4>Facility Topology &amp; Twin</h4>
-            <p>Jamnagar Refinery, Dadri Power Plant, unit flare stacks, and sub-module engineering schematics.</p>
-          </div>
-
-          <!-- 4. Industry Self-Declaration Portal -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-portal', 'Industry Compliance Portal')">
-            <div class="module-icon-wrap" style="color: #a855f7; background: rgba(168, 85, 247, 0.15);"><i class="fa-solid fa-clipboard-check"></i></div>
-            <h4>Industry Compliance Portal</h4>
-            <p>Self-declaration flare logging, statutory maintenance registry, and CPCB audit logs.</p>
-          </div>
-
-          <!-- 5. Thermal Baseline & Anomaly Detector -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-fingerprint', 'Thermal Baseline Engine')">
-            <div class="module-icon-wrap" style="color: #ef4444; background: rgba(239, 68, 68, 0.15);"><i class="fa-solid fa-chart-line"></i></div>
-            <h4>Thermal Baseline &amp; Anomaly</h4>
-            <p>Diurnal and seasonal baseline analysis with statistical sigma anomaly blowout detection (+4.56&sigma;).</p>
-          </div>
-
-          <!-- 6. Edge IoT Telemetry -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-iot', 'Edge IoT SCADA Telemetry')">
-            <div class="module-icon-wrap" style="color: #eab308; background: rgba(234, 179, 8, 0.15);"><i class="fa-solid fa-tower-broadcast"></i></div>
-            <h4>Edge IoT &amp; SCADA Feeds</h4>
-            <p>Real-time pressure, acoustic leak, thermal camera, and LEL sensor stream simulation.</p>
-          </div>
-
-          <!-- 7. Disaster SOPs & Incident Similarity -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-similarity', 'NDMA Disaster SOPs')">
+        <div class="modules-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <!-- 1. Disaster SOPs & Incident Similarity -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-similarity', 'NDMA Disaster SOPs & Incident Matching')">
             <div class="module-icon-wrap" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);"><i class="fa-solid fa-book-medical"></i></div>
             <h4>Disaster SOPs &amp; Matching</h4>
             <p>Historical industrial disaster similarity engine and NDMA standardized emergency response protocols.</p>
           </div>
 
-          <!-- 8. Escalation & SACHET CAP Gateway -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-agentic', 'Automated Escalation Gateway')">
-            <div class="module-icon-wrap" style="color: #ec4899; background: rgba(236, 72, 153, 0.15);"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <h4>Escalation &amp; SACHET CAP</h4>
-            <p>Automated tier progression, CAP-XML emergency broadcast generator, and commander PIN gate.</p>
-          </div>
-
-          <!-- 9. CPCB & ESG Statutory Penalty Calculator -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-regulatory', 'CPCB Statutory Calculator')">
+          <!-- 2. CPCB & ESG Statutory Penalty Calculator -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-regulatory', 'CPCB Statutory Environmental Damage Calculator')">
             <div class="module-icon-wrap" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.15);"><i class="fa-solid fa-scale-balanced"></i></div>
             <h4>CPCB &amp; ESG Calculator</h4>
-            <p>Section 15 EPA formula (EC = PI &times; N &times; R &times; S &times; LF), BRSR disclosures, and environmental damage audit.</p>
+            <p>Section 15 EPA formula (EC = PI &times; N &times; R &times; S &times; LF), BRSR disclosures, and statutory damage audit.</p>
           </div>
 
-          <!-- 10. REST API Explorer -->
-          <div class="module-card" onclick="window.openPrototypeModule('tab-api', 'REST API Gateway')">
+          <!-- 3. REST API Explorer -->
+          <div class="module-card" onclick="window.openPrototypeModule('tab-api', 'REST API Gateway & Telemetry Docs')">
             <div class="module-icon-wrap" style="color: #64748b; background: rgba(100, 116, 139, 0.15);"><i class="fa-solid fa-code"></i></div>
             <h4>REST API Explorer</h4>
             <p>Live REST API documentation and endpoints for FIRMS, SEVIRI, Sentinel-3, Prithvi, and TROPOMI.</p>
@@ -484,159 +489,14 @@
         </div>
       </div>
       <div class="module-view-container" id="module-view-container">
-        <!-- TAB 0: NATIONAL COMMAND DASHBOARD -->
-        <section id="tab-dashboard" class="tab-content" style="padding: 24px; overflow-y: auto;">
-          <div id="dashboard-container"></div>
-        </section>
-
-        <!-- TAB 1: INDIA 2D GIS MAP -->
-        <section id="tab-map" class="tab-content">
-          <div class="gis-layout">
-            <div class="gis-map-viewport">
-              <div id="leaflet-map"></div>
-
-              <div class="gis-toolbar">
-                <span class="gis-toolbar-label">Basemap</span>
-                <button class="btn btn-primary basemap-btn" data-layer="satellite">Satellite Hybrid</button>
-                <button class="btn btn-outline basemap-btn" data-layer="topo">Topo Terrain</button>
-                <button class="btn btn-outline basemap-btn" data-layer="osm">Streets (OSM)</button>
-                <button class="btn btn-outline basemap-btn" data-layer="dark">Tactical Dark</button>
-                
-                <div class="gis-toolbar-divider"></div>
-
-                <span class="gis-toolbar-label">Sector Focus</span>
-                <button class="btn btn-outline jump-btn" id="btn-top-anomaly" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.5); font-weight: 600;">
-                  <span class="pulse-dot pulse-dot-red" style="width: 5px; height: 5px;"></span>
-                  <span>🚩 Flagged Blowout</span>
-                </button>
-                <button class="btn btn-outline jump-btn" id="btn-top-live" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
-                  <span class="pulse-dot pulse-dot-green" style="width: 5px; height: 5px;"></span>
-                  <span>🔥 Top Live Fire</span>
-                </button>
-                <button class="btn btn-outline jump-btn" id="btn-insat-pass" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); font-weight: 600;">
-                  <span>🛰️ INSAT-3DR Geo</span>
-                </button>
-                <button class="btn btn-outline jump-btn" data-lat="22.3528" data-lon="69.8452" data-zoom="13">Jamnagar Refinery</button>
-                <button class="btn btn-outline jump-btn" data-lat="28.5995" data-lon="77.6080" data-zoom="13">Dadri Power Plant</button>
-                <button class="btn btn-outline jump-btn" data-lat="28.4082" data-lon="77.8540" data-zoom="12">Brick Kiln Belt</button>
-                <button class="btn btn-outline jump-btn" data-lat="30.2450" data-lon="75.8420" data-zoom="10">Punjab Agro Fires</button>
-                <button class="btn btn-outline jump-btn" data-lat="22.5" data-lon="78.5" data-zoom="5">India Overview</button>
-
-                <div class="gis-toolbar-divider"></div>
-
-                <button class="btn btn-outline" id="btn-refresh-nasa" style="color: #34d399; border-color: rgba(52, 211, 153, 0.4); font-size: 0.72rem; padding: 3px 8px;">
-                  <span class="pulse-dot pulse-dot-green" style="width: 6px; height: 6px;"></span>
-                  <span>NASA Live Sync</span>
-                </button>
-              </div>
-
-              <!-- Classification & Layer Filters Dock -->
-              <div class="gis-filters">
-                <div class="gis-filters-header">
-                  <span class="gis-filters-title">
-                    Active Detections: <span id="hotspot-count-label" style="color: #38bdf8; font-weight: 700;">435</span> hotspots
-                  </span>
-                  <span class="badge badge-cyan" id="live-indicator-badge" style="font-size: 0.6rem;">LIVE SATELLITE</span>
-                </div>
-
-                <div style="margin-bottom: 6px;">
-                  <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
-                    🛰️ Satellite Sensor Feed
-                  </div>
-                  <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                    <button class="btn btn-primary filter-pill-sat" data-sat="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Sensors</button>
-                    <button class="btn btn-outline filter-pill-sat" data-sat="VIIRS" style="font-size: 0.68rem; padding: 2px 7px; color: #34d399; border-color: rgba(52, 211, 153, 0.4);">
-                      <span class="pulse-dot pulse-dot-green" style="width: 4px; height: 4px;"></span>
-                      <span>VIIRS 375m (LEO)</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill-sat" data-sat="SENTINEL3" style="font-size: 0.68rem; padding: 2px 7px; color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);">
-                      <span>Sentinel-3 SLSTR (1km)</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill-sat" data-sat="SEVIRI" style="font-size: 0.68rem; padding: 2px 7px; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
-                      <span>SEVIRI (15m Geo)</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill-sat" data-sat="INSAT" style="font-size: 0.68rem; padding: 2px 7px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
-                      <span>INSAT-3DR (15m)</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div style="font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 3px; font-weight: 600;">
-                    🎯 XGBoost Thermal Classification (7 Tactical Types)
-                  </div>
-                  <div style="display: flex; gap: 4px; flex-wrap: wrap;" id="map-filter-buttons">
-                    <button class="btn btn-primary filter-pill" data-filter="ALL" style="font-size: 0.68rem; padding: 2px 7px;">All Types</button>
-                    <button class="btn btn-outline filter-pill" data-filter="INDUSTRIAL_HIGH_ALERT" style="font-size: 0.68rem; padding: 2px 7px; color: #ef4444; border-color: rgba(239, 68, 68, 0.5);">
-                      <span class="pulse-dot pulse-dot-red" style="width: 4px; height: 4px;"></span>
-                      <span>🔴 High-Alert</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill" data-filter="FACTORY" style="font-size: 0.68rem; padding: 2px 7px; color: #f97316; border-color: rgba(249, 115, 22, 0.5);">
-                      <span>🟠 Factory</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill" data-filter="HEAT_RING" style="font-size: 0.68rem; padding: 2px 7px; color: #eab308; border-color: rgba(234, 179, 8, 0.5);">
-                      <span>🟡 Heat Ring</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill" data-filter="WILDFIRE" style="font-size: 0.68rem; padding: 2px 7px; color: #22c55e; border-color: rgba(34, 197, 94, 0.5);">
-                      <span>🟢 Wildfire</span>
-                    </button>
-                    <button class="btn btn-outline filter-pill" data-filter="CROP" style="font-size: 0.68rem; padding: 2px 7px; color: #b45309; border-color: rgba(180, 83, 9, 0.5);">
-                      <span>🟤 Crop</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- GIS Right Sidebar -->
-            <aside class="gis-sidebar">
-              <div class="gis-sidebar-tabs">
-                <button class="gis-sidebar-tab-btn active" id="tab-btn-inspector">Hotspot Inspector</button>
-                <button class="gis-sidebar-tab-btn" id="tab-btn-feed">Real-time Feed</button>
-              </div>
-              <div id="gis-sidebar-content" style="padding: 12px; overflow-y: auto; flex: 1;"></div>
-            </aside>
-          </div>
-        </section>
-
-        <!-- TAB 2: FACILITY TOPOLOGY -->
-        <section id="tab-showcase" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="showcase-container"></div>
-        </section>
-
-        <!-- TAB 3: INDUSTRY COMPLIANCE PORTAL -->
-        <section id="tab-portal" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="portal-container"></div>
-        </section>
-
-        <!-- TAB 4: THERMAL BASELINE & FINGERPRINT -->
-        <section id="tab-fingerprint" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="fingerprint-container"></div>
-        </section>
-
-        <!-- TAB 5: EDGE IOT TELEMETRY -->
-        <section id="tab-iot" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="iot-container"></div>
-        </section>
-
         <!-- TAB 6: DISASTER SOPS & SIMILARITY -->
         <section id="tab-similarity" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
           <div id="similarity-container"></div>
         </section>
 
-        <!-- TAB 7: AGENTIC ESCALATION -->
-        <section id="tab-agentic" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="agentic-container"></div>
-        </section>
-
         <!-- TAB 8: REGULATORY CPCB & ESG -->
         <section id="tab-regulatory" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
           <div id="regulatory-container"></div>
-        </section>
-
-        <!-- TAB 9: 3D REPLAY -->
-        <section id="tab-replay3d" class="tab-content" style="padding: 24px; max-width: 1440px; margin: 0 auto;">
-          <div id="replay3d-container"></div>
         </section>
 
         <!-- TAB 10: REST API -->
