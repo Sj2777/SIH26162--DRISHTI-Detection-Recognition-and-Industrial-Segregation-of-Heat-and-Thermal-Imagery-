@@ -1122,22 +1122,41 @@ export class FireMapGlobe {
     });
 
     const emptyFC = { type: 'FeatureCollection', features: [] };
-    const dataFC = { type: 'FeatureCollection', features: features };
-
     const isSpecificCategory = currentFilter !== 'ALL';
+    let activeFeatures = features;
 
     if (isSpecificCategory) {
+      activeFeatures = features.filter(f => {
+        const ik = f.properties.icon_id;
+        if (currentFilter === 'FACTORY' || currentFilter === 'INDUSTRIAL_ROUTINE') {
+          return ik === 'fire-icon-FACTORY';
+        }
+        if (currentFilter === 'INDUSTRIAL_HIGH_ALERT' || currentFilter === 'ACCIDENT') {
+          return ik === 'fire-icon-INDUSTRIAL_HIGH_ALERT';
+        }
+        if (currentFilter === 'WILDFIRE') {
+          return ik === 'fire-icon-WILDFIRE';
+        }
+        if (currentFilter === 'CROP' || currentFilter === 'STUBBLE' || currentFilter === 'AGRICULTURAL') {
+          return ik === 'fire-icon-CROP';
+        }
+        if (currentFilter === 'MINE' || currentFilter === 'COAL_FIRE') {
+          return ik === 'fire-icon-MINE';
+        }
+        return false;
+      });
+
       // Particular fire type selected:
-      // Show ALL individual points of this category with their direct symbol emblems (no clusters!)
+      // Show ONLY individual points of this category with their direct symbol emblems (no clusters, no other categories!)
       clusteredSource.setData(emptyFC);
-      directSource.setData(dataFC);
+      directSource.setData({ type: 'FeatureCollection', features: activeFeatures });
       this.setClusteredLayersVisibility(false);
       this.setDirectLayersVisibility(true);
     } else {
       // ALL fire types selected (default view):
       // Clusters are present, individual category symbols are hidden
       directSource.setData(emptyFC);
-      clusteredSource.setData(dataFC);
+      clusteredSource.setData({ type: 'FeatureCollection', features: features });
       this.setDirectLayersVisibility(false);
       this.setClusteredLayersVisibility(true);
     }

@@ -1220,13 +1220,13 @@ export function matchesFireType(h, filterType) {
   const fType = (h.fire_type || h.classification || '').toUpperCase();
 
   if (filterType === 'WILDFIRE') {
-    return fType.includes('WILD') || fType.includes('FOREST') || fType === 'WILDFIRE';
+    return fType === 'WILDFIRE' || fType.includes('WILD') || fType.includes('FOREST');
   }
   if (filterType === 'FACTORY' || filterType === 'INDUSTRIAL_ROUTINE') {
-    return fType === 'FACTORY' || fType.includes('STACK') || fType.includes('CHIMNEY') || (fType.includes('INDUSTR') && !fType.includes('ALERT') && !fType.includes('ACCIDENT'));
+    return (fType === 'FACTORY' || fType.includes('STACK') || fType.includes('CHIMNEY') || (fType.includes('INDUSTR') && !fType.includes('ALERT') && !fType.includes('ACCIDENT'))) && Number(h.frp || 0) < 40;
   }
   if (filterType === 'INDUSTRIAL_HIGH_ALERT' || filterType === 'ACCIDENT') {
-    return fType === 'INDUSTRIAL_HIGH_ALERT' || fType.includes('ALERT') || fType.includes('ACCIDENT') || (h.frp >= 40 && fType.includes('INDUSTR'));
+    return fType === 'INDUSTRIAL_HIGH_ALERT' || fType.includes('ALERT') || fType.includes('ACCIDENT') || (Number(h.frp || 0) >= 40 && fType.includes('INDUSTR'));
   }
   if (filterType === 'CROP' || filterType === 'STUBBLE' || filterType === 'AGRICULTURAL') {
     return fType === 'CROP' || fType.includes('STUBBLE') || fType.includes('AGRI');
@@ -1235,7 +1235,7 @@ export function matchesFireType(h, filterType) {
     return fType === 'MINE' || fType.includes('COAL') || fType.includes('COLLIERY');
   }
   if (filterType === 'FLAGGED') {
-    return !!h.is_flagged || fType.includes('ALERT') || (h.frp >= 35);
+    return !!h.is_flagged || fType.includes('ALERT') || (Number(h.frp || 0) >= 35);
   }
   return fType === filterType;
 }
@@ -5254,12 +5254,6 @@ function initFireMapGlobe() {
       }
 
       renderMapLayers();
-
-      // If specific fire type selected, smoothly fly to top incident of that type
-      if (state.filterType !== 'ALL' && window.fireMapGlobe?.activeHotspots?.length > 0) {
-        const topFire = window.fireMapGlobe.activeHotspots[0];
-        window.fireMapGlobe.flyToHotspot(topFire);
-      }
     });
   });
 
