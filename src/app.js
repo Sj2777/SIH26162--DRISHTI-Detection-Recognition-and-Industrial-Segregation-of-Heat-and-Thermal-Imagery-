@@ -119,6 +119,9 @@ function startApp() {
     }
   });
 
+  // 0. Fetch genuine real-time Open-Meteo / GFS meteorological wind data for India
+  fetchLiveAtmosphericWind(22.5, 78.5);
+
   // 1. Immediately ingest genuine verified constellation detections (0ms delay)
   fetch('/data/live_hotspots_initial.json')
     .then(r => r.json())
@@ -299,10 +302,17 @@ function initDashboard() {
           <h2 style="font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:0;">👁️ DRISHTI National Command Intelligence Hub</h2>
           <p style="font-size:0.76rem;color:#64748b;margin:4px 0 0 0;">Satellite thermal detections are indicators requiring human validation — not proof of fire, violation, or incident.</p>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:0.68rem;color:#64748b;">Data Freshness (IST)</div>
-          <div style="font-size:0.85rem;font-weight:700;color:#34d399;font-family:monospace;">${freshness}</div>
-          <div style="font-size:0.62rem;color:#64748b;">NASA FIRMS &middot; INSAT-3DR &middot; SEVIRI</div>
+        <div style="display:flex;align-items:center;gap:20px;text-align:right;flex-shrink:0;">
+          <div>
+            <div style="font-size:0.68rem;color:#64748b;">Live Meteorological Feed</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#38bdf8;font-family:monospace;" id="dashLiveWindText">${state.windBearing}° @ ${state.windSpeed} km/h</div>
+            <div style="font-size:0.62rem;color:#34d399;">● Open-Meteo GFS Telemetry</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:#64748b;">Data Freshness (IST)</div>
+            <div style="font-size:0.85rem;font-weight:700;color:#34d399;font-family:monospace;">${freshness}</div>
+            <div style="font-size:0.62rem;color:#64748b;">NASA FIRMS &middot; INSAT-3DR &middot; SEVIRI</div>
+          </div>
         </div>
       </div>
 
@@ -2138,6 +2148,11 @@ function renderHotspotInspector(h) {
             if (lblS) lblS.innerText = `${state.windSpeed} km/h`;
             if (sliderB) sliderB.value = state.windBearing;
             if (sliderS) sliderS.value = state.windSpeed;
+            if (window.fireMapGlobe) {
+              window.fireMapGlobe.setWindParameters(state.windSpeed, state.windBearing);
+              window.fireMapGlobe.updateHazardZone(Number(h.latitude), Number(h.longitude), state.windSpeed, state.windBearing);
+            }
+            updateLiveWindBadges();
             renderMapLayers();
           }
         }
@@ -2147,6 +2162,44 @@ function renderHotspotInspector(h) {
       });
   }
 }
+
+// Live atmospheric wind update and synchronization functions
+function updateLiveWindBadges() {
+  const badge = document.getElementById('timelineWindBadge');
+  if (badge) {
+    badge.innerHTML = `<span>FIRMS</span><br><span style="color:#38bdf8;">GFS 22km</span><div style="font-size:9px;color:#22c55e;font-weight:700;margin-top:2px;letter-spacing:0.3px;">● LIVE ${state.windBearing}° @ ${state.windSpeed} km/h</div>`;
+  }
+  const dashWind = document.getElementById('dashLiveWindText');
+  if (dashWind) {
+    dashWind.innerText = `${state.windBearing}° @ ${state.windSpeed} km/h`;
+  }
+}
+window.updateLiveWindBadges = updateLiveWindBadges;
+
+async function fetchLiveAtmosphericWind(lat = 22.5, lon = 78.5) {
+  try {
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${Number(lat).toFixed(4)}&longitude=${Number(lon).toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m`;
+    const res = await fetch(weatherUrl);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.current) {
+      if (data.current.wind_direction_10m !== undefined) {
+        state.windBearing = Math.round(data.current.wind_direction_10m);
+      }
+      if (data.current.wind_speed_10m !== undefined) {
+        state.windSpeed = Math.round((data.current.wind_speed_10m || 10) * 10) / 10;
+      }
+      if (window.fireMapGlobe) {
+        window.fireMapGlobe.setWindParameters(state.windSpeed, state.windBearing);
+      }
+      updateLiveWindBadges();
+      console.log(`[DRISHTI] Real-time Open-Meteo GFS wind synced: ${state.windBearing}° @ ${state.windSpeed} km/h`);
+    }
+  } catch (err) {
+    console.warn('[DRISHTI] Atmospheric wind fetch note:', err);
+  }
+}
+window.fetchLiveAtmosphericWind = fetchLiveAtmosphericWind;
 
 
 // ==========================================
@@ -4630,6 +4683,7 @@ function initFireMapGlobe() {
     }
     document.getElementById('btnNavCommand')?.classList.add('active');
     document.getElementById('btnNavGlobe')?.classList.remove('active');
+    document.body.classList.add('scrolled-to-command');
   };
 
   window.scrollToGlobe = function() {
@@ -4642,15 +4696,17 @@ function initFireMapGlobe() {
     }
     document.getElementById('btnNavGlobe')?.classList.add('active');
     document.getElementById('btnNavCommand')?.classList.remove('active');
+    document.body.classList.remove('scrolled-to-command');
   };
 
-  // Scroll spy to sync active portal buttons
+  // Scroll spy to sync active portal buttons and isolate command dashboard from map overlays
   const mainScroll = document.getElementById('mainPageScroll');
   if (mainScroll) {
     mainScroll.addEventListener('scroll', () => {
       const isDown = mainScroll.scrollTop > window.innerHeight * 0.35;
       document.getElementById('btnNavCommand')?.classList.toggle('active', isDown);
       document.getElementById('btnNavGlobe')?.classList.toggle('active', !isDown);
+      document.body.classList.toggle('scrolled-to-command', isDown);
     });
   }
 

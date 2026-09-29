@@ -31,6 +31,8 @@
       <!-- Top Viewport: 3D Globe Hero -->
       <div class="hero-map-viewport" id="heroMapViewport">
         <div id="map"></div>
+        <!-- Canvas for Wind Streamline Particles (Scoped strictly inside 3D Globe Viewport) -->
+        <canvas id="wind-canvas"></canvas>
 
         <!-- Half-Visible Command Dashboard Teaser Bar at the Bottom -->
         <div class="command-dashboard-peek" id="commandDashboardPeek" onclick="window.scrollToCommandDashboard()">
@@ -541,15 +543,12 @@
             <span>6d</span><span>5d</span><span>4d</span><span>3d</span><span>2d</span><span>1d</span><span class="active">Today</span>
           </div>
         </div>
-        <div class="timeline-model-badge">
+        <div class="timeline-model-badge" id="timelineWindBadge" title="Real-Time Open-Meteo / GFS IMD Telemetry">
           <span>FIRMS</span><br>
           <span style="color:#38bdf8;">GFS 22km</span>
         </div>
       </div>
     </div>
-
-    <!-- Canvas for Wind Streamline Particles -->
-    <canvas id="wind-canvas"></canvas>
 
     <!-- =====================================================================
          8. EXISTING PROTOCOL MODALS (Preserved)

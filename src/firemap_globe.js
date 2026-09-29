@@ -234,6 +234,17 @@ export class FireMapGlobe {
       if (this.currentHazardHotspot) {
         this.updateHazardZone(this.currentHazardHotspot.lat, this.currentHazardHotspot.lon, this.windSpeedKmh, this.windBearingDeg);
       }
+
+      let moveDebounce = null;
+      this.map.on('moveend', () => {
+        clearTimeout(moveDebounce);
+        moveDebounce = setTimeout(() => {
+          const center = this.map ? this.map.getCenter() : null;
+          if (center && typeof window.fetchLiveAtmosphericWind === 'function') {
+            window.fetchLiveAtmosphericWind(center.lat, center.lng);
+          }
+        }, 1800);
+      });
     });
 
     this.initWindCanvas();
@@ -1421,16 +1432,25 @@ export class FireMapGlobe {
   // =========================================================================
   initWindCanvas() {
     let canvas = document.getElementById('wind-canvas');
+    const heroViewport = document.getElementById('heroMapViewport');
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.id = 'wind-canvas';
-      document.body.appendChild(canvas);
+      if (heroViewport) {
+        heroViewport.appendChild(canvas);
+      } else {
+        document.body.appendChild(canvas);
+      }
+    } else if (heroViewport && canvas.parentElement !== heroViewport) {
+      heroViewport.appendChild(canvas);
     }
     const ctx = canvas.getContext('2d');
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const parent = canvas.parentElement || heroViewport || document.body;
+      const rect = parent.getBoundingClientRect();
+      canvas.width = rect.width || window.innerWidth;
+      canvas.height = rect.height || window.innerHeight;
     };
     resize();
     window.addEventListener('resize', resize);
