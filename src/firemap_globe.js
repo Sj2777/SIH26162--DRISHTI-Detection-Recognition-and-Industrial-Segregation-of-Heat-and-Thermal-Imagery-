@@ -1296,6 +1296,21 @@ export class FireMapGlobe {
     });
   }
 
+  // Toggle satellite orbit paths and globe markers on/off
+  toggleSatelliteOrbits(visible) {
+    this.showSatelliteOrbits = visible;
+    const val = visible ? 'visible' : 'none';
+    ['satellite-geo-fill', 'satellite-geo-line', 'satellite-orbit-past', 'satellite-orbit-future'].forEach(layerId => {
+      if (this.map && this.map.getLayer(layerId)) {
+        this.map.setLayoutProperty(layerId, 'visibility', val);
+      }
+    });
+    Object.values(this.satelliteMarkers || {}).forEach(m => {
+      const el = m.getElement();
+      if (el) el.style.display = visible ? 'block' : 'none';
+    });
+  }
+
   // Open detailed live telemetry card for clicked satellite
   openSatelliteTelemetryPopup(sat) {
     const nowSec = Date.now() / 1000;
