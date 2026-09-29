@@ -326,23 +326,10 @@ function initDashboard() {
     }
   });
 
-  const industrial = hs.filter(h => h.fire_type === 'FACTORY' || h.fire_type === 'INDUSTRIAL_HIGH_ALERT' || h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT' || h.classification === 'KNOWN_INDUSTRIAL_FLARE').length;
-  const anomalies = hs.filter(h => h.fire_type === 'INDUSTRIAL_HIGH_ALERT' || h.classification === 'INDUSTRIAL_ANOMALY_ACCIDENT').length;
-  const wildfires = hs.filter(h => h.fire_type === 'WILDFIRE' || h.classification === 'WILDFIRE_FOREST').length;
-  const agro = hs.filter(h => h.fire_type === 'CROP' || h.classification === 'AGRICULTURAL_STUBBLE').length;
-  const unreg = hs.filter(h => h.classification === 'UNREGISTERED_ILLEGAL_FACILITY' || h.is_unregistered).length;
-  const flagged = hs.filter(h => h.is_flagged).length;
-  const total = hs.length;
+  // 1. Group multiple thermal detections at the same facility or site into ONE consolidated site incident
+  const siteMap = new Map();
 
-  const stateCounts = {};
-  hs.forEach(h => {
-    const st = (h.region ? h.region.split('/')[0].trim() : null) || getStateFromCoords(h.latitude, h.longitude) || 'Unknown';
-    stateCounts[st] = (stateCounts[st] || 0) + 1;
-  });
-  const topStates = Object.entries(stateCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
-
-  // Map ALL active thermal events across India with full dynamic telemetry
-  const allDashboardIncidents = hs.map((h, idx) => {
+  hs.forEach((h) => {
     let districtObj = null;
     if (h.latitude && h.longitude && Array.isArray(INDIAN_DISTRICTS)) {
       for (const d of INDIAN_DISTRICTS) {
@@ -365,49 +352,115 @@ function initDashboard() {
 
     const distName = districtObj ? districtObj.name : (h.district || 'Regional');
     const stName = districtObj ? districtObj.state : ((h.region ? h.region.split('/')[0].trim() : null) || getStateFromCoords(h.latitude, h.longitude) || 'India');
-    const frp = Number(h.frp) || 20;
-    const fireType = (h.fire_type || h.classification || 'FACTORY').toUpperCase();
-    const isCritical = frp >= 35 || fireType.includes('ALERT') || fireType.includes('ACCIDENT');
-    const priority = isCritical ? 'CRITICAL' : (frp >= 20 ? 'HIGH' : 'ELEVATED');
+
+    let siteKey = '';
+    const facName = (h.facility_name || '').trim();
+    if (facName && !facName.includes('Detection') && !facName.includes('Hotspot') && !facName.includes('Active Thermal')) {
+      siteKey = 'FACILITY:' + facName.toLowerCase();
+    } else {
+      // Spatial grid (~0.04° lat/lon ~ 4.5km site cluster) + district
+      const gridLat = (Math.round(Number(h.latitude) * 25) / 25).toFixed(2);
+      const gridLon = (Math.round(Number(h.longitude) * 25) / 25).toFixed(2);
+      siteKey = `GEO:${distName}:${stName}:${gridLat}:${gridLon}`;
+    }
+
+    if (!siteMap.has(siteKey)) {
+      siteMap.set(siteKey, {
+        siteKey,
+        hotspots: [],
+        districtObj,
+        distName,
+        stName
+      });
+    }
+    siteMap.get(siteKey).hotspots.push(h);
+  });
+
+  const allDashboardIncidents = Array.from(siteMap.values()).map((siteGroup, siteIdx) => {
+    const group = siteGroup.hotspots;
+    // Primary hotspot has the highest FRP
+    group.sort((a, b) => Number(b.frp || 0) - Number(a.frp || 0));
+    const primary = group[0];
+
+    const distName = siteGroup.distName;
+    const stName = siteGroup.stName;
+
+    const hotspotCount = group.length;
+    const peakFrp = Number(primary.frp || 20);
+    const sumFrp = group.reduce((acc, curr) => acc + Number(curr.frp || 0), 0);
+    const maxConfidence = Math.max(...group.map(curr => Number(curr.confidence || curr.confidence_score || 85)));
+
+    // Fire type hierarchy: INDUSTRIAL_HIGH_ALERT > FACTORY > MINE > WILDFIRE > CROP
+    let consolidatedFireType = (primary.fire_type || primary.classification || 'FACTORY').toUpperCase();
+    if (group.some(curr => {
+      const ft = (curr.fire_type || curr.classification || '').toUpperCase();
+      return ft.includes('ALERT') || ft.includes('ACCIDENT');
+    })) {
+      consolidatedFireType = 'INDUSTRIAL_HIGH_ALERT';
+    } else if (group.some(curr => {
+      const ft = (curr.fire_type || curr.classification || '').toUpperCase();
+      return ft === 'FACTORY' || ft.includes('STACK') || ft.includes('CHIMNEY') || ft.includes('INDUSTR');
+    })) {
+      consolidatedFireType = 'FACTORY';
+    } else if (group.some(curr => {
+      const ft = (curr.fire_type || curr.classification || '').toUpperCase();
+      return ft === 'MINE' || ft.includes('COAL') || ft.includes('COLLIERY');
+    })) {
+      consolidatedFireType = 'MINE';
+    } else if (group.some(curr => {
+      const ft = (curr.fire_type || curr.classification || '').toUpperCase();
+      return ft === 'WILDFIRE' || ft.includes('WILD') || ft.includes('FOREST');
+    })) {
+      consolidatedFireType = 'WILDFIRE';
+    }
+
+    const isCritical = peakFrp >= 35 || consolidatedFireType.includes('ALERT') || consolidatedFireType.includes('ACCIDENT');
+    const priority = isCritical ? 'CRITICAL' : (peakFrp >= 20 ? 'HIGH' : 'ELEVATED');
     const priorityColor = priority === 'CRITICAL' ? '#ef4444' : (priority === 'HIGH' ? '#f97316' : '#f59e0b');
     const priorityBadgeClass = priority === 'CRITICAL' ? 'badge-critical' : 'badge-warning';
 
-    const title = h.facility_name 
-      ? h.facility_name 
-      : `${distName} (${stName}) Active Thermal Hotspot`;
+    const title = primary.facility_name 
+      ? primary.facility_name 
+      : `${distName} (${stName}) Thermal Emission Site`;
 
-    const sector = h.classification || h.fire_type || 'Satellite Thermal Detection';
-    const dev = Math.max(1.2, (frp / 11.5)).toFixed(1);
-    const pop = h.context_dossier?.population?.density_km2 
-      ? Math.round(h.context_dossier.population.density_km2 * 12.5) 
-      : Math.round(Math.max(1200, frp * 190));
+    const sector = primary.classification || consolidatedFireType || 'Satellite Thermal Detection';
+    const dev = Math.max(1.2, (peakFrp / 11.5)).toFixed(1);
+    const pop = primary.context_dossier?.population?.density_km2 
+      ? Math.round(primary.context_dossier.population.density_km2 * 12.5) 
+      : Math.round(Math.max(1200, peakFrp * 190));
 
-    const ackStatus = frp >= 30 ? 'IMMEDIATE ACTION REQUIRED' : 'AWAITING ACKNOWLEDGEMENT';
+    const ackStatus = peakFrp >= 30 ? 'IMMEDIATE ACTION REQUIRED' : 'AWAITING ACKNOWLEDGEMENT';
 
-    const explanation = h.classification_explanation || (
-      h.facility_name
-        ? `Within operational bounds of ${h.facility_name} (${frp.toFixed(1)} MW FRP). Deviation ${dev}× above 90d baseline.`
-        : `Multi-sensor satellite radiometry detected ${frp.toFixed(1)} MW FRP in ${distName}, ${stName} (${dev}× baseline).`
+    const satSet = new Set(group.map(curr => curr.satellite || 'NASA VIIRS'));
+    const satString = Array.from(satSet).join(' &middot; ');
+
+    const explanation = primary.classification_explanation || (
+      primary.facility_name
+        ? `${hotspotCount > 1 ? `${hotspotCount} multi-sensor hotspot detections consolidated at ${primary.facility_name}` : `Within operational perimeter of ${primary.facility_name}`} (Peak ${peakFrp.toFixed(1)} MW FRP). Deviation ${dev}× above 90d baseline.`
+        : `${hotspotCount > 1 ? `${hotspotCount} thermal detection points consolidated at this site` : 'Multi-sensor radiometry detection'} in ${distName}, ${stName} (${dev}× baseline).`
     );
 
     return {
-      rank: idx + 1,
-      id: h.id,
-      lat: Number(h.latitude) || 22.5,
-      lon: Number(h.longitude) || 78.5,
+      rank: siteIdx + 1,
+      id: primary.id,
+      hotspotIds: group.map(curr => curr.id),
+      hotspotCount: hotspotCount,
+      lat: Number(primary.latitude) || 22.5,
+      lon: Number(primary.longitude) || 78.5,
       facility: title,
       district: distName,
       state: stName,
       sector: sector,
-      fire_type: fireType,
-      classification: h.classification || fireType,
-      is_flagged: !!h.is_flagged,
-      frp: frp.toFixed(1),
+      fire_type: consolidatedFireType,
+      classification: primary.classification || consolidatedFireType,
+      is_flagged: group.some(curr => !!curr.is_flagged),
+      frp: peakFrp.toFixed(1),
+      sumFrp: sumFrp.toFixed(1),
       deviation: `${dev}×`,
-      confidence: h.confidence || h.confidence_score || 94,
-      satellite: h.satellite || 'NASA VIIRS',
-      acqDate: h.acq_date || 'Today',
-      acqTime: h.acq_time || 'Recent Orbit',
+      confidence: maxConfidence,
+      satellite: satString,
+      acqDate: primary.acq_date || 'Today',
+      acqTime: primary.acq_time || 'Recent Orbit',
       priority: priority,
       priorityColor: priorityColor,
       priorityBadgeClass: priorityBadgeClass,
@@ -416,6 +469,29 @@ function initDashboard() {
       explanation: explanation
     };
   });
+
+  // Sort so critical priority and highest FRP appear first
+  allDashboardIncidents.sort((a, b) => {
+    if (a.priority === 'CRITICAL' && b.priority !== 'CRITICAL') return -1;
+    if (b.priority === 'CRITICAL' && a.priority !== 'CRITICAL') return 1;
+    return Number(b.frp) - Number(a.frp);
+  });
+  allDashboardIncidents.forEach((s, idx) => { s.rank = idx + 1; });
+
+  const industrial = allDashboardIncidents.filter(s => matchesFireType(s, 'FACTORY') || matchesFireType(s, 'INDUSTRIAL_HIGH_ALERT')).length;
+  const anomalies = allDashboardIncidents.filter(s => matchesFireType(s, 'INDUSTRIAL_HIGH_ALERT')).length;
+  const wildfires = allDashboardIncidents.filter(s => matchesFireType(s, 'WILDFIRE')).length;
+  const agro = allDashboardIncidents.filter(s => matchesFireType(s, 'CROP')).length;
+  const unreg = allDashboardIncidents.filter(s => s.classification === 'UNREGISTERED_ILLEGAL_FACILITY' || s.is_unregistered).length;
+  const flagged = allDashboardIncidents.filter(s => s.is_flagged).length;
+  const total = allDashboardIncidents.length;
+
+  const stateCounts = {};
+  allDashboardIncidents.forEach(site => {
+    const st = site.state || 'Unknown';
+    stateCounts[st] = (stateCounts[st] || 0) + 1;
+  });
+  const topStates = Object.entries(stateCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
 
   state.allDashboardIncidents = allDashboardIncidents;
   state.dashIncidentFilter = state.dashIncidentFilter || 'FACTORY';
@@ -717,6 +793,11 @@ window.renderDashboardIncidentCards = function(categoryFilter = 'FACTORY') {
                 <span class="badge ${inc.priorityBadgeClass}" style="font-size: 0.58rem; padding: 1px 5px;">
                   ${inc.priority}
                 </span>
+                ${inc.hotspotCount > 1 ? `
+                  <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.58rem; padding: 1px 6px;">
+                    📍 ${inc.hotspotCount} Detections at Site
+                  </span>
+                ` : ''}
               </div>
               <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px;">
                 <span style="color: #cbd5e1; font-weight: 500;">📍 ${inc.district}, ${inc.state}</span> &middot; 
@@ -733,8 +814,9 @@ window.renderDashboardIncidentCards = function(categoryFilter = 'FACTORY') {
         <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.32); border-radius: 6px; padding: 6px 10px; font-size: 0.68rem; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <div>
-              <span style="color: #64748b;">Thermal FRP:</span>
+              <span style="color: #64748b;">Peak FRP:</span>
               <strong style="color: #f97316; font-family: monospace; margin-left: 3px;">${inc.frp} MW</strong>
+              ${inc.hotspotCount > 1 ? `<span style="color: #94a3b8; font-size: 0.62rem; margin-left: 3px;">(${inc.sumFrp} MW site total)</span>` : ''}
             </div>
             <div>
               <span style="color: #64748b;">Deviation:</span>
