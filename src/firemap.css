@@ -587,6 +587,18 @@ html, body {
   box-sizing: border-box;
   position: relative;
   z-index: 10;
+  font-family: var(--fm-font-body, var(--font-main));
+}
+
+#dashboard-container {
+  font-family: var(--fm-font-body, var(--font-main));
+}
+
+#dashboard-container h1,
+#dashboard-container h2,
+#dashboard-container h3,
+#dashboard-container h4 {
+  font-family: var(--fm-font-display, var(--font-main));
 }
 
 .command-section-topbar {
@@ -596,10 +608,11 @@ html, body {
   padding-bottom: 18px;
   margin-bottom: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--fm-font-body, var(--font-main));
 }
 
 .command-section-breadcrumbs {
-  font-family: var(--fm-font-display);
+  font-family: var(--fm-font-display, var(--font-main));
   font-size: 13px;
   color: #94a3b8;
 }
