@@ -213,14 +213,30 @@ function Dashboard() {
                 <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h2 className="font-semibold">Satellite fire map</h2><p className="text-xs text-muted-foreground">Focused on {session.municipality}</p></div><span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase text-primary">Satellite</span></div>
                 <div className="relative h-[500px] overflow-hidden bg-map-surface">
                   <Map
-                    initialViewState={{ longitude: mapCenter.lng, latitude: mapCenter.lat, zoom: 11 }}
-                    mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+                    initialViewState={{ longitude: mapCenter.lng, latitude: mapCenter.lat, zoom: 13 }}
+                    mapStyle={{
+                      version: 8,
+                      sources: {
+                        'gmap-hybrid': {
+                          type: 'raster',
+                          tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
+                          tileSize: 256
+                        }
+                      },
+                      layers: [{
+                        id: 'satellite-layer',
+                        type: 'raster',
+                        source: 'gmap-hybrid',
+                        minzoom: 0,
+                        maxzoom: 22
+                      }]
+                    }}
                   >
                     {filteredAlerts.map((alert, index) => {
                       const isCritical = alert.severity === "CRITICAL";
                       const isWarning = alert.severity === "WARNING";
-                      const lat = mapCenter.lat + (index % 4 - 2) * 0.05;
-                      const lng = mapCenter.lng + ((index + 2) % 4 - 2) * 0.05;
+                      const lat = alert.lat ?? mapCenter.lat + (index % 4 - 2) * 0.05;
+                      const lng = alert.lng ?? mapCenter.lng + ((index + 2) % 4 - 2) * 0.05;
                       return (
                         <Marker key={alert.id} longitude={lng} latitude={lat} anchor="center">
                           <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedId(alert.id); }} aria-label={`Open ${alert.id}`} className={cn("grid size-8 place-items-center rounded-full border-2 border-primary-foreground shadow-lg transition-transform hover:scale-110", isCritical ? "bg-critical text-critical-foreground animate-pulse" : isWarning ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}><Flame className="size-4" /></button>

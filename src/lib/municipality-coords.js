@@ -88,9 +88,20 @@ export const MUNICIPALITY_COORDS = {
   "Puducherry Municipality": { lat: 11.9416, lng: 79.8083 },
 };
 
-// Default fallback (center of India)
-export const DEFAULT_COORDS = { lat: 22.5, lng: 78.5 };
+// Default fallback (Pune, since our demo data is Pune-based)
+export const DEFAULT_COORDS = { lat: 18.5204, lng: 73.8567 };
 
 export function getMunicipalityCoords(name) {
-  return MUNICIPALITY_COORDS[name] || DEFAULT_COORDS;
+  if (!name) return DEFAULT_COORDS;
+  
+  // Exact match
+  if (MUNICIPALITY_COORDS[name]) return MUNICIPALITY_COORDS[name];
+  
+  // Loose match (e.g., "Nagpur Municipal Corporation" -> "Nagpur MC")
+  const looseKey = Object.keys(MUNICIPALITY_COORDS).find(k => 
+    name.toLowerCase().includes(k.replace(" MC", "").toLowerCase()) ||
+    k.toLowerCase().includes(name.replace(" MC", "").toLowerCase())
+  );
+  
+  return looseKey ? MUNICIPALITY_COORDS[looseKey] : DEFAULT_COORDS;
 }

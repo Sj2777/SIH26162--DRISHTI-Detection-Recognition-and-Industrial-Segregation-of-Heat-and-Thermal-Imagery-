@@ -13,4 +13,7 @@ export default defineConfig({
     tailwindcss(),
     tsConfigPaths(),
   ],
+  optimizeDeps: {
+    exclude: ['maplibre-gl']
+  }
 });
