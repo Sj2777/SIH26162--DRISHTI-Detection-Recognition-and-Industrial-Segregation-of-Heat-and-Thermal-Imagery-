@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-
 const KEY = "agni-vision-theme";
 
 export function readTheme() {

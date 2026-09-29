@@ -10,8 +10,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue } from
-"@/components/ui/select";
+  SelectValue,
+} from "@/components/ui/select";
 import { INDIA_MUNICIPALITIES, INDIA_STATES } from "@/lib/india-municipalities";
 import { readSession, writeSession } from "@/lib/demo-session";
 import { cn } from "@/lib/utils";
@@ -19,22 +19,22 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-    { title: "Sign in — AGNI-VISION Municipal Watch" },
-    {
-      name: "description",
-      content:
-      "Demo sign-in for the AGNI-VISION municipal fire control console. Pick your state and municipality to enter the ward-level alert dashboard."
-    },
-    { property: "og:title", content: "Sign in — AGNI-VISION Municipal Watch" },
-    {
-      property: "og:description",
-      content: "Demo access to ward-level fire alerts, industry histories and response reports."
-    },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" }]
-
+      { title: "Sign in — AGNI-VISION Municipal Watch" },
+      {
+        name: "description",
+        content:
+          "Demo sign-in for the AGNI-VISION municipal fire control console. Pick your state and municipality to enter the ward-level alert dashboard.",
+      },
+      { property: "og:title", content: "Sign in — AGNI-VISION Municipal Watch" },
+      {
+        property: "og:description",
+        content: "Demo access to ward-level fire alerts, industry histories and response reports.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
   }),
-  component: AuthPage
+  component: AuthPage,
 });
 
 function AuthPage() {
@@ -63,7 +63,7 @@ function AuthPage() {
       setError("Select a state and then a municipality.");
       return;
     }
-    
+
     try {
       const res = await fetch("http://localhost:8000/api/auth/login", {
         method: "POST",
@@ -73,8 +73,8 @@ function AuthPage() {
           password: password.trim(),
           name: name.trim(),
           municipality,
-          state
-        })
+          state,
+        }),
       });
       if (res.ok) {
         const user = await res.json();
@@ -111,9 +111,16 @@ function AuthPage() {
             Ward-level fire detection for municipal control rooms.
           </h1>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Flame className="size-4 text-critical" /> Live satellite thermal alerts by ward</li>
-            <li className="flex items-center gap-2"><MapPin className="size-4 text-info" /> Industry profiles with past fire history</li>
-            <li className="flex items-center gap-2"><ShieldAlert className="size-4 text-warning" /> Escalation actions, reports and alert sirens</li>
+            <li className="flex items-center gap-2">
+              <Flame className="size-4 text-critical" /> Live satellite thermal alerts by ward
+            </li>
+            <li className="flex items-center gap-2">
+              <MapPin className="size-4 text-info" /> Industry profiles with past fire history
+            </li>
+            <li className="flex items-center gap-2">
+              <ShieldAlert className="size-4 text-warning" /> Escalation actions, reports and alert
+              sirens
+            </li>
           </ul>
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             Demo environment · accounts are simulated, no real login is created
@@ -122,36 +129,58 @@ function AuthPage() {
 
         <form
           onSubmit={submit}
-          className="rounded-xl border border-border bg-card p-5 shadow-2xl sm:p-6">
-          
+          className="rounded-xl border border-border bg-card p-5 shadow-2xl sm:p-6"
+        >
           <div className="mb-5 grid grid-cols-2 gap-1 rounded-lg bg-secondary/40 p-1">
-            {["signin", "signup"].map((value) =>
-            <button
-              key={value}
-              type="button"
-              onClick={() => {setMode(value);setError("");}}
-              className={cn(
-                "cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                mode === value ? "bg-primary/20 text-primary ring-1 ring-primary/30" : "text-muted-foreground hover:text-foreground"
-              )}>
-              
+            {["signin", "signup"].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setMode(value);
+                  setError("");
+                }}
+                className={cn(
+                  "cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  mode === value
+                    ? "bg-primary/20 text-primary ring-1 ring-primary/30"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
                 {value === "signin" ? "Sign in" : "Create account"}
               </button>
-            )}
+            ))}
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Officer name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full name"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Official email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@municipality.gov.in" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@municipality.gov.in"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -159,13 +188,20 @@ function AuthPage() {
                 <Label>State / UT</Label>
                 <Select
                   value={state}
-                  onValueChange={(value) => {setState(value);setMunicipality("");}}>
-                  
-                  <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                  onValueChange={(value) => {
+                    setState(value);
+                    setMunicipality("");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
                   <SelectContent className="max-h-72">
-                    {INDIA_STATES.map((item) =>
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                    )}
+                    {INDIA_STATES.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -173,12 +209,16 @@ function AuthPage() {
                 <Label>Municipality</Label>
                 <Select value={municipality} onValueChange={setMunicipality} disabled={!state}>
                   <SelectTrigger>
-                    <SelectValue placeholder={state ? "Select municipality" : "Pick a state first"} />
+                    <SelectValue
+                      placeholder={state ? "Select municipality" : "Pick a state first"}
+                    />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
-                    {municipalities.map((item) =>
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                    )}
+                    {municipalities.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -197,6 +237,6 @@ function AuthPage() {
           </p>
         </form>
       </div>
-    </div>);
-
+    </div>
+  );
 }

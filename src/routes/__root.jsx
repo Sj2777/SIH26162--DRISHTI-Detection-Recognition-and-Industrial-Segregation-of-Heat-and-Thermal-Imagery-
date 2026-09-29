@@ -5,8 +5,8 @@ import {
   createRootRouteWithContext,
   useRouter,
   HeadContent,
-  Scripts } from
-"@tanstack/react-router";
+  Scripts,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -24,14 +24,14 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-            
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
             Go home
           </Link>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 function ErrorComponent({ error, reset }) {
@@ -53,60 +53,64 @@ function ErrorComponent({ error, reset }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-            
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
             Try again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-            
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
             Go home
           </a>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 export const Route = createRootRouteWithContext()({
   head: () => ({
     meta: [
-    { charSet: "utf-8" },
-    { name: "viewport", content: "width=device-width, initial-scale=1" },
-    { title: "AGNI-VISION Municipal Control" },
-    { name: "description", content: "Municipal fire detection and incident response console." },
-    { name: "author", content: "AGNI-VISION" },
-    { property: "og:title", content: "AGNI-VISION Municipal Control" },
-    { property: "og:description", content: "Municipal fire detection and incident response console." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" }],
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "AGNI-VISION Municipal Control" },
+      { name: "description", content: "Municipal fire detection and incident response console." },
+      { name: "author", content: "AGNI-VISION" },
+      { property: "og:title", content: "AGNI-VISION Municipal Control" },
+      {
+        property: "og:description",
+        content: "Municipal fire detection and incident response console.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
 
     links: [
-    {
-      rel: "stylesheet",
-      href: appCss
-    },
-    {
-      rel: "preconnect",
-      href: "https://fonts.googleapis.com"
-    },
-    {
-      rel: "preconnect",
-      href: "https://fonts.gstatic.com",
-      crossOrigin: "anonymous"
-    },
-    {
-      rel: "stylesheet",
-      href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap"
-    },
-    { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }]
-
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap",
+      },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent
+  errorComponent: ErrorComponent,
 });
 
 function RootShell({ children }) {
@@ -119,8 +123,8 @@ function RootShell({ children }) {
         {children}
         <Scripts />
       </body>
-    </html>);
-
+    </html>
+  );
 }
 
 function RootComponent() {
@@ -131,6 +135,6 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-right" richColors closeButton />
-    </QueryClientProvider>);
-
+    </QueryClientProvider>
+  );
 }

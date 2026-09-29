@@ -2,13 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 
 const KEY = "agni-vision-demo-session";
 
-
-
-
-
-
-
-
 export function readSession() {
   if (typeof window === "undefined") return null;
   try {
@@ -52,10 +45,10 @@ export function useDemoSession() {
 }
 
 export function initials(name) {
-  return name.
-  split(" ").
-  filter(Boolean).
-  slice(0, 2).
-  map((part) => part[0]?.toUpperCase() ?? "").
-  join("");
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }

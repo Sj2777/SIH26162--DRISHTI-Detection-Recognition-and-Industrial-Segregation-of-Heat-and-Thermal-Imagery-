@@ -9,8 +9,6 @@ export function setSoundEnabled(enabled) {
   window.localStorage.setItem(SOUND_KEY, enabled ? "on" : "off");
 }
 
-
-
 /** Two-tone siren beep for new critical alerts. */
 export function playAlertTone(severity = "CRITICAL") {
   if (typeof window === "undefined" || !soundEnabled()) return;
@@ -23,7 +21,8 @@ export function playAlertTone(severity = "CRITICAL") {
     gain.connect(ctx.destination);
     gain.gain.setValueAtTime(0.0001, now);
 
-    const tones = severity === "CRITICAL" ? [880, 660, 880, 660] : severity === "WARNING" ? [720, 540] : [520];
+    const tones =
+      severity === "CRITICAL" ? [880, 660, 880, 660] : severity === "WARNING" ? [720, 540] : [520];
     tones.forEach((freq, index) => {
       const osc = ctx.createOscillator();
       osc.type = "square";
@@ -38,8 +37,8 @@ export function playAlertTone(severity = "CRITICAL") {
     gain.gain.exponentialRampToValueAtTime(0.0001, end);
     window.setTimeout(() => void ctx.close(), (end - now) * 1000 + 200);
   } catch {
-
-    /* audio unavailable */}
+    /* audio unavailable */
+  }
 }
 
 export async function requestNotificationPermission() {

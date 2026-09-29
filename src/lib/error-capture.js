@@ -2,7 +2,7 @@
 // when h3 has already swallowed the throw into a generic 500 Response.
 
 let lastCapturedError;
-const TTL_MS = 5_000;
+const TTL_MS = 5000;
 
 function record(error) {
   lastCapturedError = { error, at: Date.now() };
@@ -13,7 +13,7 @@ function record(error) {
 // the failure detail stripped. Expand Error-like args into a string that keeps the
 // message, stack, and the full cause chain.
 const CAUSE_DEPTH_LIMIT = 5;
-const DESCRIPTION_LENGTH_LIMIT = 8_000;
+const DESCRIPTION_LENGTH_LIMIT = 8000;
 
 export function describeError(error) {
   const parts = [];
