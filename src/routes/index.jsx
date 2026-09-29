@@ -53,7 +53,7 @@ function AuthPage() {
 
   const municipalities = useMemo(() => INDIA_MUNICIPALITIES[state] ?? [], [state]);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Fill in every field to continue.");
@@ -63,8 +63,31 @@ function AuthPage() {
       setError("Select a state and then a municipality.");
       return;
     }
-    writeSession({ name: name.trim(), email: email.trim(), state, municipality });
-    void navigate({ to: "/dashboard" });
+    
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: email.trim(),
+          password: password.trim(),
+          name: name.trim(),
+          municipality,
+          state
+        })
+      });
+      if (res.ok) {
+        const user = await res.json();
+        writeSession(user);
+        void navigate({ to: "/dashboard" });
+      } else {
+        setError("Invalid credentials.");
+      }
+    } catch (e) {
+      // Fallback for demo if backend is offline
+      writeSession({ name: name.trim(), email: email.trim(), state, municipality });
+      void navigate({ to: "/dashboard" });
+    }
   };
 
   return (

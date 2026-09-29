@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext()({
     },
     {
       rel: "stylesheet",
-      href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap"
     },
     { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }]
 

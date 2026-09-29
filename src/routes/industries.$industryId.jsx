@@ -13,8 +13,9 @@ import {
 import { useEffect } from "react";
 import { toast } from "sonner";
 
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { industryById, INDUSTRIES } from "@/lib/demo-data";
+import { industryById, INDUSTRIES as FALLBACK_INDUSTRIES } from "@/lib/demo-data";
 import { useDemoSession } from "@/lib/demo-session";
 import { cn } from "@/lib/utils";
 
@@ -46,11 +47,33 @@ function IndustryDetail() {
   const { industryId } = Route.useParams();
   const navigate = useNavigate();
   const { session, ready } = useDemoSession();
-  const industry = industryById(industryId);
 
   useEffect(() => {
     if (ready && !session) void navigate({ to: "/" });
   }, [ready, session, navigate]);
+
+  const { data: industry, isLoading } = useQuery({
+    queryKey: ["industry", industryId],
+    queryFn: async () => {
+      const res = await fetch(`http://localhost:8000/api/industries/${industryId}`);
+      if (!res.ok) throw new Error("Not found");
+      return res.json();
+    },
+    initialData: () => industryById(industryId)
+  });
+
+  const { data: industries = FALLBACK_INDUSTRIES } = useQuery({
+    queryKey: ["industries"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/api/industries");
+      if (!res.ok) throw new Error("Not found");
+      return res.json();
+    }
+  });
+
+  if (isLoading) {
+    return <div className="grid min-h-screen place-items-center bg-background px-4">Loading...</div>;
+  }
 
   if (!industry) {
     return (
@@ -61,7 +84,6 @@ function IndustryDetail() {
           <Button className="mt-5" asChild><Link to="/dashboard">Back to control room</Link></Button>
         </div>
       </div>);
-
   }
 
   const critical = industry.history.filter((entry) => entry.severity === "CRITICAL").length;
@@ -139,7 +161,7 @@ function IndustryDetail() {
             <div className="rounded-xl border border-border bg-card p-5 shadow-xl">
               <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Other facilities</div>
               <div className="space-y-2">
-                {INDUSTRIES.filter((item) => item.id !== industry.id).map((item) =>
+                {industries.filter((item) => item.id !== industry.id).map((item) =>
                 <Link
                   key={item.id}
                   to="/industries/$industryId"

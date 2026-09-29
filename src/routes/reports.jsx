@@ -17,8 +17,9 @@ import {
 "recharts";
 import { toast } from "sonner";
 
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { INDUSTRIES, MONTHLY_ALERTS, RESPONSE_TREND } from "@/lib/demo-data";
+import { INDUSTRIES as FALLBACK_INDUSTRIES, MONTHLY_ALERTS as FALLBACK_MONTHLY, RESPONSE_TREND as FALLBACK_RESPONSE } from "@/lib/demo-data";
 import { useDemoSession } from "@/lib/demo-session";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,6 @@ export const Route = createFileRoute("/reports")({
     },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" }]
-
   }),
   component: ReportsPage
 });
@@ -52,7 +52,34 @@ function ReportsPage() {
     if (ready && !session) void navigate({ to: "/" });
   }, [ready, session, navigate]);
 
-  const totals = MONTHLY_ALERTS.reduce(
+  const { data: industries = FALLBACK_INDUSTRIES } = useQuery({
+    queryKey: ["industries"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/api/industries");
+      if (!res.ok) throw new Error("Network error");
+      return res.json();
+    }
+  });
+
+  const { data: monthlyAlerts = FALLBACK_MONTHLY } = useQuery({
+    queryKey: ["stats", "monthly"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/api/stats/monthly");
+      if (!res.ok) throw new Error("Network error");
+      return res.json();
+    }
+  });
+
+  const { data: responseTrend = FALLBACK_RESPONSE } = useQuery({
+    queryKey: ["stats", "response"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/api/stats/response");
+      if (!res.ok) throw new Error("Network error");
+      return res.json();
+    }
+  });
+
+  const totals = monthlyAlerts.reduce(
     (acc, row) => ({
       critical: acc.critical + row.critical,
       warning: acc.warning + row.warning,
@@ -66,14 +93,14 @@ function ReportsPage() {
   { name: "Warning", value: totals.warning },
   { name: "Routine", value: totals.routine }];
 
-  const perIndustry = INDUSTRIES.map((industry) => ({
+  const perIndustry = industries.map((industry) => ({
     name: industry.name.split(" ").slice(0, 2).join(" "),
     alerts: industry.history.length
   }));
-  const latestResponse = RESPONSE_TREND[RESPONSE_TREND.length - 1]?.minutes ?? 0;
+  const latestResponse = responseTrend[responseTrend.length - 1]?.minutes ?? 0;
 
   const exportCsv = () => {
-    const rows = [["Month", "Critical", "Warning", "Routine"], ...MONTHLY_ALERTS.map((r) => [r.month, r.critical, r.warning, r.routine])];
+    const rows = [["Month", "Critical", "Warning", "Routine"], ...monthlyAlerts.map((r) => [r.month, r.critical, r.warning, r.routine])];
     const blob = new Blob([rows.map((r) => r.join(",")).join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -107,13 +134,13 @@ function ReportsPage() {
           <Kpi value={total} label="Total alerts" tone="text-foreground" />
           <Kpi value={totals.critical} label="Critical incidents" tone="text-critical" icon={TriangleAlert} />
           <Kpi value={`${latestResponse}m`} label="Latest avg response" tone="text-success" icon={Timer} />
-          <Kpi value={INDUSTRIES.length} label="Monitored industries" tone="text-info" />
+          <Kpi value={industries.length} label="Monitored industries" tone="text-info" />
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <Panel title="Alerts by month and severity">
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={MONTHLY_ALERTS}>
+              <BarChart data={monthlyAlerts}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} />
                 <YAxis stroke="var(--color-muted-foreground)" fontSize={11} />
@@ -148,7 +175,7 @@ function ReportsPage() {
 
           <Panel title="Average response time (minutes)">
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={RESPONSE_TREND}>
+              <LineChart data={responseTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} />
                 <YAxis stroke="var(--color-muted-foreground)" fontSize={11} />
