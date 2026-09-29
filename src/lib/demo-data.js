@@ -134,11 +134,16 @@ export const INITIAL_ALERTS = [
   industryId: "sunrise-chemicals",
   time: "14:12 IST",
   severity: "CRITICAL",
-  status: "PENDING",
+  priority: "High",
+  classification: "Industrial",
+  landCover: "Urban Industrial",
+  assignedOfficer: null,
+  status: "New",
   frp: 64.8,
   confidence: 94,
   position: "left-[49%] top-[43%]",
-  source: "VIIRS · SNPP"
+  source: "VIIRS · SNPP",
+  detectionTime: new Date(Date.now() - 1000 * 60 * 15).toISOString() // 15 mins ago
 },
 {
   id: "AL-1041",
@@ -147,11 +152,16 @@ export const INITIAL_ALERTS = [
   industryId: "msw-yard",
   time: "13:40 IST",
   severity: "WARNING",
-  status: "PENDING",
+  priority: "Medium",
+  classification: "Waste/Dump",
+  landCover: "Open ground",
+  assignedOfficer: "R. Sharma",
+  status: "Under verification",
   frp: 9.2,
   confidence: 82,
   position: "left-[23%] top-[66%]",
-  source: "NOAA-20"
+  source: "NOAA-20",
+  detectionTime: new Date(Date.now() - 1000 * 60 * 45).toISOString() // 45 mins ago
 },
 {
   id: "AL-1039",
@@ -160,11 +170,16 @@ export const INITIAL_ALERTS = [
   industryId: "ganga-textiles",
   time: "11:05 IST",
   severity: "ROUTINE",
-  status: "ROUTINE FLARE",
+  priority: "Low",
+  classification: "Industrial",
+  landCover: "Urban Industrial",
+  assignedOfficer: null,
+  status: "Resolved",
   frp: 4.1,
   confidence: 76,
   position: "left-[72%] top-[28%]",
-  source: "SEVIRI"
+  source: "SEVIRI",
+  detectionTime: new Date(Date.now() - 1000 * 60 * 180).toISOString() // 3 hrs ago
 }];
 
 
@@ -176,11 +191,16 @@ export const INCOMING_ALERTS = [
   industryId: "coastal-refinery",
   time: "14:26 IST",
   severity: "CRITICAL",
-  status: "PENDING",
+  priority: "High",
+  classification: "Industrial",
+  landCover: "Industrial Port",
+  assignedOfficer: null,
+  status: "New",
   frp: 77.4,
   confidence: 91,
   position: "left-[62%] top-[62%]",
-  source: "VIIRS · NOAA-21"
+  source: "VIIRS · NOAA-21",
+  detectionTime: new Date().toISOString()
 }];
 
 

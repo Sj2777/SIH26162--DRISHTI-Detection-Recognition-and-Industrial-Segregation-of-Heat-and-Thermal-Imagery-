@@ -30,10 +30,18 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const actions = [
-{ label: "Verify incident", status: "VERIFIED INCIDENT" },
-{ label: "Escalate", status: "ESCALATED" },
-{ label: "Resolve", status: "RESOLVED" },
-{ label: "False positive", status: "FALSE POSITIVE" }];
+  { label: "Acknowledge", status: "Acknowledged" },
+  { label: "Request analyst review", status: "Analyst review requested" },
+  { label: "Contact facility", status: "Industry contacted" },
+  { label: "Verify as incident", status: "Under verification" },
+  { label: "Mark routine flare", status: "Routine flare" },
+  { label: "Escalate to fire-control-room", status: "Fire-control-room notified" },
+  { label: "Escalate to state", status: "Escalated to state" },
+  { label: "Close as resolved", status: "Resolved" },
+  { label: "Mark false positive", status: "False positive" },
+  { label: "Add field note/photo", status: "Note added" },
+  { label: "Generate incident report", status: "Report generated" },
+];
 
 
 function Dashboard() {
@@ -151,9 +159,24 @@ function Dashboard() {
                 <div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h2 className="font-semibold">Live alerts</h2><p className="text-xs text-muted-foreground">Priority queue</p></div><span className="rounded-md bg-critical/10 px-2 py-1 text-[10px] font-bold text-critical">{criticalCount} CRITICAL</span></div>
                 <div className="max-h-[548px] space-y-2 overflow-y-auto p-3">
                   {filteredAlerts.map((alert) => <button key={alert.id} type="button" onClick={() => setSelectedId(alert.id)} className={cn("w-full rounded-md border p-3 text-left transition-colors", selected.id === alert.id ? "border-primary bg-primary/5" : "border-border hover:bg-secondary/60")}>
-                    <div className="flex items-center justify-between gap-2"><span className={cn("rounded px-2 py-0.5 text-[9px] font-bold", alert.severity === "CRITICAL" ? "bg-critical/10 text-critical" : alert.severity === "WARNING" ? "bg-warning/10 text-warning" : "bg-success/10 text-success")}>{alert.severity}</span><span className="text-[10px] text-muted-foreground">{alert.time}</span></div>
-                    <div className="mt-2 text-sm font-semibold">{alert.facility}</div><div className="mt-1 text-xs text-muted-foreground">{alert.location}</div>
-                    <div className="mt-3 flex items-center justify-between text-[10px]"><span>FRP {alert.frp} MW</span><span className="font-semibold text-primary">{alert.confidence}% confidence</span></div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex gap-1">
+                        <span className={cn("rounded px-2 py-0.5 text-[9px] font-bold", alert.severity === "CRITICAL" ? "bg-critical/10 text-critical" : alert.severity === "WARNING" ? "bg-warning/10 text-warning" : "bg-success/10 text-success")}>{alert.severity}</span>
+                        {alert.priority && <span className={cn("rounded px-2 py-0.5 text-[9px] font-bold border", alert.priority === "High" ? "border-critical text-critical" : alert.priority === "Medium" ? "border-warning text-warning" : "border-info text-info")}>{alert.priority} Priority</span>}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{alert.detectionTime ? getTimeSince(alert.detectionTime) : alert.time}</span>
+                    </div>
+                    <div className="mt-2 text-sm font-semibold">{alert.facility}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{alert.location}</div>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-muted-foreground uppercase tracking-wider">
+                      {alert.classification && <span>{alert.classification}</span>}
+                      {alert.landCover && <span>• {alert.landCover}</span>}
+                      {alert.assignedOfficer && <span className="text-primary font-semibold">• {alert.assignedOfficer}</span>}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-[10px]">
+                      <span>FRP {alert.frp} MW</span>
+                      <span className="font-semibold text-primary">{alert.confidence}% confidence</span>
+                    </div>
                   </button>)}
                 </div>
               </aside>
