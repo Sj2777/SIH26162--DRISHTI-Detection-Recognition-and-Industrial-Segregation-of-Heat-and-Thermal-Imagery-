@@ -1,3 +1,5 @@
+const fs = require('fs');
+const code = 
 import React, { useState } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -141,3 +143,5 @@ export const FacilityMap: React.FC<FacilityMapProps> = ({ facility, assets }) =>
     </div>
   );
 };
+;
+fs.writeFileSync('src/components/map/FacilityMap.tsx', code);

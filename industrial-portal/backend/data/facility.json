@@ -1,7 +1,7 @@
 {
-  "facilityName": "AGNI Demo Petrochemical Facility",
-  "facilityType": "Petrochemical Processing Complex",
-  "location": "Industrial Sector 7, Western Corridor (Demo Zone)",
+  "facilityName": "Tata Motors Ltd (Pimpri Plant)",
+  "facilityType": "Auto Manufacturing Complex",
+  "location": "Pimpri-Chinchwad Industrial Area, Pune 411018, Maharashtra",
   "operatingMode": "NORMAL",
   "overallRisk": "HIGH",
   "activeThermalEvents": 2,
@@ -15,13 +15,14 @@
     "speed": "14 km/h"
   },
   "coordinates": {
-    "center": [22.3150, 73.1750],
+    "center": [18.6225, 73.8058],
     "zoom": 16,
     "boundary": [
-      [22.3215, 73.1685],
-      [22.3215, 73.1815],
-      [22.3085, 73.1815],
-      [22.3085, 73.1685]
+      [18.6290, 73.7993],
+      [18.6290, 73.8123],
+      [18.6160, 73.8123],
+      [18.6160, 73.7993]
     ]
   }
 }
+

@@ -5,8 +5,8 @@
     "type": "Combustion Unit",
     "status": "NORMAL",
     "risk": "LOW",
-    "latitude": 22.3185,
-    "longitude": 73.1712,
+    "latitude": 18.626,
+    "longitude": 73.802,
     "condition": "Nominal flare combustion, pilot temperature optimal",
     "isThermalEvent": false
   },
@@ -16,8 +16,8 @@
     "type": "Storage Terminal",
     "status": "CRITICAL",
     "risk": "HIGH",
-    "latitude": 22.3138,
-    "longitude": 73.1782,
+    "latitude": 18.6213,
+    "longitude": 73.809,
     "condition": "Thermal deviation detected (2.7× facility baseline)",
     "isThermalEvent": true
   },
@@ -27,8 +27,8 @@
     "type": "Gas Compression",
     "status": "WARNING",
     "risk": "MEDIUM",
-    "latitude": 22.3162,
-    "longitude": 73.1745,
+    "latitude": 18.6237,
+    "longitude": 73.8053,
     "condition": "Vibration elevated on secondary stage shaft",
     "isThermalEvent": false
   },
@@ -38,8 +38,8 @@
     "type": "Steam Generation",
     "status": "NORMAL",
     "risk": "LOW",
-    "latitude": 22.3115,
-    "longitude": 73.1720,
+    "latitude": 18.619,
+    "longitude": 73.8028,
     "condition": "Steam pressure and exhaust flue gases nominal",
     "isThermalEvent": false
   },
@@ -49,8 +49,8 @@
     "type": "Hydrocarbon Conduit",
     "status": "WARNING",
     "risk": "MEDIUM",
-    "latitude": 22.3170,
-    "longitude": 73.1790,
+    "latitude": 18.6245,
+    "longitude": 73.8098,
     "condition": "Transient pressure oscillation at junction manifold",
     "isThermalEvent": false
   },
@@ -60,8 +60,8 @@
     "type": "Distribution Terminal",
     "status": "NORMAL",
     "risk": "LOW",
-    "latitude": 22.3102,
-    "longitude": 73.1765,
+    "latitude": 18.6177,
+    "longitude": 73.8073,
     "condition": "Vapor recovery active, static grounding verified",
     "isThermalEvent": false
   }
