@@ -92,7 +92,8 @@ function Dashboard() {
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sound, setSound] = useState(true);
-  const incomingIndex = useRef(0);
+  const [activeTab, setActiveTab] = useState("monitoring");
+  const mapRef = useRef(null);
 
   const { data: alerts = INITIAL_ALERTS, refetch } = useQuery({
     queryKey: ["alerts"],
@@ -408,68 +409,116 @@ function Dashboard() {
               </div>
             </div>
 
-            <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              <Kpi
-                icon={Flame}
-                label="Active incidents"
-                value={criticalCount}
-                note="Require immediate action"
-                tone="text-critical"
-              />
-              <Kpi
-                icon={MapPinned}
-                label="New alerts"
-                value={alerts.filter((a) => a.status === "New" || a.status === "PENDING").length}
-                note="Awaiting ACK"
-                tone="text-warning"
-              />
-              <Kpi
-                icon={Layers3}
-                label="Industrial facilities"
-                value={industries.length}
-                note={`${industries.filter((i) => i.riskScore >= 65).length} high-risk`}
-                tone="text-info"
-              />
-              <Kpi
-                icon={ShieldCheck}
-                label="Escalated to Fire Dept"
-                value={
-                  alerts.filter(
-                    (a) =>
-                      a.status === "Escalated to state" ||
-                      a.status === "Fire-control-room notified",
-                  ).length
-                }
-                note="Currently active"
-                tone="text-destructive"
-              />
-              <Kpi
-                icon={Activity}
-                label="Under investigation"
-                value={alerts.filter((a) => a.status === "Under verification").length}
-                note="Field team assigned"
-                tone="text-warning"
-              />
-              <Kpi
-                icon={BarChart3}
-                label="Resolved incidents"
-                value={
-                  alerts.filter((a) => a.status === "Resolved" || a.status === "False positive")
-                    .length
-                }
-                note="This month"
-                tone="text-success"
-              />
-              <Kpi
-                icon={Activity}
-                label="Avg ACK time"
-                value={`${Math.round(industries.reduce((s, i) => s + (i.history?.[0]?.responseMins || 0), 0) / industries.length)}m`}
-                note="Based on facility history"
-                tone="text-success"
-              />
-            </section>
+            <div className="flex border-b border-border mb-5">
+              <button
+                type="button"
+                className={cn("px-4 py-2 text-sm font-semibold border-b-2 transition-colors", activeTab === "monitoring" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}
+                onClick={() => setActiveTab("monitoring")}
+              >
+                Live Monitoring
+              </button>
+              <button
+                type="button"
+                className={cn("px-4 py-2 text-sm font-semibold border-b-2 transition-colors", activeTab === "analytics" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}
+                onClick={() => setActiveTab("analytics")}
+              >
+                Analytics & KPIs
+              </button>
+            </div>
 
-            <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+            {activeTab === "analytics" && (
+              <div className="space-y-5">
+                <section className="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-5">
+                  <Kpi icon={Flame} label="Active incidents" value={criticalCount} note="Require immediate action" tone="text-critical" />
+                  <Kpi icon={MapPinned} label="New alerts" value={alerts.filter((a) => a.status === "New" || a.status === "PENDING").length} note="Awaiting ACK" tone="text-warning" />
+                  <Kpi icon={Layers3} label="Industrial facilities" value={industries.length} note={`${industries.filter((i) => i.riskScore >= 65).length} high-risk`} tone="text-info" />
+                  <Kpi icon={ShieldCheck} label="Escalated to Fire Dept" value={alerts.filter((a) => a.status === "Escalated to state" || a.status === "Fire-control-room notified").length} note="Currently active" tone="text-destructive" />
+                  <Kpi icon={Activity} label="Under investigation" value={alerts.filter((a) => a.status === "Under verification").length} note="Field team assigned" tone="text-warning" />
+                  <Kpi icon={BarChart3} label="Resolved incidents" value={alerts.filter((a) => a.status === "Resolved" || a.status === "False positive").length} note="This month" tone="text-success" />
+                  <Kpi icon={Activity} label="Avg ACK time" value={`${Math.round(industries.reduce((s, i) => s + (i.history?.[0]?.responseMins || 0), 0) / industries.length)}m`} note="Based on facility history" tone="text-success" />
+                </section>
+                <section className="grid gap-5 lg:grid-cols-3">
+                  <Panel title="Incident activity" icon={Activity}>
+                    <div className="space-y-3">
+                      {alerts.slice(0, 3).map((alert) => (
+                        <div key={alert.id} className="flex gap-3">
+                          <span
+                            className={cn(
+                              "mt-1 size-2 shrink-0 rounded-full",
+                              alert.severity === "CRITICAL"
+                                ? "bg-critical"
+                                : alert.severity === "WARNING"
+                                  ? "bg-warning"
+                                  : "bg-success",
+                            )}
+                          />
+                          <div>
+                            <div className="text-sm font-medium">{alert.facility}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {alert.time} · {alert.status}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Panel>
+                  <Panel title="Fire-risk trend" icon={BarChart3}>
+                    <ResponsiveContainer width="100%" height={145}>
+                      <LineChart data={RESPONSE_TREND}>
+                        <XAxis
+                          dataKey="month"
+                          axisLine={false}
+                          tickLine={false}
+                          fontSize={10}
+                          stroke="var(--color-muted-foreground)"
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            background: "var(--color-popover)",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: 6,
+                            fontSize: 11,
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="minutes"
+                          stroke="var(--color-primary)"
+                          strokeWidth={2.5}
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Panel>
+                  <Panel title="Top-risk regions" icon={MapPinned}>
+                    <div className="space-y-3">
+                      {[...industries]
+                        .sort((a, b) => b.riskScore - a.riskScore)
+                        .slice(0, 3)
+                        .map((item) => (
+                          <Link
+                            key={item.id}
+                            to="/industries/$industryId"
+                            params={{ industryId: item.id }}
+                            className="flex items-center justify-between rounded-md border border-border px-3 py-2 hover:bg-secondary"
+                          >
+                            <div>
+                              <div className="text-sm font-medium">{item.name}</div>
+                              <div className="text-[10px] text-muted-foreground">{item.ward}</div>
+                            </div>
+                            <span className="text-sm font-bold text-critical">
+                              {item.riskScore}
+                            </span>
+                          </Link>
+                        ))}
+                    </div>
+                  </Panel>
+                </section>
+              </div>
+            )}
+
+            {activeTab === "monitoring" && (
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="flex flex-col gap-5">
                 <section
                   id="map-section"
@@ -488,6 +537,7 @@ function Dashboard() {
                   </div>
                   <div className="relative h-[400px] overflow-hidden bg-map-surface">
                     <Map
+                      ref={mapRef}
                       initialViewState={{
                         longitude: mapCenter.lng,
                         latitude: mapCenter.lat,
@@ -525,6 +575,7 @@ function Dashboard() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedId(alert.id);
+                                mapRef.current?.flyTo({ center: [lng, lat], zoom: 15, duration: 800 });
                               }}
                               aria-label={`Open ${alert.id}`}
                               className={cn(
@@ -625,130 +676,56 @@ function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="rounded-md bg-secondary/30 border border-border p-4 font-mono text-[11px] leading-loose text-foreground">
-                    <div className="mb-2 text-muted-foreground font-bold tracking-widest">
+                  <div className="rounded-md bg-secondary/10 border-2 border-primary/20 p-6 font-mono text-sm leading-relaxed text-foreground shadow-inner">
+                    <div className="mb-4 text-muted-foreground font-bold tracking-widest text-xs border-b border-border/50 pb-2">
                       SITUATION REPORT (SITREP) - SATELLITE DISASTER INTELLIGENCE
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">* Location:</span> {selected.lat}°N,{" "}
-                      {selected.lng}°E | {session.state}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Target Area:</span>{" "}
-                      {selected.facility}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Detection Sensor:</span>{" "}
-                      {selected.source} (Time: {selected.time})
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Observed FRP:</span> {selected.frp}{" "}
-                      MW (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}σ)
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Planck Temperature:</span>{" "}
-                      {Math.round(selected.frp * 15 + 1000)} K
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Land Cover:</span>{" "}
-                      {selected.landCover || "Sensing via ESA WorldCover 10m"}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Population Density:</span> ~
-                      {selected.severity === "CRITICAL"
-                        ? "12,500"
-                        : selected.severity === "WARNING"
-                          ? "8,200"
-                          : "3,400"}{" "}
-                      (Assessing spatial census...)
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">* Suggested Mitigation:</span>{" "}
-                      {selected.severity === "CRITICAL"
-                        ? "Deploy district emergency response squad; maintain downwind exclusion perimeter."
-                        : selected.severity === "WARNING"
-                          ? "Send field team for ground verification within 30 minutes."
-                          : "Monitor — likely routine industrial activity."}
+                    <div className="space-y-1.5">
+                      <div>
+                        <span className="text-muted-foreground">* Location:</span> {selected.lat}°N,{" "}
+                        {selected.lng}°E | {session.state}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Target Area:</span>{" "}
+                        {selected.facility}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Detection Sensor:</span>{" "}
+                        {selected.source} (Time: {selected.time})
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Observed FRP:</span> <span className="font-bold text-critical">{selected.frp} MW</span>{" "}
+                        (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}σ)
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Planck Temperature:</span>{" "}
+                        {Math.round(selected.frp * 15 + 1000)} K
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Land Cover:</span>{" "}
+                        {selected.landCover || "Sensing via ESA WorldCover 10m"}
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">* Population Density:</span> ~
+                        {selected.severity === "CRITICAL"
+                          ? "12,500"
+                          : selected.severity === "WARNING"
+                            ? "8,200"
+                            : "3,400"}{" "}
+                        (Assessing spatial census...)
+                      </div>
+                      <div className="mt-4 pt-2 border-t border-border/50">
+                        <span className="text-muted-foreground">* Suggested Mitigation:</span>{" "}
+                        <span className={cn("font-semibold", selected.severity === "CRITICAL" ? "text-critical" : selected.severity === "WARNING" ? "text-warning" : "text-success")}>
+                          {selected.severity === "CRITICAL"
+                            ? "Deploy district emergency response squad; maintain downwind exclusion perimeter."
+                            : selected.severity === "WARNING"
+                              ? "Send field team for ground verification within 30 minutes."
+                              : "Monitor — likely routine industrial activity."}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </section>
-
-                <section className="grid gap-5 lg:grid-cols-3">
-                  <Panel title="Incident activity" icon={Activity}>
-                    <div className="space-y-3">
-                      {alerts.slice(0, 3).map((alert) => (
-                        <div key={alert.id} className="flex gap-3">
-                          <span
-                            className={cn(
-                              "mt-1 size-2 shrink-0 rounded-full",
-                              alert.severity === "CRITICAL"
-                                ? "bg-critical"
-                                : alert.severity === "WARNING"
-                                  ? "bg-warning"
-                                  : "bg-success",
-                            )}
-                          />
-                          <div>
-                            <div className="text-sm font-medium">{alert.facility}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {alert.time} · {alert.status}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Panel>
-                  <Panel title="Fire-risk trend" icon={BarChart3}>
-                    <ResponsiveContainer width="100%" height={145}>
-                      <LineChart data={RESPONSE_TREND}>
-                        <XAxis
-                          dataKey="month"
-                          axisLine={false}
-                          tickLine={false}
-                          fontSize={10}
-                          stroke="var(--color-muted-foreground)"
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            background: "var(--color-popover)",
-                            border: "1px solid var(--color-border)",
-                            borderRadius: 6,
-                            fontSize: 11,
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="minutes"
-                          stroke="var(--color-primary)"
-                          strokeWidth={2.5}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Panel>
-                  <Panel title="Top-risk regions" icon={MapPinned}>
-                    <div className="space-y-3">
-                      {[...industries]
-                        .sort((a, b) => b.riskScore - a.riskScore)
-                        .slice(0, 3)
-                        .map((item) => (
-                          <Link
-                            key={item.id}
-                            to="/industries/$industryId"
-                            params={{ industryId: item.id }}
-                            className="flex items-center justify-between rounded-md border border-border px-3 py-2 hover:bg-secondary"
-                          >
-                            <div>
-                              <div className="text-sm font-medium">{item.name}</div>
-                              <div className="text-[10px] text-muted-foreground">{item.ward}</div>
-                            </div>
-                            <span className="text-sm font-bold text-critical">
-                              {item.riskScore}
-                            </span>
-                          </Link>
-                        ))}
-                    </div>
-                  </Panel>
                 </section>
               </div>
 
@@ -833,6 +810,7 @@ function Dashboard() {
                 </div>
               </aside>
             </div>
+            )}
           </main>
         </div>
       </div>
