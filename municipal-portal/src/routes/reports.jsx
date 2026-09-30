@@ -30,13 +30,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/reports")({
   head: () => ({
     meta: [
-      { title: "Reports & charts — AGNI-VISION Municipal Watch" },
+      { title: "Reports & charts â€” AGNI-VISION Municipal Watch" },
       {
         name: "description",
         content:
           "Monthly fire alert volumes, severity mix, response-time trend and per-industry incident counts for the municipality.",
       },
-      { property: "og:title", content: "Reports & charts — AGNI-VISION Municipal Watch" },
+      { property: "og:title", content: "Reports & charts â€” AGNI-VISION Municipal Watch" },
       {
         property: "og:description",
         content:
@@ -62,27 +62,21 @@ function ReportsPage() {
   const { data: industries = FALLBACK_INDUSTRIES } = useQuery({
     queryKey: ["industries"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/api/industries");
-      if (!res.ok) throw new Error("Network error");
-      return res.json();
+      throw new Error("Network error");
     },
   });
 
   const { data: monthlyAlerts = FALLBACK_MONTHLY } = useQuery({
     queryKey: ["stats", "monthly"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/api/stats/monthly");
-      if (!res.ok) throw new Error("Network error");
-      return res.json();
+      return FALLBACK_MONTHLY;
     },
   });
 
   const { data: responseTrend = FALLBACK_RESPONSE } = useQuery({
     queryKey: ["stats", "response"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/api/stats/response");
-      if (!res.ok) throw new Error("Network error");
-      return res.json();
+      return FALLBACK_RESPONSE;
     },
   });
 
@@ -143,7 +137,7 @@ function ReportsPage() {
             <BarChart3 className="size-3.5" /> Reports &amp; charts
           </div>
           <h1 className="mt-2 text-2xl font-bold">
-            {session?.municipality ?? "Municipality"} — last 6 months
+            {session?.municipality ?? "Municipality"} â€” last 6 months
           </h1>
         </header>
 
@@ -214,7 +208,7 @@ function ReportsPage() {
                     className="size-2 rounded-full"
                     style={{ backgroundColor: SEVERITY_COLORS[index] }}
                   />
-                  {entry.name} · {entry.value}
+                  {entry.name} Â· {entry.value}
                 </span>
               ))}
             </div>
@@ -297,3 +291,6 @@ function Panel({ title, children }) {
     </section>
   );
 }
+
+
+

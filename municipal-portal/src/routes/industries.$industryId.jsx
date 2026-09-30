@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Building2,
@@ -22,13 +22,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/industries/$industryId")({
   head: () => ({
     meta: [
-      { title: "Industry fire history — AGNI-VISION Municipal Watch" },
+      { title: "Industry fire history â€” AGNI-VISION Municipal Watch" },
       {
         name: "description",
         content:
           "Past fire alerts, response times and control-room contact details for a registered industrial facility.",
       },
-      { property: "og:title", content: "Industry fire history — AGNI-VISION Municipal Watch" },
+      { property: "og:title", content: "Industry fire history â€” AGNI-VISION Municipal Watch" },
       {
         property: "og:description",
         content:
@@ -71,9 +71,7 @@ function IndustryDetail() {
   const { data: industries = FALLBACK_INDUSTRIES } = useQuery({
     queryKey: ["industries"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/api/industries");
-      if (!res.ok) throw new Error("Not found");
-      return res.json();
+      throw new Error("Not found");
     },
   });
 
@@ -148,7 +146,7 @@ function IndustryDetail() {
                 <div key={entry.id} className="rounded-lg border border-border bg-secondary/35 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] uppercase tracking-wider">
                     <span className={severityTone(entry.severity)}>
-                      {entry.severity} · {entry.id}
+                      {entry.severity} Â· {entry.id}
                     </span>
                     <span className="text-muted-foreground">
                       {new Date(entry.date).toLocaleDateString("en-IN", {
@@ -208,7 +206,7 @@ function IndustryDetail() {
                 className="mt-4 w-full"
                 onClick={() =>
                   toast.success("Calling site supervisor", {
-                    description: `${industry.contact.supervisor} · ${industry.contact.phone}`,
+                    description: `${industry.contact.supervisor} Â· ${industry.contact.phone}`,
                   })
                 }
               >
@@ -278,3 +276,4 @@ function ContactRow({ icon: Icon, label, value, href }) {
     </div>
   );
 }
+

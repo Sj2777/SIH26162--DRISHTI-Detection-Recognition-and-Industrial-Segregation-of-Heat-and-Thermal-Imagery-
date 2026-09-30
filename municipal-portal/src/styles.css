@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "tailwindcss" source(none);
 @source "../src";
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -120,4 +119,5 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 @keyframes status-pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 42%, transparent); } 50% { opacity: .72; box-shadow: 0 0 0 5px transparent; } }
 @utility status-pulse { animation: status-pulse 2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .status-pulse { animation: none; } }
+
 

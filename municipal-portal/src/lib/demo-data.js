@@ -3,7 +3,7 @@ export const INDUSTRIES = [
     id: "tata-motors",
     name: "Tata Motors Ltd (Pimpri Plant)",
     category: "Auto manufacturing",
-    ward: "Ward 42 — Pimpri-Chinchwad",
+    ward: 'Ward 42 - Pimpri-Chinchwad', lat: 18.6225, lng: 73.8058,
     riskScore: 87,
     contact: {
       supervisor: "R. Kulkarni (Site Safety Officer)",
@@ -18,7 +18,7 @@ export const INDUSTRIES = [
         date: "2026-08-14",
         severity: "CRITICAL",
         frp: 58.2,
-        outcome: "Verified incident — paint shop fire contained",
+        outcome: "Verified incident â€” paint shop fire contained",
         responseMins: 14,
       },
       {
@@ -26,7 +26,7 @@ export const INDUSTRIES = [
         date: "2026-06-02",
         severity: "WARNING",
         frp: 12.4,
-        outcome: "Resolved — exhaust overheat",
+        outcome: "Resolved â€” exhaust overheat",
         responseMins: 26,
       },
       {
@@ -34,7 +34,7 @@ export const INDUSTRIES = [
         date: "2026-03-19",
         severity: "ROUTINE",
         frp: 3.8,
-        outcome: "Routine flare — scheduled maintenance",
+        outcome: "Routine flare â€” scheduled maintenance",
         responseMins: 5,
       },
     ],
@@ -43,7 +43,7 @@ export const INDUSTRIES = [
     id: "serum-institute",
     name: "Serum Institute of India",
     category: "Pharmaceuticals",
-    ward: "Ward 12 — Hadapsar",
+    ward: 'Ward 12 - Hadapsar', lat: 18.5020, lng: 73.9400,
     riskScore: 64,
     contact: {
       supervisor: "S. Menon (Plant Manager)",
@@ -58,7 +58,7 @@ export const INDUSTRIES = [
         date: "2026-07-08",
         severity: "WARNING",
         frp: 9.9,
-        outcome: "False positive — steam boiler plume",
+        outcome: "False positive â€” steam boiler plume",
         responseMins: 18,
       },
       {
@@ -75,7 +75,7 @@ export const INDUSTRIES = [
     id: "century-enka",
     name: "Century Enka Ltd",
     category: "Chemicals & Textiles",
-    ward: "Ward 3 — Bhosari MIDC",
+    ward: 'Ward 3 - Bhosari MIDC', lat: 18.6322, lng: 73.8260,
     riskScore: 92,
     contact: {
       supervisor: "A. Pathan (Yard In-charge)",
@@ -90,7 +90,7 @@ export const INDUSTRIES = [
         date: "2026-08-01",
         severity: "WARNING",
         frp: 10.7,
-        outcome: "Resolved — localized solvent fire damped",
+        outcome: "Resolved â€” localized solvent fire damped",
         responseMins: 22,
       },
       {
@@ -98,7 +98,7 @@ export const INDUSTRIES = [
         date: "2026-05-23",
         severity: "CRITICAL",
         frp: 44.6,
-        outcome: "Verified incident — reactor overheat ignition",
+        outcome: "Verified incident â€” reactor overheat ignition",
         responseMins: 17,
       },
     ],
@@ -107,7 +107,7 @@ export const INDUSTRIES = [
     id: "bajaj-auto",
     name: "Bajaj Auto Ltd (Akurdi)",
     category: "Auto manufacturing",
-    ward: "Ward 9 — Akurdi",
+    ward: 'Ward 9 - Akurdi', lat: 18.6475, lng: 73.7915,
     riskScore: 58,
     contact: {
       supervisor: "V. Deshpande (Shift Superintendent)",
@@ -122,7 +122,7 @@ export const INDUSTRIES = [
         date: "2026-09-04",
         severity: "ROUTINE",
         frp: 6.1,
-        outcome: "False alarm — welding works",
+        outcome: "False alarm â€” welding works",
         responseMins: 4,
       },
     ],
@@ -131,7 +131,7 @@ export const INDUSTRIES = [
     id: "bank-of-india",
     name: "Bank of India (Shagun Chowk)",
     category: "Commercial Building",
-    ward: "Sadashiv Peth — Laxmi Road",
+    ward: 'Sadashiv Peth - Laxmi Road', lat: 18.5180, lng: 73.8510,
     riskScore: 40,
     contact: {
       supervisor: "Branch Manager",
@@ -146,7 +146,7 @@ export const INDUSTRIES = [
         date: "2026-09-29",
         severity: "CRITICAL",
         frp: 35.5,
-        outcome: "Resolved — AC unit fire contained",
+        outcome: "Resolved â€” AC unit fire contained",
         responseMins: 60,
       },
     ],
@@ -156,7 +156,7 @@ export const INDUSTRIES = [
 export const INITIAL_ALERTS = [
   {
     id: "AL-1044",
-    location: "Sadashiv Peth — Laxmi Road",
+    location: "Sadashiv Peth â€” Laxmi Road",
     facility: "Bank of India (Shagun Chowk)",
     industryId: "bank-of-india",
     time: "09:30 IST",
@@ -176,7 +176,7 @@ export const INITIAL_ALERTS = [
   },
   {
     id: "AL-1042",
-    location: "Ward 42 — Pimpri-Chinchwad",
+    location: "Ward 42 â€” Pimpri-Chinchwad",
     facility: "Tata Motors Ltd (Pimpri Plant)",
     industryId: "tata-motors",
     time: "14:12 IST",
@@ -191,12 +191,12 @@ export const INITIAL_ALERTS = [
     lat: 18.6225,
     lng: 73.8058,
     position: "left-[49%] top-[43%]",
-    source: "VIIRS · SNPP",
+    source: "VIIRS Â· SNPP",
     detectionTime: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
   {
     id: "AL-1041",
-    location: "Ward 3 — Bhosari MIDC",
+    location: "Ward 3 â€” Bhosari MIDC",
     facility: "Century Enka Ltd",
     industryId: "century-enka",
     time: "13:40 IST",
@@ -216,7 +216,7 @@ export const INITIAL_ALERTS = [
   },
   {
     id: "AL-1039",
-    location: "Ward 12 — Hadapsar",
+    location: "Ward 12 â€” Hadapsar",
     facility: "Serum Institute of India",
     industryId: "serum-institute",
     time: "11:05 IST",
@@ -239,7 +239,7 @@ export const INITIAL_ALERTS = [
 export const INCOMING_ALERTS = [
   {
     id: "AL-1043",
-    location: "Ward 9 — Akurdi",
+    location: "Ward 9 â€” Akurdi",
     facility: "Bajaj Auto Ltd (Akurdi)",
     industryId: "bajaj-auto",
     time: "14:26 IST",
@@ -254,7 +254,7 @@ export const INCOMING_ALERTS = [
     lat: 18.6475,
     lng: 73.7915,
     position: "left-[62%] top-[62%]",
-    source: "VIIRS · NOAA-21",
+    source: "VIIRS Â· NOAA-21",
     detectionTime: new Date().toISOString(),
   },
 ];
@@ -280,3 +280,5 @@ export const RESPONSE_TREND = [
 export function industryById(id) {
   return INDUSTRIES.find((industry) => industry.id === id);
 }
+
+

@@ -46,13 +46,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Fire Command Dashboard — AGNI-VISION" },
+      { title: "Fire Command Dashboard Ã¢â‚¬â€ AGNI-VISION" },
       {
         name: "description",
         content:
           "Municipal fire detection map, Alert Inbox, risk zones and incident response controls.",
       },
-      { property: "og:title", content: "Fire Command Dashboard — AGNI-VISION" },
+      { property: "og:title", content: "Fire Command Dashboard Ã¢â‚¬â€ AGNI-VISION" },
       {
         property: "og:description",
         content: "Municipal fire detection map, Alert Inbox and incident response controls.",
@@ -78,6 +78,7 @@ const getTimeSince = (timeString) => {
 };
 
 function Dashboard() {
+  useEffect(() => { toast.success("UPDATED PORTAL!", { description: "The latest changes have been loaded successfully." }); }, []);
   const navigate = useNavigate();
   const { session, ready, signOut } = useDemoSession();
   const { theme, setTheme } = useTheme();
@@ -92,8 +93,7 @@ function Dashboard() {
     queryKey: ["alerts"],
     queryFn: async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/alerts");
-        if (res.ok) return await res.json();
+        throw new Error("Force");
       } catch {
         console.error("Backend fetch failed, falling back to local data");
       }
@@ -106,8 +106,7 @@ function Dashboard() {
     queryKey: ["industries"],
     queryFn: async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/industries");
-        if (res.ok) return await res.json();
+        throw new Error("Force");
       } catch {
         // ignore
       }
@@ -158,7 +157,7 @@ function Dashboard() {
 
   const updateAlert = (status, label) => {
     updateAlertMutation.mutate({ id: selected.id, status });
-    toast.success(label, { description: `${selected.id} · ${selected.facility}` });
+    toast.success(label, { description: `${selected.id} Ã‚Â· ${selected.facility}` });
   };
 
   const toggleSound = () => {
@@ -217,8 +216,7 @@ function Dashboard() {
               <NavItem icon={BarChart3} label="Reports" collapsed={collapsed} />
             </Link>
             <Link
-              to="/industries/$industryId"
-              params={{ industryId: industries[0]?.id ?? "sunrise-chemicals" }}
+              to="/industries"
             >
               <NavItem icon={Building2} label="Industries" collapsed={collapsed} />
             </Link>
@@ -300,8 +298,7 @@ function Dashboard() {
                   <NavItem icon={BarChart3} label="Reports" />
                 </Link>
                 <Link
-                  to="/industries/$industryId"
-                  params={{ industryId: industries[0]?.id ?? "sunrise-chemicals" }}
+                  to="/industries"
                   onClick={() => setMobileOpen(false)}
                 >
                   <NavItem icon={Building2} label="Industries" />
@@ -394,7 +391,7 @@ function Dashboard() {
                 </p>
                 <h1 className="mt-1 text-2xl font-bold">{session.municipality}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {session.state}, India · jurisdiction locked to this account
+                  {session.state}, India Ã‚Â· jurisdiction locked to this account
                 </p>
               </div>
               <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-xs font-semibold text-success">
@@ -433,7 +430,7 @@ function Dashboard() {
                 <section className="grid gap-5 lg:grid-cols-3">
                   <Panel title="Incident activity" icon={Activity}>
                     <div className="space-y-3">
-                      {alerts.slice(0, 3).map((alert) => (
+                      {alerts.slice(0, 4).map((alert) => (
                         <div key={alert.id} className="flex gap-3">
                           <span
                             className={cn(
@@ -448,7 +445,7 @@ function Dashboard() {
                           <div>
                             <div className="text-sm font-medium">{alert.facility}</div>
                             <div className="text-xs text-muted-foreground">
-                              {alert.time} · {alert.status}
+                              {alert.time} Ã‚Â· {alert.status}
                             </div>
                           </div>
                         </div>
@@ -487,7 +484,7 @@ function Dashboard() {
                     <div className="space-y-3">
                       {[...industries]
                         .sort((a, b) => b.riskScore - a.riskScore)
-                        .slice(0, 3)
+                        .slice(0, 4)
                         .map((item) => (
                           <Link
                             key={item.id}
@@ -603,7 +600,7 @@ function Dashboard() {
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <div className="text-xs font-bold uppercase tracking-wider text-primary">
-                          INCIDENT BRIEF · {selected.id}
+                          INCIDENT BRIEF Ã‚Â· {selected.id}
                         </div>
                         <span
                           className={cn(
@@ -620,7 +617,7 @@ function Dashboard() {
                       </div>
                       <h2 className="text-xl font-bold">{selected.facility}</h2>
                       <div className="text-sm text-muted-foreground mt-1">
-                        {selected.location} • {selected.classification || "Unclassified"}
+                        {selected.location} Ã¢â‚¬Â¢ {selected.classification || "Unclassified"}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 justify-end max-w-lg mt-3 md:mt-0">
@@ -662,7 +659,7 @@ function Dashboard() {
                             }}
                           >
                             {action.label}
-                            {isActive && " ✓"}
+                            {isActive && " Ã¢Å“â€œ"}
                           </Button>
                         );
                       })}
@@ -675,8 +672,8 @@ function Dashboard() {
                     </div>
                     <div className="space-y-1.5">
                       <div>
-                        <span className="text-muted-foreground">* Location:</span> {selected.lat}°N,{" "}
-                        {selected.lng}°E | {session.state}
+                        <span className="text-muted-foreground">* Location:</span> {selected.lat}Ã‚Â°N,{" "}
+                        {selected.lng}Ã‚Â°E | {session.state}
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Target Area:</span>{" "}
@@ -688,7 +685,7 @@ function Dashboard() {
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Observed FRP:</span> <span className="font-bold text-critical">{selected.frp} MW</span>{" "}
-                        (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}σ)
+                        (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}ÃÆ’)
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Planck Temperature:</span>{" "}
@@ -714,7 +711,7 @@ function Dashboard() {
                             ? "Deploy district emergency response squad; maintain downwind exclusion perimeter."
                             : selected.severity === "WARNING"
                               ? "Send field team for ground verification within 30 minutes."
-                              : "Monitor — likely routine industrial activity."}
+                              : "Monitor Ã¢â‚¬â€ likely routine industrial activity."}
                         </span>
                       </div>
                     </div>
@@ -740,7 +737,7 @@ function Dashboard() {
                     <button
                       key={alert.id}
                       type="button"
-                      onClick={() => setSelectedId(alert.id)}
+                      onClick={() => { setSelectedId(alert.id); mapRef.current?.flyTo({ center: [alert.lng || 73.851, alert.lat || 18.518], zoom: 15, duration: 800 }); }}
                       className={cn(
                         "w-full rounded-md border p-3 text-left transition-colors",
                         selected.id === alert.id
@@ -785,10 +782,10 @@ function Dashboard() {
                       <div className="mt-1 text-xs text-muted-foreground">{alert.location}</div>
                       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-muted-foreground uppercase tracking-wider">
                         {alert.classification && <span>{alert.classification}</span>}
-                        {alert.landCover && <span>• {alert.landCover}</span>}
+                        {alert.landCover && <span>Ã¢â‚¬Â¢ {alert.landCover}</span>}
                         {alert.assignedOfficer && (
                           <span className="text-primary font-semibold">
-                            • {alert.assignedOfficer}
+                            Ã¢â‚¬Â¢ {alert.assignedOfficer}
                           </span>
                         )}
                       </div>
@@ -867,3 +864,12 @@ function Legend({ tone, label }) {
     </span>
   );
 }
+
+
+
+
+
+
+
+
+
