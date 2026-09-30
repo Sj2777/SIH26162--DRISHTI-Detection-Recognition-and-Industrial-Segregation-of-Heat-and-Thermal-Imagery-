@@ -82,15 +82,19 @@ export const Header: React.FC<HeaderProps> = ({ facility, activeTab, onTabChange
           </nav>
         </div>
 
-        {/* Right: Telemetry stream + Logout */}
+        {/* Right: Facility Health + Logout */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>
-          <div style={{ background: 'rgba(11,15,21,0.85)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
-            <span style={{ color: '#64748b' }}>SATELLITE:</span>
-            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{facility?.satelliteUpdate ?? '--'}</span>
+          <div style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
+            <span style={{ color: '#fcd34d' }}>RISK:</span>
+            <span style={{ color: '#fff', fontWeight: 700 }}>WATCH</span>
           </div>
           <div style={{ background: 'rgba(11,15,21,0.85)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
-            <span style={{ color: '#64748b' }}>QUALITY:</span>
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>{facility ? `${facility.dataQuality}%` : '--'}</span>
+            <span style={{ color: '#64748b' }}>ANOMALIES:</span>
+            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>3</span>
+          </div>
+          <div style={{ background: 'rgba(11,15,21,0.85)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
+            <span style={{ color: '#64748b' }}>SATELLITE:</span>
+            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>18:20 IST</span>
           </div>
           <button
             onClick={onLogout}

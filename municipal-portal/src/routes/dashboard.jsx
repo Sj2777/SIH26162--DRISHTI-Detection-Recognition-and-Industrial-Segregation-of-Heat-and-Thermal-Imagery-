@@ -37,6 +37,7 @@ import {
   setSoundEnabled,
   soundEnabled,
 } from "@/lib/alert-signals";
+import { generateCAPXML } from "@/lib/capXml";
 import { INDUSTRIES, INCOMING_ALERTS, INITIAL_ALERTS, RESPONSE_TREND } from "@/lib/demo-data";
 import { initials, useDemoSession } from "@/lib/demo-session";
 import { useTheme } from "@/lib/theme";
@@ -49,12 +50,12 @@ export const Route = createFileRoute("/dashboard")({
       {
         name: "description",
         content:
-          "Municipal fire detection map, live alerts, risk zones and incident response controls.",
+          "Municipal fire detection map, Alert Inbox, risk zones and incident response controls.",
       },
       { property: "og:title", content: "Fire Command Dashboard — AGNI-VISION" },
       {
         property: "og:description",
-        content: "Municipal fire detection map, live alerts and incident response controls.",
+        content: "Municipal fire detection map, Alert Inbox and incident response controls.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -64,17 +65,9 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const actions = [
-  { label: "Acknowledge", status: "Acknowledged" },
-  { label: "Request analyst review", status: "Analyst review requested" },
-  { label: "Contact facility", status: "Industry contacted" },
-  { label: "Verify as incident", status: "Under verification" },
-  { label: "Mark routine flare", status: "Routine flare" },
-  { label: "Escalate to fire-control-room", status: "Fire-control-room notified" },
-  { label: "Escalate to state", status: "Escalated to state" },
-  { label: "Close as resolved", status: "Resolved" },
-  { label: "Mark false positive", status: "False positive" },
-  { label: "Add field note/photo", status: "Note added" },
-  { label: "Generate incident report", status: "Report generated" },
+  { label: "Acknowledge Alert", status: "Acknowledged" },
+  { label: "Verify as Incident", status: "Under verification" },
+  { label: "Escalate to Fire Dept (Generate CAP XML)", status: "Fire-control-room notified" },
 ];
 
 const getTimeSince = (timeString) => {
@@ -610,7 +603,7 @@ function Dashboard() {
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <div className="text-xs font-bold uppercase tracking-wider text-primary">
-                          SACHET Alert · {selected.id}
+                          INCIDENT BRIEF · {selected.id}
                         </div>
                         <span
                           className={cn(
@@ -735,7 +728,7 @@ function Dashboard() {
               >
                 <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0">
                   <div>
-                    <h2 className="font-semibold">Live alerts</h2>
+                    <h2 className="font-semibold">Alert Inbox</h2>
                     <p className="text-xs text-muted-foreground">Priority queue</p>
                   </div>
                   <span className="rounded-md bg-critical/10 px-2 py-1 text-[10px] font-bold text-critical">
