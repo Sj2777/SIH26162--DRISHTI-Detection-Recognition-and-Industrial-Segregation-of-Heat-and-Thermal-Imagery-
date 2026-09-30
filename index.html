@@ -819,22 +819,22 @@
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <!-- Industry Card -->
-          <a href="/industry/" target="_blank" style="text-decoration: none; display: block;">
+          <div onclick="window.location.href='/industry/'" style="text-decoration: none; display: block; cursor: pointer;">
             <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--fm-border); border-radius: 12px; padding: 30px 20px; transition: all 0.3s ease; cursor: pointer; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.background='rgba(59, 130, 246, 0.1)';" onmouseout="this.style.borderColor='var(--fm-border)'; this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.05)';">
               <i class="fa-solid fa-industry" style="font-size: 2.5rem; color: #3b82f6; margin-bottom: 16px;"></i>
               <h3 style="color: #fff; font-size: 1.2rem; margin: 0 0 8px 0;">Industry Portal</h3>
               <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Access industry compliance and reporting tools.</p>
             </div>
-          </a>
+          </div>
           
           <!-- Municipal Card -->
-          <a href="/municipal/" target="_blank" style="text-decoration: none; display: block;">
+          <div onclick="window.location.href='/municipal/'" style="text-decoration: none; display: block; cursor: pointer;">
             <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--fm-border); border-radius: 12px; padding: 30px 20px; transition: all 0.3s ease; cursor: pointer; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.borderColor='#10b981'; this.style.transform='translateY(-4px)'; this.style.background='rgba(16, 185, 129, 0.1)';" onmouseout="this.style.borderColor='var(--fm-border)'; this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.05)';">
               <i class="fa-solid fa-city" style="font-size: 2.5rem; color: #10b981; margin-bottom: 16px;"></i>
               <h3 style="color: #fff; font-size: 1.2rem; margin: 0 0 8px 0;">Municipal Portal</h3>
               <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Access municipal administration and tracking.</p>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </div>

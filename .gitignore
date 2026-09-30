@@ -32,3 +32,13 @@ __pycache__/
 # Sensitive environment credentials
 .env
 .env*.local
+
+# Nested portal build artifacts & dependencies
+municipal-portal/node_modules/
+municipal-portal/dist/
+municipal-portal/.output/
+municipal-portal/.nitro/
+industrial-portal/frontend/node_modules/
+industrial-portal/frontend/dist/
+industrial-portal/backend/node_modules/
+industrial-portal/backend/dist/

@@ -142,13 +142,20 @@ export default defineConfig({
       },
 
       // Industry & Municipal Unified Proxy
+      '/industry-api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/industry-api/, '')
+      },
       '/industry': {
         target: 'http://localhost:5174',
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       },
       '/municipal': {
         target: 'http://localhost:5175',
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       },
 
       // ── Legacy routes (keep backward compat) ────────────────
