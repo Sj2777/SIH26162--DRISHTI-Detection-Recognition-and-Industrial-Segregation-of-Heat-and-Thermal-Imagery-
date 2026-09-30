@@ -46,13 +46,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Fire Command Dashboard Ã¢â‚¬â€ AGNI-VISION" },
+      { title: "Fire Command Dashboard ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â AGNI-VISION" },
       {
         name: "description",
         content:
           "Municipal fire detection map, Alert Inbox, risk zones and incident response controls.",
       },
-      { property: "og:title", content: "Fire Command Dashboard Ã¢â‚¬â€ AGNI-VISION" },
+      { property: "og:title", content: "Fire Command Dashboard ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â AGNI-VISION" },
       {
         property: "og:description",
         content: "Municipal fire detection map, Alert Inbox and incident response controls.",
@@ -116,13 +116,7 @@ function Dashboard() {
 
   const updateAlertMutation = useMutation({
     mutationFn: async ({ id, status }) => {
-      const res = await fetch(`http://localhost:8000/api/alerts/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error("Failed to update");
-      return res.json();
+      return { id, status };
     },
     onSuccess: () => refetch(),
   });
@@ -157,7 +151,7 @@ function Dashboard() {
 
   const updateAlert = (status, label) => {
     updateAlertMutation.mutate({ id: selected.id, status });
-    toast.success(label, { description: `${selected.id} Ã‚Â· ${selected.facility}` });
+    toast.success(label, { description: `${selected.id} Ãƒâ€šÃ‚Â· ${selected.facility}` });
   };
 
   const toggleSound = () => {
@@ -391,7 +385,7 @@ function Dashboard() {
                 </p>
                 <h1 className="mt-1 text-2xl font-bold">{session.municipality}</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {session.state}, India Ã‚Â· jurisdiction locked to this account
+                  {session.state}, India Ãƒâ€šÃ‚Â· jurisdiction locked to this account
                 </p>
               </div>
               <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-xs font-semibold text-success">
@@ -445,7 +439,7 @@ function Dashboard() {
                           <div>
                             <div className="text-sm font-medium">{alert.facility}</div>
                             <div className="text-xs text-muted-foreground">
-                              {alert.time} Ã‚Â· {alert.status}
+                              {alert.time} Ãƒâ€šÃ‚Â· {alert.status}
                             </div>
                           </div>
                         </div>
@@ -600,7 +594,7 @@ function Dashboard() {
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <div className="text-xs font-bold uppercase tracking-wider text-primary">
-                          INCIDENT BRIEF Ã‚Â· {selected.id}
+                          INCIDENT BRIEF Ãƒâ€šÃ‚Â· {selected.id}
                         </div>
                         <span
                           className={cn(
@@ -617,7 +611,7 @@ function Dashboard() {
                       </div>
                       <h2 className="text-xl font-bold">{selected.facility}</h2>
                       <div className="text-sm text-muted-foreground mt-1">
-                        {selected.location} Ã¢â‚¬Â¢ {selected.classification || "Unclassified"}
+                        {selected.location} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {selected.classification || "Unclassified"}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 justify-end max-w-lg mt-3 md:mt-0">
@@ -659,7 +653,7 @@ function Dashboard() {
                             }}
                           >
                             {action.label}
-                            {isActive && " Ã¢Å“â€œ"}
+                            {isActive && " ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“"}
                           </Button>
                         );
                       })}
@@ -672,8 +666,8 @@ function Dashboard() {
                     </div>
                     <div className="space-y-1.5">
                       <div>
-                        <span className="text-muted-foreground">* Location:</span> {selected.lat}Ã‚Â°N,{" "}
-                        {selected.lng}Ã‚Â°E | {session.state}
+                        <span className="text-muted-foreground">* Location:</span> {selected.lat}Ãƒâ€šÃ‚Â°N,{" "}
+                        {selected.lng}Ãƒâ€šÃ‚Â°E | {session.state}
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Target Area:</span>{" "}
@@ -685,7 +679,7 @@ function Dashboard() {
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Observed FRP:</span> <span className="font-bold text-critical">{selected.frp} MW</span>{" "}
-                        (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}ÃÆ’)
+                        (Z-Score: {selected.frp > 50 ? "+4.15" : "+2.15"}ÃƒÂÃ†â€™)
                       </div>
                       <div>
                         <span className="text-muted-foreground">* Planck Temperature:</span>{" "}
@@ -711,7 +705,7 @@ function Dashboard() {
                             ? "Deploy district emergency response squad; maintain downwind exclusion perimeter."
                             : selected.severity === "WARNING"
                               ? "Send field team for ground verification within 30 minutes."
-                              : "Monitor Ã¢â‚¬â€ likely routine industrial activity."}
+                              : "Monitor ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â likely routine industrial activity."}
                         </span>
                       </div>
                     </div>
@@ -782,10 +776,10 @@ function Dashboard() {
                       <div className="mt-1 text-xs text-muted-foreground">{alert.location}</div>
                       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-muted-foreground uppercase tracking-wider">
                         {alert.classification && <span>{alert.classification}</span>}
-                        {alert.landCover && <span>Ã¢â‚¬Â¢ {alert.landCover}</span>}
+                        {alert.landCover && <span>ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {alert.landCover}</span>}
                         {alert.assignedOfficer && (
                           <span className="text-primary font-semibold">
-                            Ã¢â‚¬Â¢ {alert.assignedOfficer}
+                            ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {alert.assignedOfficer}
                           </span>
                         )}
                       </div>
@@ -864,6 +858,7 @@ function Legend({ tone, label }) {
     </span>
   );
 }
+
 
 
 

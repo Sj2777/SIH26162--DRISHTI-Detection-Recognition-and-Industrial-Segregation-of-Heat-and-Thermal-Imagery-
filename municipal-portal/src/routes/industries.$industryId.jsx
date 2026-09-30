@@ -61,9 +61,7 @@ function IndustryDetail() {
   const { data: industry, isLoading } = useQuery({
     queryKey: ["industry", industryId],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:8000/api/industries/${industryId}`);
-      if (!res.ok) throw new Error("Not found");
-      return res.json();
+      throw new Error("Offline");
     },
     initialData: () => industryById(industryId),
   });
@@ -276,4 +274,5 @@ function ContactRow({ icon: Icon, label, value, href }) {
     </div>
   );
 }
+
 
