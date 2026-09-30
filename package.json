@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npx concurrently \"vite\" \"cd industrial-portal/frontend && npm run dev -- --port 5174\" \"cd municipal-portal && npm run dev -- --port 5175\" \"cd industrial-portal/backend && npm run dev\"",
     "services": "python3 backend/context_service.py & python3 backend/prithvi_service.py",
     "start": "bash start.sh",
     "build": "vite build",
@@ -16,6 +16,7 @@
     "mapbox-gl": "^3.31.0"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "vite": "^6.0.0"
   }
 }

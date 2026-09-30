@@ -22,5 +22,5 @@ start "AGNI-VISION Prithvi Service (5178)" python backend\prithvi_service.py
 
 timeout /t 2 /nobreak >nul
 
-echo Starting Vite Frontend...
+echo Starting Unified Frontend Services (Landing Page, Industry, Municipal)...
 npm run dev

@@ -3852,6 +3852,31 @@ function initApiFeeds() {
 // 12. MODALS & TIMERS
 // ==========================================
 function initModals() {
+  // Login Modal
+  const loginModal = document.getElementById('login-modal');
+  const btnLogin = document.getElementById('loginBtn');
+  const btnCloseLoginModal = document.getElementById('btn-close-login-modal');
+
+  if (btnLogin && loginModal) {
+    btnLogin.addEventListener('click', () => {
+      loginModal.style.display = 'flex';
+    });
+  }
+
+  if (btnCloseLoginModal && loginModal) {
+    btnCloseLoginModal.addEventListener('click', () => {
+      loginModal.style.display = 'none';
+    });
+  }
+
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        loginModal.style.display = 'none';
+      }
+    });
+  }
+
   // Broadcast Gate Modal
   const broadcastModal = document.getElementById('broadcast-modal');
   const btnCancelBroadcast = document.getElementById('btn-cancel-broadcast');

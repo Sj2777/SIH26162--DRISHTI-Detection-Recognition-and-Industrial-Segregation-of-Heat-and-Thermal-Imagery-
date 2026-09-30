@@ -141,6 +141,16 @@ export default defineConfig({
         }
       },
 
+      // Industry & Municipal Unified Proxy
+      '/industry': {
+        target: 'http://localhost:5174',
+        changeOrigin: true
+      },
+      '/municipal': {
+        target: 'http://localhost:5175',
+        changeOrigin: true
+      },
+
       // ── Legacy routes (keep backward compat) ────────────────
       '/api/nasa-firms-noaa20': {
         target: 'https://firms.modaps.eosdis.nasa.gov',

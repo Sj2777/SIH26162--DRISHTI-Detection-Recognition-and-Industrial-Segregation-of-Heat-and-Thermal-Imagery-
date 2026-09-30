@@ -143,23 +143,28 @@
     </div>
 
     <!-- =====================================================================
-         3. FLOATING TOP-RIGHT SEARCH BAR (Dual Mode: District/State vs Industry)
+         3. FLOATING TOP-RIGHT SEARCH BAR & LOGIN
          ===================================================================== -->
-    <div id="topRightSearchBar" class="floating-search-container">
-      <div class="search-mode-selector">
-        <button id="searchModeDistrict" class="search-mode-pill active">
-          <i class="fa-solid fa-map-location-dot"></i> <span>District / State</span>
-        </button>
-        <button id="searchModeIndustry" class="search-mode-pill">
-          <i class="fa-solid fa-industry"></i> <span>Industry</span>
-        </button>
+    <div class="top-right-controls" style="position: fixed; top: 12px; right: 14px; z-index: 1001; display: flex; align-items: flex-start; gap: 10px;">
+      <div id="topRightSearchBar" class="floating-search-container" style="position: relative; top: 0; right: 0; z-index: auto;">
+        <div class="search-mode-selector">
+          <button id="searchModeDistrict" class="search-mode-pill active">
+            <i class="fa-solid fa-map-location-dot"></i> <span>District / State</span>
+          </button>
+          <button id="searchModeIndustry" class="search-mode-pill">
+            <i class="fa-solid fa-industry"></i> <span>Industry</span>
+          </button>
+        </div>
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass search-glass-icon"></i>
+          <input type="text" id="topSearchInput" placeholder="Search by district or state (e.g. Korba, Raigarh, Singrauli)..." autocomplete="off" />
+          <button id="clearTopSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
+        </div>
+        <ul id="topSearchResults" class="search-results-floating-list" style="display: none;"></ul>
       </div>
-      <div class="search-input-wrap">
-        <i class="fa-solid fa-magnifying-glass search-glass-icon"></i>
-        <input type="text" id="topSearchInput" placeholder="Search by district or state (e.g. Korba, Raigarh, Singrauli)..." autocomplete="off" />
-        <button id="clearTopSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
-      </div>
-      <ul id="topSearchResults" class="search-results-floating-list" style="display: none;"></ul>
+      <button id="loginBtn" style="background: rgba(14, 17, 23, 0.92); border: 1px solid var(--fm-border); color: #fff; padding: 0 16px; height: 38px; border-radius: 8px; cursor: pointer; font-family: var(--font-primary); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: all 0.2s ease;">
+        <i class="fa-solid fa-user"></i> Login
+      </button>
     </div>
 
     <!-- =====================================================================
@@ -800,6 +805,36 @@
 
         <div id="industry-history-modal-body">
           <!-- Dynamic Content Rendered by window.openIndustryHistoryModal() -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: LOGIN -->
+    <div id="login-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+      <div class="modal-content" style="max-width: 600px; width: 92%; padding: 30px; text-align: center; background: rgba(14, 17, 23, 0.95); backdrop-filter: blur(14px); border: 1px solid var(--fm-border); border-radius: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 1.5rem; color: #fff;">Select Portal</h2>
+          <button id="btn-close-login-modal" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 1.8rem; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Industry Card -->
+          <a href="/industry/" target="_blank" style="text-decoration: none; display: block;">
+            <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--fm-border); border-radius: 12px; padding: 30px 20px; transition: all 0.3s ease; cursor: pointer; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.background='rgba(59, 130, 246, 0.1)';" onmouseout="this.style.borderColor='var(--fm-border)'; this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.05)';">
+              <i class="fa-solid fa-industry" style="font-size: 2.5rem; color: #3b82f6; margin-bottom: 16px;"></i>
+              <h3 style="color: #fff; font-size: 1.2rem; margin: 0 0 8px 0;">Industry Portal</h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Access industry compliance and reporting tools.</p>
+            </div>
+          </a>
+          
+          <!-- Municipal Card -->
+          <a href="/municipal/" target="_blank" style="text-decoration: none; display: block;">
+            <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--fm-border); border-radius: 12px; padding: 30px 20px; transition: all 0.3s ease; cursor: pointer; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.borderColor='#10b981'; this.style.transform='translateY(-4px)'; this.style.background='rgba(16, 185, 129, 0.1)';" onmouseout="this.style.borderColor='var(--fm-border)'; this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.05)';">
+              <i class="fa-solid fa-city" style="font-size: 2.5rem; color: #10b981; margin-bottom: 16px;"></i>
+              <h3 style="color: #fff; font-size: 1.2rem; margin: 0 0 8px 0;">Municipal Portal</h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Access municipal administration and tracking.</p>
+            </div>
+          </a>
         </div>
       </div>
     </div>
