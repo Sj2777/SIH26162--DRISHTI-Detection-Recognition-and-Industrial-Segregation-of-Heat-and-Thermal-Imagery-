@@ -1,64 +1,289 @@
 @import 'leaflet/dist/leaflet.css';
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   AGNI-VISION DESIGN SYSTEM — Industrial Portal
+   Mirrors landing page (firemap.css) design language
+   ================================================================ */
+
 :root {
   color-scheme: dark;
+  --av-bg:            #0a0d12;
+  --av-bg-elevated:   rgba(18, 20, 28, 0.95);
+  --av-bg-glass:      rgba(14, 17, 23, 0.88);
+  --av-border:        rgba(255, 255, 255, 0.12);
+  --av-border-subtle: rgba(255, 255, 255, 0.06);
+  --av-text:          #ffffff;
+  --av-text-muted:    #94a3b8;
+  --av-text-dim:      #64748b;
+  --av-fire:          #ff4500;
+  --av-orange:        #f97316;
+  --av-cyan:          #38bdf8;
+  --av-green:         #22c55e;
+  --av-red:           #ef4444;
+  --av-yellow:        #f59e0b;
+  --av-purple:        #a855f7;
+  --av-font-display:  'Lexend', -apple-system, BlinkMacSystemFont, sans-serif;
+  --av-font-body:     'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  --av-font-mono:     'JetBrains Mono', ui-monospace, monospace;
+  --av-radius:        10px;
+  --av-radius-sm:     6px;
+  --av-shadow:        0 8px 32px rgba(0,0,0,0.7);
 }
 
-body {
-  background-color: #0a0d12;
-  color: #e2e8f0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  background-color: var(--av-bg);
+  color: var(--av-text);
+  font-family: var(--av-font-body);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* Custom dark industrial styling for Leaflet */
-.leaflet-container {
-  background: #0d1219 !important;
-  font-family: inherit;
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Glass Card ────────────────────────────────────────────── */
+.av-card {
+  background: var(--av-bg-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius);
+  box-shadow: var(--av-shadow);
 }
 
+/* ── Buttons ────────────────────────────────────────────────── */
+.av-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--av-radius-sm);
+  font-family: var(--av-font-display);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.av-btn-primary {
+  background: linear-gradient(135deg, #ff4500, #f97316);
+  color: #fff;
+  border-color: rgba(255,69,0,0.4);
+}
+.av-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.av-btn-outline {
+  background: transparent;
+  color: var(--av-text-muted);
+  border-color: var(--av-border);
+}
+.av-btn-outline:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--av-text);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.av-btn-danger {
+  background: rgba(239,68,68,0.1);
+  color: var(--av-red);
+  border-color: rgba(239,68,68,0.35);
+}
+.av-btn-danger:hover { background: rgba(239,68,68,0.2); transform: translateY(-1px); }
+
+/* ── Status Badges ─────────────────────────────────────────── */
+.av-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: var(--av-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.av-badge-green  { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.35); }
+.av-badge-orange { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.35); }
+.av-badge-red    { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
+.av-badge-cyan   { background: rgba(56,189,248,0.15); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.35); }
+.av-badge-yellow { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.35); }
+
+/* ── Pulse dot ─────────────────────────────────────────────── */
+.av-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--av-green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.9);
+  animation: av-pulse 2s ease-out infinite;
+  flex-shrink: 0;
+  display: inline-block;
+}
+@keyframes av-pulse {
+  0%   { box-shadow: 0 0 6px rgba(34,197,94,0.9), 0 0 0 0 rgba(34,197,94,0.6); }
+  70%  { box-shadow: 0 0 6px rgba(34,197,94,0.9), 0 0 0 6px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 6px rgba(34,197,94,0.9), 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* ── Tab Nav ────────────────────────────────────────────────── */
+.av-tab-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(11,15,21,0.85);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.av-tab {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: var(--av-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--av-text-muted);
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.av-tab:hover { color: var(--av-text); background: rgba(255,255,255,0.05); }
+.av-tab.active {
+  background: rgba(56,189,248,0.15);
+  color: var(--av-cyan);
+  border-color: rgba(56,189,248,0.4);
+}
+
+/* ── KPI Card ───────────────────────────────────────────────── */
+.av-kpi {
+  background: var(--av-bg-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius);
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.av-kpi:hover { border-color: rgba(56,189,248,0.3); transform: translateY(-2px); }
+.av-kpi-label {
+  font-family: var(--av-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--av-text-dim);
+}
+.av-kpi-value {
+  font-family: var(--av-font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--av-text);
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+/* ── Table ─────────────────────────────────────────────────── */
+.av-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--av-font-body);
+  font-size: 13px;
+}
+.av-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-family: var(--av-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--av-text-dim);
+  border-bottom: 1px solid var(--av-border);
+}
+.av-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--av-border-subtle);
+  color: var(--av-text-muted);
+}
+.av-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* ── Section Header ─────────────────────────────────────────── */
+.av-section-title {
+  font-family: var(--av-font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--av-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.av-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, #ff4500, #f97316);
+  border-radius: 2px;
+}
+
+/* ── Leaflet dark theme ─────────────────────────────────────── */
+.leaflet-container { background: #0d1219 !important; font-family: inherit; }
 .leaflet-popup-content-wrapper {
-  background-color: #16202c !important;
-  color: #e2e8f0 !important;
-  border: 1px solid #2a3a4e !important;
-  border-radius: 6px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
-  padding: 2px !important;
+  background: var(--av-bg-elevated) !important;
+  color: var(--av-text) !important;
+  border: 1px solid var(--av-border) !important;
+  border-radius: var(--av-radius-sm) !important;
+  box-shadow: var(--av-shadow) !important;
+}
+.leaflet-popup-tip { background: var(--av-bg-elevated) !important; }
+.leaflet-control-zoom a {
+  background: var(--av-bg-glass) !important;
+  color: var(--av-text) !important;
+  border-color: var(--av-border) !important;
 }
 
-.leaflet-popup-tip {
-  background-color: #16202c !important;
-  border: 1px solid #2a3a4e !important;
+/* ── Error/Loading states ───────────────────────────────────── */
+.av-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: var(--av-text-muted);
+  font-family: var(--av-font-body);
 }
+.av-error-icon { font-size: 2.5rem; color: var(--av-red); }
+.av-error-title { font-size: 1rem; font-weight: 600; color: var(--av-text); }
+.av-error-msg { font-size: 0.8rem; color: var(--av-text-dim); text-align: center; max-width: 400px; }
 
-.leaflet-popup-content {
-  margin: 10px 12px !important;
-  line-height: 1.4 !important;
-}
-
-/* Custom DivIcons */
-.map-marker-pulse {
-  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-
+/* Pulse animation for map marker */
+.map-marker-pulse { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
 @keyframes pulse-ring {
-  0% {
-    transform: scale(0.9);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.35);
-    opacity: 0.3;
-  }
-  100% {
-    transform: scale(0.9);
-    opacity: 0.9;
-  }
+  0%   { transform: scale(0.9); opacity: 0.9; }
+  50%  { transform: scale(1.35); opacity: 0.3; }
+  100% { transform: scale(0.9); opacity: 0.9; }
 }

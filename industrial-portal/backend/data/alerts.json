@@ -9,6 +9,9 @@
     "detectedAt": "14:32",
     "status": "UNRESOLVED",
     "description": "Thermal activity exceeds the facility baseline and requires inspection.",
-    "locationCoordinates": [22.3138, 73.1782]
+    "locationCoordinates": [
+      18.6213,
+      73.809
+    ]
   }
 ]

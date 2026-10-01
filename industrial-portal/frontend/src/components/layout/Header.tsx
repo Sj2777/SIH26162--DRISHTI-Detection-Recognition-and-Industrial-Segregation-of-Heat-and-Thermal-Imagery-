@@ -5,128 +5,104 @@ interface HeaderProps {
   facility: FacilityData | null;
   activeTab: 'overview' | 'thermal' | 'telemetry' | 'health' | 'incident';
   onTabChange: (tab: 'overview' | 'thermal' | 'telemetry' | 'health' | 'incident') => void;
+  onLogout?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ facility, activeTab, onTabChange }) => {
+export const Header: React.FC<HeaderProps> = ({ facility, activeTab, onTabChange, onLogout }) => {
   return (
-    <header className="border-b border-[#223142] bg-[#111721] px-5 py-2.5 sticky top-0 z-40">
-      <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
-        {/* Left: Branding, Facility Name & Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-[#1e2a3b] border border-[#ff5722]/50 text-[#ff5722] font-black text-xs tracking-wider shadow-inner">
-              AV
-            </div>
+    <header style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 40,
+      backgroundColor: 'rgba(14, 17, 23, 0.92)',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)',
+      borderBottom: '1px solid rgba(255,255,255,0.12)',
+      padding: '8px 20px',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+    }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+
+        {/* Left: Logo + Nav */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'linear-gradient(135deg, rgba(255,69,0,0.2), rgba(249,115,22,0.2))',
+              border: '1px solid rgba(255,69,0,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: 11, color: '#f97316', letterSpacing: 1
+            }}>AV</div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold tracking-widest text-[#f97316] uppercase">
-                  AGNI-VISION
-                </span>
-                <span className="text-[#3b4c60] text-xs">/</span>
-                <span className="text-xs text-[#94a3b8] font-medium tracking-wide">
-                  Industrial Safety Portal
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#f97316', textTransform: 'uppercase' }}>AGNI-VISION</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>/</span>
+                <span style={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>Industrial Portal</span>
               </div>
-              <div className="flex items-center gap-3 mt-0.5">
-                <h1 className="text-sm md:text-base font-semibold text-slate-100 tracking-tight">
-                  {facility ? facility.facilityName : 'Loading Facility...'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                <h1 style={{ margin: 0, fontFamily: 'Lexend, sans-serif', fontSize: 14, fontWeight: 600, color: '#fff' }}>
+                  {facility ? facility.facilityName : 'Connecting...'}
                 </h1>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-[#064e3b]/40 text-[#34d399] border border-[#059669]/50">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></span>
-                  MONITORING ACTIVE
-                </div>
+                <span className="av-badge av-badge-green" style={{ padding: '1px 7px' }}>
+                  <span className="av-pulse" style={{ width: 5, height: 5 }}></span>
+                  LIVE
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Navigation Mode Selector */}
-          <nav className="flex items-center bg-[#0b0f15] border border-[#1e2a38] p-1 rounded">
-            <button
-              onClick={() => onTabChange('overview')}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-colors ${
-                activeTab === 'overview'
-                  ? 'bg-[#1e293b] text-white border border-[#3b82f6]/40 shadow-sm'
-                  : 'text-[#94a3b8] hover:text-white'
-              }`}
-            >
-              OVERVIEW
+          {/* Tab Nav */}
+          <nav className="av-tab-bar">
+            <button className={`av-tab${activeTab === 'overview' ? ' active' : ''}`} onClick={() => onTabChange('overview')}>
+              Overview
             </button>
-            <button
-              onClick={() => onTabChange('thermal')}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-colors flex items-center gap-1.5 ${
-                activeTab === 'thermal'
-                  ? 'bg-[#2a1b14] text-[#fb923c] border border-[#f97316]/50 shadow-sm'
-                  : 'text-[#94a3b8] hover:text-white'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#f97316]"></span>
-              THERMAL INTELLIGENCE
+            <button className={`av-tab${activeTab === 'thermal' ? ' active' : ''}`}
+              style={activeTab === 'thermal' ? { background: 'rgba(249,115,22,0.15)', color: '#fb923c', borderColor: 'rgba(249,115,22,0.4)' } : {}}
+              onClick={() => onTabChange('thermal')}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f97316', display: 'inline-block' }}></span>
+              Thermal
             </button>
-            <button
-              onClick={() => onTabChange('telemetry')}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-colors flex items-center gap-1.5 ${
-                activeTab === 'telemetry'
-                  ? 'bg-[#132338] text-[#38bdf8] border border-[#0284c7]/50 shadow-sm'
-                  : 'text-[#94a3b8] hover:text-white'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0284c7]"></span>
-              LIVE TELEMETRY
+            <button className={`av-tab${activeTab === 'telemetry' ? ' active' : ''}`} onClick={() => onTabChange('telemetry')}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#38bdf8', display: 'inline-block' }}></span>
+              Telemetry
             </button>
-            <button
-              onClick={() => onTabChange('health')}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-colors flex items-center gap-1.5 ${
-                activeTab === 'health'
-                  ? 'bg-[#2b1c11] text-[#fcd34d] border border-[#f59e0b]/50 shadow-sm'
-                  : 'text-[#94a3b8] hover:text-white'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
-              ASSET HEALTH
+            <button className={`av-tab${activeTab === 'health' ? ' active' : ''}`}
+              style={activeTab === 'health' ? { background: 'rgba(245,158,11,0.15)', color: '#fcd34d', borderColor: 'rgba(245,158,11,0.4)' } : {}}
+              onClick={() => onTabChange('health')}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
+              Asset Health
             </button>
-            <button
-              onClick={() => onTabChange('incident')}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-colors flex items-center gap-1.5 ${
-                activeTab === 'incident'
-                  ? 'bg-[#311116] text-[#fca5a5] border border-[#ef4444]/60 shadow-sm'
-                  : 'text-[#94a3b8] hover:text-white'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ef4444] animate-pulse"></span>
-              INCIDENT RESPONSE
+            <button className={`av-tab${activeTab === 'incident' ? ' active' : ''}`}
+              style={activeTab === 'incident' ? { background: 'rgba(239,68,68,0.15)', color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' } : {}}
+              onClick={() => onTabChange('incident')}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'av-pulse 2s infinite' }}></span>
+              Incidents
             </button>
           </nav>
         </div>
 
-        {/* Right: Operational Telemetry Stream */}
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <div className="bg-[#0b0f15] border border-[#1e2a38] px-2.5 py-1.5 rounded flex items-center gap-2">
-            <span className="text-[#64748b]">SATELLITE:</span>
-            <span className="text-slate-200 font-semibold">
-              {facility?.satelliteUpdate ?? '--'}
-            </span>
+        {/* Right: Facility Health + Logout */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>
+          <div style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
+            <span style={{ color: '#fcd34d' }}>RISK:</span>
+            <span style={{ color: '#fff', fontWeight: 700 }}>WATCH</span>
           </div>
-
-          <div className="bg-[#0b0f15] border border-[#1e2a38] px-2.5 py-1.5 rounded flex items-center gap-2">
-            <span className="text-[#64748b]">TELEMETRY:</span>
-            <span className="text-slate-200 font-semibold">
-              {facility?.telemetryUpdate ?? '--'}
-            </span>
+          <div style={{ background: 'rgba(11,15,21,0.85)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
+            <span style={{ color: '#64748b' }}>ANOMALIES:</span>
+            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>3</span>
           </div>
-
-          <div className="bg-[#0b0f15] border border-[#1e2a38] px-2.5 py-1.5 rounded flex items-center gap-2">
-            <span className="text-[#64748b]">DATA QUALITY:</span>
-            <span className="text-[#10b981] font-semibold">
-              {facility ? `${facility.dataQuality}%` : '--'}
-            </span>
+          <div style={{ background: 'rgba(11,15,21,0.85)', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: 6, display: 'flex', gap: 6 }}>
+            <span style={{ color: '#64748b' }}>SATELLITE:</span>
+            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>18:20 IST</span>
           </div>
-
-          <div className="hidden sm:flex bg-[#0b0f15] border border-[#1e2a38] px-2.5 py-1.5 rounded items-center gap-2">
-            <span className="text-[#64748b]">WIND:</span>
-            <span className="text-slate-200 font-semibold">
-              {facility ? `${facility.wind.direction} ${facility.wind.speed}` : '--'}
-            </span>
-          </div>
+          <button
+            onClick={onLogout}
+            className="av-btn av-btn-danger"
+            style={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, letterSpacing: 1 }}
+          >
+            ⏻ LOGOUT
+          </button>
         </div>
       </div>
     </header>

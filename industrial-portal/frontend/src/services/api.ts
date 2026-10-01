@@ -9,7 +9,7 @@ import {
   IncidentRecord,
 } from '../types';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '/industry-api/api';
 
 export const fetchFacilityData = async (): Promise<FacilityData> => {
   const response = await fetch(`${API_BASE}/facility`);

@@ -11,12 +11,13 @@ import incidentsRouter from './routes/incidents';
 
 const app: Application = express();
 
-// Configure CORS for local development
+// Configure CORS for local development (allow all localhost ports since we proxy through vite)
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => callback(null, true),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   })
 );
 
