@@ -7,6 +7,9 @@ import {
   AssetHealthData,
   HistoricalIncident,
   IncidentRecord,
+  IncidentReport,
+  EscalationConfig,
+  PortalNotification,
 } from '../types';
 
 const API_BASE = '/industry-api/api';
@@ -194,4 +197,80 @@ export const closeIncident = async (
     throw new Error(`Failed to close incident: ${response.statusText}`);
   }
   return response.json();
+};
+
+export const generateIncidentReport = async (
+  id: string,
+  actor = 'FACILITY_OPERATOR'
+): Promise<IncidentReport> => {
+  const response = await fetch(`${API_BASE}/incidents/${encodeURIComponent(id)}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actor }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to generate incident report: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const fetchEscalationConfig = async (): Promise<EscalationConfig> => {
+  const response = await fetch(`${API_BASE}/escalation-config`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch escalation config: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const updateEscalationConfig = async (
+  responseWindowSeconds: number
+): Promise<EscalationConfig> => {
+  const response = await fetch(`${API_BASE}/escalation-config`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ responseWindowSeconds }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to update escalation config: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const startIncidentEscalationTimer = async (id: string): Promise<IncidentRecord> => {
+  const response = await fetch(`${API_BASE}/incidents/${encodeURIComponent(id)}/escalation-timer/start`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to start escalation timer: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const fetchNotifications = async (): Promise<PortalNotification[]> => {
+  const response = await fetch(`${API_BASE}/notifications`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const markNotificationRead = async (id: string): Promise<PortalNotification> => {
+  const response = await fetch(`${API_BASE}/notifications/${encodeURIComponent(id)}/read`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to mark notification as read: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const markAllNotificationsRead = async (): Promise<PortalNotification[]> => {
+  const response = await fetch(`${API_BASE}/notifications/read-all`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to mark all notifications as read: ${response.statusText}`);
+  }
+  const result: { notifications: PortalNotification[] } = await response.json();
+  return result.notifications;
 };

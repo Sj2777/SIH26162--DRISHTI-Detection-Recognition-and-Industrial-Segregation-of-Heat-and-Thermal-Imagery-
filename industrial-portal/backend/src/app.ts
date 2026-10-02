@@ -8,6 +8,7 @@ import thermalEventsRouter from './routes/thermalEvents';
 import telemetryRouter from './routes/telemetry';
 import assetHealthRouter from './routes/assetHealth';
 import incidentsRouter from './routes/incidents';
+import notificationsRouter from './routes/notifications';
 
 const app: Application = express();
 
@@ -32,5 +33,6 @@ app.use('/api', thermalEventsRouter);
 app.use('/api', telemetryRouter);
 app.use('/api', assetHealthRouter);
 app.use('/api', incidentsRouter);
+app.use('/api/notifications', notificationsRouter);
 
 export default app;

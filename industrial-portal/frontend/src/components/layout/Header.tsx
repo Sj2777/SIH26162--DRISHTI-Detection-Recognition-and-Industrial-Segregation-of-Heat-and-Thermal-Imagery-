@@ -1,5 +1,6 @@
 import React from 'react';
 import { FacilityData } from '../../types';
+import { NotificationCenter } from '../notifications/NotificationCenter';
 
 interface HeaderProps {
   facility: FacilityData | null;
@@ -96,6 +97,7 @@ export const Header: React.FC<HeaderProps> = ({ facility, activeTab, onTabChange
             <span style={{ color: '#64748b' }}>SATELLITE:</span>
             <span style={{ color: '#e2e8f0', fontWeight: 600 }}>18:20 IST</span>
           </div>
+          <NotificationCenter />
           <button
             onClick={onLogout}
             className="av-btn av-btn-danger"
