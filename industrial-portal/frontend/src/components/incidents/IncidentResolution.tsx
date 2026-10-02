@@ -276,7 +276,7 @@ export const IncidentResolution: React.FC<IncidentResolutionProps> = ({
               FORMALLY CLOSE INCIDENT
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed mb-3">
-              Closing this incident marks the workflow record as complete. All audit events and evidence records are retained for the current demo session.
+              Closing this incident marks the workflow record as complete. Audit events and evidence records remain available while the backend process is running.
             </p>
             <form onSubmit={handleCloseSubmit} className="space-y-3 text-xs font-mono">
               <div>

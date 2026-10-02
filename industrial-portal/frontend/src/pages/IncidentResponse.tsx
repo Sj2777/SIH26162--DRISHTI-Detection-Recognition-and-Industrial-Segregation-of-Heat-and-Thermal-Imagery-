@@ -136,7 +136,7 @@ export const IncidentResponse: React.FC = () => {
             onResolveClick={handleScrollToResolve}
           />
 
-          {/* 3. Workflow Stepper & Append-Only Demo Audit Timeline */}
+          {/* 3. Workflow Stepper & Demo Audit Timeline */}
           <IncidentTimeline incident={incident} />
 
           {/* 4. Facility Evidence Panel */}

@@ -373,7 +373,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
           <div className="bg-[#0b1b15] border border-[#065f46] p-3 rounded text-xs font-mono text-emerald-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-bold">STATUS: INCIDENT CLOSED</span>
-              <span className="text-[#6ee7b7]">— All corrective actions documented and session audit log completed.</span>
+              <span className="text-[#6ee7b7]">— All corrective actions documented; incident workflow closed.</span>
             </div>
           </div>
         )}
@@ -486,7 +486,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
                   CONFIRM ROUTINE OPERATING CONDITION?
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  This records the facility's assessment that the observed activity is routine or planned. The original alert remains in the audit trail.
+                  This records the facility's assessment that the observed activity is routine or planned. The original alert remains in this incident's demo record.
                 </p>
                 <textarea
                   value={actionNote}
@@ -550,7 +550,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
                   DISPUTE REGULATORY ALERT?
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  Submit facility evidence indicating that the alert may not represent an abnormal facility condition. Note: This action does not delete or suppress the alert from the audit log.
+                  Submit facility evidence indicating that the alert may not represent an abnormal facility condition. Note: This action does not delete or suppress the alert from the incident's demo record.
                 </p>
                 <textarea
                   value={actionNote}

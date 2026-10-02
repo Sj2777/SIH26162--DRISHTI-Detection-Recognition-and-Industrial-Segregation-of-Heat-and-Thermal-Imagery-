@@ -44,6 +44,7 @@
         "isoTimestamp": "2026-09-29T14:32:08Z",
         "actor": "SATELLITE_ORBITAL_RADAR",
         "type": "DETECTION",
+          "eventType": "DETECTION",
         "title": "Satellite thermal anomaly detected",
         "description": "Orbital radiometric pass recorded 2.7× thermal intensity anomaly displaced 320m SE of Flare Stack 01."
       },
@@ -53,6 +54,7 @@
         "isoTimestamp": "2026-09-29T14:36:12Z",
         "actor": "GOV_MONITORING_NETWORK",
         "type": "ALERT_DISPATCH",
+          "eventType": "ALERT_DISPATCH",
         "title": "Government regulatory alert received",
         "description": "Alert ALT-2026-0891 routed to AGNI Demo Petrochemical Facility control room console."
       }

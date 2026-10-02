@@ -24,6 +24,17 @@ const getFormattedTime = () => {
     .padStart(2, '0')}:${d.getUTCSeconds().toString().padStart(2, '0')} UTC`;
 };
 
+  const recognizedActionTypes = new Set([
+    'BEGIN_INSPECTION',
+    'START_FIELD_INSPECTION',
+    'START_INSPECTION',
+    'CONFIRM_ROUTINE',
+    'PLANNED_MAINTENANCE',
+    'DISPUTE_ALERT',
+    'REPORT_SUSPECTED_LEAK',
+    'REPORT_SUSPECTED_FIRE'
+  ]);
+
 // GET /api/incidents
 router.get('/incidents', (_req: Request, res: Response) => {
   res.status(200).json(incidentsStore);
@@ -59,6 +70,7 @@ router.post('/incidents/:id/acknowledge', (req: Request, res: Response) => {
     actor: req.body.actor || 'FACILITY_OPERATOR',
     type: 'ACKNOWLEDGEMENT',
     title: 'Facility operator acknowledged alert',
+      eventType: 'ACKNOWLEDGEMENT',
     description: 'Alert confirmed received and under active review. Notice does not indicate false alarm or premature closure.'
   });
 
@@ -73,6 +85,10 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
   }
 
   const { type, note, actor = 'FACILITY_OPERATOR' } = req.body;
+    if (!recognizedActionTypes.has(type)) {
+      return res.status(400).json({ error: 'Invalid incident action type' });
+    }
+
   const nowTime = getFormattedTime();
   const isoNow = new Date().toISOString();
 
@@ -88,6 +104,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'INVESTIGATION_START',
       title: 'Field investigation initiated',
+        eventType: 'BEGIN_INSPECTION',
       description: note || 'Field investigation initiated for Tank Farm 04.'
     });
   } else if (type === 'START_FIELD_INSPECTION' || type === 'START_INSPECTION') {
@@ -100,6 +117,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'FIELD_INSPECTION_START',
       title: 'Field inspection started for Tank Farm 04.',
+        eventType: 'START_FIELD_INSPECTION',
       description: note || 'Field inspection started for Tank Farm 04.'
     });
   } else if (type === 'CONFIRM_ROUTINE') {
@@ -111,6 +129,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'OPERATOR_FEEDBACK',
       title: 'Facility confirmed activity as routine',
+        eventType: 'CONFIRM_ROUTINE',
       description: note || 'Operator recorded assessment that observed thermal activity corresponds with routine operations. Regulatory alert preserved.'
     });
   } else if (type === 'PLANNED_MAINTENANCE') {
@@ -122,6 +141,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'OPERATOR_FEEDBACK',
       title: 'Activity marked as planned maintenance',
+        eventType: 'PLANNED_MAINTENANCE',
       description: note || 'Observed thermal footprint associated with approved scheduled operating/maintenance window.'
     });
   } else if (type === 'DISPUTE_ALERT') {
@@ -133,6 +153,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'DISPUTE_SUBMITTED',
       title: 'Facility disputed regulatory alert',
+        eventType: 'DISPUTE_ALERT',
       description: note || 'Operator logged formal contestation indicating sensor measurements may reflect reflection or flare background artifact.'
     });
   } else if (type === 'REPORT_SUSPECTED_LEAK') {
@@ -144,6 +165,7 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'SUSPECTED_LEAK',
       title: 'Suspected hydrocarbon vapor leak reported',
+        eventType: 'REPORT_SUSPECTED_LEAK',
       description: note || 'Operator flagged elevated gas concentrations coinciding with localized thermal elevation.'
     });
   } else if (type === 'REPORT_SUSPECTED_FIRE') {
@@ -155,18 +177,10 @@ router.post('/incidents/:id/action', (req: Request, res: Response) => {
       actor,
       type: 'SUSPECTED_FIRE',
       title: 'Suspected thermal/fire condition reported',
+        eventType: 'REPORT_SUSPECTED_FIRE',
       description: note || 'Operator flagged acute thermal signature for emergency fire-watch monitoring.'
     });
   } else {
-    incident.auditTrail.push({
-      id: `aud-${Date.now()}`,
-      timestamp: nowTime,
-      isoTimestamp: isoNow,
-      actor,
-      type: 'GENERAL_ACTION',
-      title: `Operator Action: ${type}`,
-      description: note || 'Facility operator performed workflow update.'
-    });
   }
 
   res.status(200).json(incident);
@@ -205,7 +219,8 @@ router.post('/incidents/:id/evidence', (req: Request, res: Response) => {
     actor: source,
     type: 'EVIDENCE_SUBMITTED',
     title: `Evidence Submitted: ${type.replace(/_/g, ' ')}`,
-    description: `${description} (Source: ${source})`
+      eventType: 'EVIDENCE_SUBMITTED',
+      description: `${description || 'Field verification record'} (Source: ${source})`
   });
 
   res.status(200).json(incident);
@@ -240,6 +255,7 @@ router.post('/incidents/:id/escalate', (req: Request, res: Response) => {
     actor,
     type: 'DISTRICT_ESCALATION',
     title: 'Facility escalated incident to district operations',
+      eventType: 'DISTRICT_ESCALATION',
     description: `District escalation record submitted. Reason: ${reason} (Demo handoff only).`
   });
 
@@ -288,6 +304,7 @@ router.post('/incidents/:id/resolve', (req: Request, res: Response) => {
     actor: req.body.actor || 'FACILITY_OPERATOR',
     type: 'RESOLUTION',
     title: 'Incident marked as resolved',
+      eventType: 'RESOLUTION',
     description: `Finding: ${observedFinding}. Root Cause: ${rootCause}. Corrective Action: ${correctiveAction}. Awaiting final administrative closure.`
   });
 
@@ -327,7 +344,8 @@ router.post('/incidents/:id/close', (req: Request, res: Response) => {
     actor: req.body.actor || 'SAFETY_SUPERVISOR',
     type: 'CLOSURE',
     title: 'Incident formally closed',
-    description: `Final closure recorded. Root cause: ${rootCause}. Corrective action: ${correctiveAction}. Audit events are retained for the current demo session.`
+      eventType: 'CLOSURE',
+      description: `Incident closed. Root cause: ${rootCause}. Corrective action: ${correctiveAction}. Demo session record is held in memory and resets when the backend restarts.`
   });
 
   res.status(200).json(incident);

@@ -234,6 +234,7 @@ export interface AuditEventItem {
   isoTimestamp: string;
   actor: string;
   type: string;
+    eventType?: string;
   title: string;
   description: string;
 }
