@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "0.1",
+  "alertId": "ALT-2026-0891",
+  "incidentId": "ALT-2026-0891",
+  "accepted": true,
+  "status": "RESOLVED",
+  "resolvedAt": "2026-09-29T14:36:12Z",
+  "resolution": {
+    "observedFinding": "Thermal anomaly at 2.7x facility baseline",
+    "rootCause": "Planned operating activity",
+    "correctiveAction": "Operating schedule verified and inspection record updated.",
+    "resolution": "Thermal activity traced to planned tank heating operation."
+  }
+}

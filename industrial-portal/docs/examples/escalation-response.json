@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "0.1",
+  "alertId": "ALT-2026-0891",
+  "incidentId": "ALT-2026-0891",
+  "accepted": true,
+  "status": "ESCALATED",
+  "target": "DISTRICT_SAFETY_OPERATIONS",
+  "respondedAt": "2026-09-29T14:36:12Z"
+}
