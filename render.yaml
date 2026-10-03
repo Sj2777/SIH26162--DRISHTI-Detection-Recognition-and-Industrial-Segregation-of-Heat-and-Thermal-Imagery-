@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: agni-vision
+    runtime: python
+    plan: free
+    buildCommand: npm install && npm run build && pip install -r requirements.txt
+    startCommand: python3 server.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: VITE_SIMULATION_MODE
+        value: "false"
+      - key: VITE_FIRMS_MAP_KEY
+        sync: false
+      - key: VITE_COPERNICUS_CLIENT_ID
+        sync: false
+      - key: VITE_COPERNICUS_CLIENT_SECRET
+        sync: false

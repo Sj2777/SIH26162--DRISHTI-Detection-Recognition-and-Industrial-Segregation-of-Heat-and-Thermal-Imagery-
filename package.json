@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "services": "python3 backend/context_service.py & python3 backend/prithvi_service.py",
-    "start": "bash start.sh",
+    "start": "python3 server.py",
+    "dev:all": "bash start.sh",
     "build": "vite build",
     "preview": "vite preview"
   },
