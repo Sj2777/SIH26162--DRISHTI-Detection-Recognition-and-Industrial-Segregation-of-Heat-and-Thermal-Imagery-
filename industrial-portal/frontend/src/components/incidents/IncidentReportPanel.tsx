@@ -125,9 +125,17 @@ export const IncidentReportPanel: React.FC<IncidentReportPanelProps> = ({
       )}
 
       {error && (
-        <p role="alert" className="bg-[#450a0a]/70 border border-[#dc2626] rounded p-3 text-xs font-mono text-red-200">
-          Report generation failed: {error}
-        </p>
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-[#450a0a]/70 border border-[#dc2626] rounded p-3 text-xs font-mono text-red-200">
+          <span>Report generation failed: {error}</span>
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={loading}
+            className="rounded border border-red-700 px-2 py-1 font-semibold hover:bg-red-900 disabled:opacity-60"
+          >
+            Retry report generation
+          </button>
+        </div>
       )}
 
       {report && (

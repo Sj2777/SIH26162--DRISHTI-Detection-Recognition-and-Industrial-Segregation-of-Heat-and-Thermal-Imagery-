@@ -3,6 +3,7 @@ import {
   Asset,
   AlertItem,
   ThermalData,
+  SatelliteVsReportedData,
   TelemetryData,
   AssetHealthData,
   HistoricalIncident,
@@ -50,6 +51,14 @@ export const fetchThermalEvents = async (): Promise<ThermalData> => {
   const response = await fetch(`${API_BASE}/thermal-events`);
   if (!response.ok) {
     throw new Error(`Failed to fetch thermal events: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const fetchSatelliteVsReported = async (): Promise<SatelliteVsReportedData> => {
+  const response = await fetch(`${API_BASE}/satellite-vs-reported`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch satellite vs reported activity: ${response.statusText}`);
   }
   return response.json();
 };

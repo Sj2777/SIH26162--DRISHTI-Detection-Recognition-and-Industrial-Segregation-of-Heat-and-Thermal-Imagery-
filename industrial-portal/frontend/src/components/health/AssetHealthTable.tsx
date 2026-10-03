@@ -42,7 +42,13 @@ export const AssetHealthTable: React.FC<AssetHealthTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1a232f]">
-            {assets.map((asset) => {
+            {assets.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 px-4 text-center text-xs text-[#94a3b8]">
+                  No asset health assessments are available.
+                </td>
+              </tr>
+            ) : assets.map((asset) => {
               const isSelected = asset.assetId === selectedAssetId;
               const isAttention = asset.healthStatus === 'ATTENTION';
               const isCritical = asset.healthStatus === 'CRITICAL';

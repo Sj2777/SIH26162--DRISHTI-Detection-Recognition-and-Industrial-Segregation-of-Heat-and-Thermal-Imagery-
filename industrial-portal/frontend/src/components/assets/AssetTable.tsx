@@ -36,7 +36,13 @@ export const AssetTable: React.FC<AssetTableProps> = ({ assets }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1a232f]">
-            {assets.map((asset) => {
+            {assets.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 px-4 text-center text-xs text-[#94a3b8]">
+                  No asset records are available.
+                </td>
+              </tr>
+            ) : assets.map((asset) => {
               const isCritical = asset.status === 'CRITICAL';
               const isWarning = asset.status === 'WARNING';
 

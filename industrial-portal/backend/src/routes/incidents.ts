@@ -9,6 +9,8 @@ const seedFilePath = path.join(__dirname, '../../data/incident-workflow.json');
 // In-memory incident store seeded from JSON file
 let incidentsStore: any[] = [];
 
+export const getIncidentStore = (): readonly any[] => incidentsStore;
+
 try {
   const rawData = fs.readFileSync(seedFilePath, 'utf-8');
   incidentsStore = JSON.parse(rawData);

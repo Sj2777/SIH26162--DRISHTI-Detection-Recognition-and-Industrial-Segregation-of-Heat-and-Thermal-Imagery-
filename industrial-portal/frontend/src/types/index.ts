@@ -109,6 +109,38 @@ export interface ThermalData {
   recentObservations: ThermalObservation[];
 }
 
+export type SatelliteReportedIndicator =
+  | 'CONSISTENT'
+  | 'SATELLITE_ACTIVITY_NOT_REPORTED'
+  | 'REPORTED_ACTIVITY_NOT_OBSERVED'
+  | 'INSUFFICIENT_DATA';
+
+export interface SatelliteVsReportedItem {
+  assetId: string;
+  assetName: string;
+  matchingDistanceMeters: number | null;
+  satelliteObserved: {
+    count: number;
+    peakIntensity: number | null;
+    latestDetectionTime: string | null;
+  };
+  facilityReported: {
+    status: string;
+    source: string | null;
+    recordedAt: string | null;
+    telemetryContext: string | null;
+  };
+  indicator: SatelliteReportedIndicator;
+  explanation: string;
+}
+
+export interface SatelliteVsReportedData {
+  matchingRadiusMeters: number;
+  unmatchedObservationCount: number;
+  items: SatelliteVsReportedItem[];
+  limitations: string[];
+}
+
 // Phase 3: Live Telemetry Types
 export interface TelemetryMetric {
   value: number;

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FacilityData, Asset, AlertItem } from '../types';
 import { fetchFacilityData, fetchAssets, fetchAlerts } from '../services/api';
 import { Header } from '../components/layout/Header';
@@ -7,6 +7,8 @@ import { KpiCards } from '../components/facility/KpiCard';
 import { FacilityMap } from '../components/map/FacilityMap';
 import { ActiveAlertCard } from '../components/alerts/ActiveAlertCard';
 import { AssetTable } from '../components/assets/AssetTable';
+import { RetryableError } from '../components/layout/RetryableError';
+import { getUserFacingErrorMessage } from '../utils/errorMessage';
 
 interface OverviewProps {
   facility?: FacilityData | null;
@@ -19,65 +21,55 @@ export const Overview: React.FC<OverviewProps> = ({ facility: propFacility, hide
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
+
+  const loadDashboardData = useCallback(async () => {
+    const currentRequestId = ++requestId.current;
+    try {
+      setLoading(true);
+      setError(null);
+
+      const promises: [Promise<FacilityData | null>, Promise<Asset[]>, Promise<AlertItem[]>] = [
+        propFacility ? Promise.resolve(propFacility) : fetchFacilityData(),
+        fetchAssets(),
+        fetchAlerts(),
+      ];
+
+      const [facilityRes, assetsRes, alertsRes] = await Promise.all(promises);
+      if (currentRequestId === requestId.current) {
+        if (facilityRes) setFacility(facilityRes);
+        setAssets(assetsRes);
+        setAlerts(alertsRes);
+      }
+    } catch (err) {
+      if (currentRequestId === requestId.current) {
+        console.error('Error loading dashboard data:', err);
+        setError(
+          getUserFacingErrorMessage(err, 'Dashboard data could not be loaded. Try again.')
+        );
+      }
+    } finally {
+      if (currentRequestId === requestId.current) setLoading(false);
+    }
+  }, [propFacility]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const promises: [Promise<FacilityData | null>, Promise<Asset[]>, Promise<AlertItem[]>] = [
-          propFacility ? Promise.resolve(propFacility) : fetchFacilityData(),
-          fetchAssets(),
-          fetchAlerts(),
-        ];
-
-        const [facilityRes, assetsRes, alertsRes] = await Promise.all(promises);
-
-        if (isMounted) {
-          if (facilityRes) setFacility(facilityRes);
-          setAssets(assetsRes);
-          setAlerts(alertsRes);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Error loading dashboard data:', err);
-          setError(
-            err instanceof Error ? err.message : 'Failed to connect to backend telemetry service'
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadDashboardData();
-
+    void loadDashboardData();
     return () => {
-      isMounted = false;
+      requestId.current += 1;
     };
-  }, [propFacility]);
+  }, [loadDashboardData]);
 
   const content = (
     <div className="space-y-6">
       {/* Error banner if backend is unreachable */}
       {error && (
-        <div className="bg-[#450a0a]/80 border border-[#dc2626] rounded p-4 text-xs font-mono text-red-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-red-400">TELEMETRY ERROR:</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-3 py-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
+        <RetryableError
+          title="Dashboard data unavailable"
+          message={error}
+          retrying={loading}
+          onRetry={() => void loadDashboardData()}
+        />
       )}
 
       {/* Loading state skeleton */}
@@ -89,7 +81,7 @@ export const Overview: React.FC<OverviewProps> = ({ facility: propFacility, hide
       )}
 
       {/* Dashboard Content */}
-      {(!loading || facility) && (
+      {!error && (!loading || facility) && (
         <>
           {/* Top 6 KPI Cards */}
           <KpiCards facility={facility} />
@@ -128,4 +120,3 @@ export const Overview: React.FC<OverviewProps> = ({ facility: propFacility, hide
     </div>
   );
 };
-

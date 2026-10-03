@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IncidentRecord, IncidentReport } from '../types';
 import {
   fetchIncidentById,
@@ -19,6 +19,8 @@ import { IncidentActions } from '../components/incidents/IncidentActions';
 import { EvidencePanel } from '../components/incidents/EvidencePanel';
 import { IncidentResolution } from '../components/incidents/IncidentResolution';
 import { IncidentReportPanel } from '../components/incidents/IncidentReportPanel';
+import { RetryableError } from '../components/layout/RetryableError';
+import { getUserFacingErrorMessage } from '../utils/errorMessage';
 
 const AUTO_ESCALATION_REASON = 'AUTO-ESCALATED: No facility acknowledgement within configured response window.';
 
@@ -39,6 +41,8 @@ export const IncidentResponse: React.FC = () => {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [timerBusy, setTimerBusy] = useState<boolean>(false);
   const [timerError, setTimerError] = useState<string | null>(null);
+  const incidentRequestId = useRef(0);
+  const configRequestId = useRef(0);
 
   const timerCanRun = Boolean(
     incident &&
@@ -54,37 +58,55 @@ export const IncidentResponse: React.FC = () => {
   );
   const countdownActive = Boolean(timerCanRun && incident?.ackDueAt);
 
-  const loadIncident = async () => {
+  const loadIncident = useCallback(async () => {
+    const currentRequestId = ++incidentRequestId.current;
     try {
       setLoading(true);
       setError(null);
       const data = await fetchIncidentById('ALT-2026-0891');
-      setIncident(data);
+      if (currentRequestId === incidentRequestId.current) setIncident(data);
     } catch (err) {
-      console.error('Error fetching incident record:', err);
-      setError(err instanceof Error ? err.message : 'Failed to retrieve incident workflow record');
+      if (currentRequestId === incidentRequestId.current) {
+        console.error('Error fetching incident record:', err);
+        setError(
+          getUserFacingErrorMessage(err, 'Incident workflow could not be loaded. Try again.')
+        );
+      }
     } finally {
-      setLoading(false);
+      if (currentRequestId === incidentRequestId.current) setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadIncident();
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    fetchEscalationConfig()
-      .then((config) => {
-        if (mounted) setResponseWindowSeconds(config.responseWindowSeconds);
-      })
-      .catch((err: unknown) => {
-        if (mounted) setTimerError(err instanceof Error ? err.message : 'Failed to load demo timer config');
-      });
+    void loadIncident();
     return () => {
-      mounted = false;
+      incidentRequestId.current += 1;
     };
+  }, [loadIncident]);
+
+  const loadEscalationConfig = useCallback(async () => {
+    const currentRequestId = ++configRequestId.current;
+    try {
+      const config = await fetchEscalationConfig();
+      if (currentRequestId === configRequestId.current) {
+        setResponseWindowSeconds(config.responseWindowSeconds);
+        setTimerError(null);
+      }
+    } catch (err) {
+      if (currentRequestId === configRequestId.current) {
+        setTimerError(
+          getUserFacingErrorMessage(err, 'Demo timer configuration could not be loaded.')
+        );
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    void loadEscalationConfig();
+    return () => {
+      configRequestId.current += 1;
+    };
+  }, [loadEscalationConfig]);
 
   useEffect(() => {
     if (!incident || !countdownActive || !incident.ackDueAt) {
@@ -99,22 +121,45 @@ export const IncidentResponse: React.FC = () => {
         : null);
     };
 
+    let mounted = true;
+    let requestInFlight = false;
     const refreshIncident = async () => {
+      if (!mounted || document.visibilityState !== 'visible' || requestInFlight) return;
+      requestInFlight = true;
       try {
         const latest = await fetchIncidentById(incident.id);
-        setIncident(latest);
-        setTimerError(null);
-      } catch {
-        setTimerError('Unable to refresh the simulated acknowledgement timer.');
+        if (mounted) {
+          setIncident(latest);
+          setTimerError(null);
+        }
+      } catch (err) {
+        if (mounted) {
+          setTimerError(
+            getUserFacingErrorMessage(err, 'Unable to refresh the simulated acknowledgement timer.')
+          );
+        }
+      } finally {
+        requestInFlight = false;
       }
     };
 
-    updateRemaining();
-    const interval = window.setInterval(() => {
+    const refreshTimer = () => {
+      if (document.visibilityState !== 'visible') return;
       updateRemaining();
       void refreshIncident();
-    }, 2000);
-    return () => window.clearInterval(interval);
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshTimer();
+    };
+
+    updateRemaining();
+    const interval = window.setInterval(refreshTimer, 2000);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [incident?.id, incident?.ackDueAt, countdownActive]);
 
   const handleAcknowledge = async () => {
@@ -173,7 +218,9 @@ export const IncidentResponse: React.FC = () => {
         ? { ...current, auditTrail: generatedReport.timeline }
         : current);
     } catch (err) {
-      setReportError(err instanceof Error ? err.message : 'Failed to generate incident report');
+      setReportError(
+        getUserFacingErrorMessage(err, 'Incident report could not be generated. Try again.')
+      );
     } finally {
       setReportLoading(false);
     }
@@ -189,7 +236,7 @@ export const IncidentResponse: React.FC = () => {
       const updated = await startIncidentEscalationTimer(incident.id);
       setIncident(updated);
     } catch (err) {
-      setTimerError(err instanceof Error ? err.message : 'Failed to restart the demo timer');
+      setTimerError(getUserFacingErrorMessage(err, 'Demo timer could not be restarted.'));
     } finally {
       setTimerBusy(false);
     }
@@ -219,18 +266,18 @@ export const IncidentResponse: React.FC = () => {
 
       {/* Error state */}
       {error && (
-        <div className="bg-[#450a0a]/80 border border-[#dc2626] rounded p-4 text-xs font-mono text-red-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-red-400">WORKFLOW ERROR:</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => loadIncident()}
-            className="px-3 py-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
+        <RetryableError
+          title="Incident workflow unavailable"
+          message={error}
+          retrying={loading}
+          onRetry={() => void loadIncident()}
+        />
+      )}
+
+      {!loading && !error && !incident && (
+        <p className="rounded border border-[#233140] bg-[#121820] p-6 text-center text-xs text-[#94a3b8]">
+          No incident record is available.
+        </p>
       )}
 
       {incident && (
@@ -289,7 +336,21 @@ export const IncidentResponse: React.FC = () => {
                 </button>
               </div>
             </div>
-            {timerError && <p role="alert" className="text-[11px] font-mono text-red-300 mt-3">{timerError}</p>}
+            {timerError && (
+              <div role="alert" className="mt-3 flex flex-wrap items-center gap-3 text-[11px] font-mono text-red-300">
+                <span>{timerError}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadEscalationConfig();
+                    void loadIncident();
+                  }}
+                  className="rounded border border-red-800 px-2 py-1 hover:bg-red-950"
+                >
+                  Retry timer data
+                </button>
+              </div>
+            )}
           </section>
 
           <IncidentReportPanel

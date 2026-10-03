@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PortalNotification } from '../../types';
 import {
   fetchNotifications,
   markAllNotificationsRead,
   markNotificationRead,
 } from '../../services/api';
+import { RetryableError } from '../layout/RetryableError';
+import { getUserFacingErrorMessage } from '../../utils/errorMessage';
 
 const severityStyles = {
   critical: 'border-l-red-500 text-red-300',
@@ -19,33 +21,64 @@ export const NotificationCenter: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [updating, setUpdating] = useState<boolean>(false);
+  const [retryAction, setRetryAction] = useState<(() => Promise<void>) | null>(null);
+  const mounted = useRef(false);
+  const requestInFlight = useRef(false);
+
+  const loadNotifications = useCallback(async () => {
+    if (requestInFlight.current) return;
+    requestInFlight.current = true;
+    if (mounted.current) setLoading(true);
+    try {
+      const items = await fetchNotifications();
+      if (mounted.current) {
+        setNotifications(items);
+        setError(null);
+        setRetryAction(null);
+      }
+    } catch (err) {
+      if (mounted.current) {
+        setError(getUserFacingErrorMessage(err, 'Notifications could not be loaded. Try again.'));
+        setRetryAction(null);
+      }
+    } finally {
+      requestInFlight.current = false;
+      if (mounted.current) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let mounted = true;
-
-    const loadNotifications = async () => {
-      try {
-        const items = await fetchNotifications();
-        if (mounted) {
-          setNotifications(items);
-          setError(null);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load notifications');
-        }
-      } finally {
-        if (mounted) setLoading(false);
+    mounted.current = true;
+    let active = true;
+    let timeout: number | undefined;
+    const schedulePoll = () => {
+      if (!active || document.visibilityState !== 'visible') return;
+      if (timeout !== undefined) window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => void poll(), 10000);
+    };
+    const poll = async () => {
+      if (!active) return;
+      if (document.visibilityState === 'visible') await loadNotifications();
+      schedulePoll();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        if (timeout !== undefined) window.clearTimeout(timeout);
+        return;
       }
+      if (timeout !== undefined) window.clearTimeout(timeout);
+      void poll();
     };
 
-    void loadNotifications();
-    const interval = window.setInterval(() => void loadNotifications(), 10000);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    void poll();
     return () => {
-      mounted = false;
-      window.clearInterval(interval);
+      active = false;
+      mounted.current = false;
+      if (timeout !== undefined) window.clearTimeout(timeout);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [loadNotifications]);
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
@@ -54,12 +87,18 @@ export const NotificationCenter: React.FC = () => {
     setError(null);
     try {
       const updated = await markNotificationRead(id);
-      setNotifications((current) => current.map((notification) =>
-        notification.id === updated.id ? updated : notification));
+      if (mounted.current) {
+        setNotifications((current) => current.map((notification) =>
+          notification.id === updated.id ? updated : notification));
+        setRetryAction(null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update notification');
+      if (mounted.current) {
+        setError(getUserFacingErrorMessage(err, 'Notification could not be updated.'));
+        setRetryAction(() => () => handleMarkRead(id));
+      }
     } finally {
-      setUpdating(false);
+      if (mounted.current) setUpdating(false);
     }
   };
 
@@ -67,11 +106,18 @@ export const NotificationCenter: React.FC = () => {
     setUpdating(true);
     setError(null);
     try {
-      setNotifications(await markAllNotificationsRead());
+      const updated = await markAllNotificationsRead();
+      if (mounted.current) {
+        setNotifications(updated);
+        setRetryAction(null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update notifications');
+      if (mounted.current) {
+        setError(getUserFacingErrorMessage(err, 'Notifications could not be updated.'));
+        setRetryAction(() => handleMarkAllRead);
+      }
     } finally {
-      setUpdating(false);
+      if (mounted.current) setUpdating(false);
     }
   };
 
@@ -115,7 +161,15 @@ export const NotificationCenter: React.FC = () => {
 
           <div className="overflow-y-auto">
             {loading && <p role="status" className="px-4 py-6 text-center text-xs font-mono text-[#94a3b8]">Loading notifications...</p>}
-            {error && <p role="alert" className="mx-3 my-3 rounded border border-red-800 bg-red-950/50 p-3 text-xs font-mono text-red-200">{error}</p>}
+            {error && (
+              <div className="mx-3 my-3">
+                <RetryableError
+                  message={error}
+                  onRetry={() => void (retryAction ? retryAction() : loadNotifications())}
+                  retrying={loading}
+                />
+              </div>
+            )}
             {!loading && !error && notifications.length === 0 && (
               <p className="px-4 py-8 text-center text-xs font-mono text-[#7e90a5]">No notifications</p>
             )}

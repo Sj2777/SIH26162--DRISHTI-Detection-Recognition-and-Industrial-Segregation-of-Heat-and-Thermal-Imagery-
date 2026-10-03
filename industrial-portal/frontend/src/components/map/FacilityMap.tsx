@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
+import { setWorkerUrl } from 'maplibre-gl';
+import mapLibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Asset, FacilityData } from '../../types';
+
+setWorkerUrl(mapLibreWorkerUrl);
 
 interface FacilityMapProps {
   facility: FacilityData | null;
@@ -25,6 +29,13 @@ export const FacilityMap: React.FC<FacilityMapProps> = ({ facility, assets }) =>
       </div>
 
       <div className="w-full relative" style={{ minHeight: '400px', flex: 1 }}>
+        {assets.length === 0 && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+            <p className="rounded border border-[#334155] bg-[#0b0f15]/90 px-4 py-2 text-xs text-slate-200">
+              No asset locations are available.
+            </p>
+          </div>
+        )}
         <Map
           initialViewState={{
             longitude: center[1],

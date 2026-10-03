@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ThermalData } from '../types';
 import { fetchThermalEvents } from '../services/api';
 import { ThermalSummaryCards } from '../components/thermal/ThermalSummaryCards';
@@ -8,43 +8,41 @@ import { ThermalBaseline30dChart } from '../components/thermal/ThermalBaseline30
 import { DayNightComparisonCard } from '../components/thermal/DayNightComparisonCard';
 import { ThermalInterpretationCard } from '../components/thermal/ThermalInterpretationCard';
 import { ThermalObservationsTable } from '../components/thermal/ThermalObservationsTable';
+import { SatelliteVsReportedPanel } from '../components/thermal/SatelliteVsReportedPanel';
+import { RetryableError } from '../components/layout/RetryableError';
+import { getUserFacingErrorMessage } from '../utils/errorMessage';
 
 export const ThermalIntelligence: React.FC = () => {
   const [data, setData] = useState<ThermalData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
+
+  const loadThermalData = useCallback(async () => {
+    const currentRequestId = ++requestId.current;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetchThermalEvents();
+      if (currentRequestId === requestId.current) setData(res);
+    } catch (err) {
+      if (currentRequestId === requestId.current) {
+        console.error('Error fetching thermal events:', err);
+        setError(
+          getUserFacingErrorMessage(err, 'Thermal observations could not be loaded. Try again.')
+        );
+      }
+    } finally {
+      if (currentRequestId === requestId.current) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadThermalData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetchThermalEvents();
-        if (isMounted) {
-          setData(res);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Error fetching thermal events:', err);
-          setError(
-            err instanceof Error ? err.message : 'Failed to retrieve thermal intelligence telemetry'
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadThermalData();
-
+    void loadThermalData();
     return () => {
-      isMounted = false;
+      requestId.current += 1;
     };
-  }, []);
+  }, [loadThermalData]);
 
   return (
     <div className="space-y-6">
@@ -71,20 +69,16 @@ export const ThermalIntelligence: React.FC = () => {
         </div>
       </div>
 
+      <SatelliteVsReportedPanel />
+
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#450a0a]/80 border border-[#dc2626] rounded p-4 text-xs font-mono text-red-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-red-400">TELEMETRY ERROR:</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-3 py-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
+        <RetryableError
+          title="Thermal data unavailable"
+          message={error}
+          retrying={loading}
+          onRetry={() => void loadThermalData()}
+        />
       )}
 
       {/* Loading State */}
@@ -104,12 +98,30 @@ export const ThermalIntelligence: React.FC = () => {
           <ThermalSummaryCards summary={data.summary} />
 
           {/* 2. 24-Hour Diurnal Thermal Profile (ECharts) */}
-          <ThermalProfile24hChart data={data.profile24h} />
+          {data.profile24h.length > 0 ? (
+            <ThermalProfile24hChart data={data.profile24h} />
+          ) : (
+            <p className="rounded border border-[#233140] bg-[#121820] p-5 text-center text-xs text-[#94a3b8]">
+              No 24-hour thermal profile data is available.
+            </p>
+          )}
 
           {/* 3. Mid-Section: 7-Day Trend & 30-Day Fingerprint Baseline */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <ThermalTrend7dChart data={data.trend7d} />
-            <ThermalBaseline30dChart data={data.baseline30d} />
+            {data.trend7d.length > 0 ? (
+              <ThermalTrend7dChart data={data.trend7d} />
+            ) : (
+              <p className="rounded border border-[#233140] bg-[#121820] p-5 text-center text-xs text-[#94a3b8]">
+                No seven-day thermal trend data is available.
+              </p>
+            )}
+            {data.baseline30d.length > 0 ? (
+              <ThermalBaseline30dChart data={data.baseline30d} />
+            ) : (
+              <p className="rounded border border-[#233140] bg-[#121820] p-5 text-center text-xs text-[#94a3b8]">
+                No 30-day baseline data is available.
+              </p>
+            )}
           </div>
 
           {/* 4. Lower-Section: Day/Night Behaviour & Interpretation Card */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AssetHealthData, HistoricalIncident } from '../types';
 import { fetchAssetHealth, fetchHistoricalIncidents } from '../services/api';
 import { AssetHealthSummaryCards } from '../components/health/AssetHealthSummaryCards';
@@ -7,6 +7,8 @@ import { AssetHealthDetail } from '../components/health/AssetHealthDetail';
 import { AnomalyEvidencePanel } from '../components/health/AnomalyEvidencePanel';
 import { HistoricalMatchPanel } from '../components/health/HistoricalMatchPanel';
 import { InspectionRecommendation } from '../components/health/InspectionRecommendation';
+import { RetryableError } from '../components/layout/RetryableError';
+import { getUserFacingErrorMessage } from '../utils/errorMessage';
 
 export const AssetHealth: React.FC = () => {
   const [data, setData] = useState<AssetHealthData | null>(null);
@@ -14,47 +16,44 @@ export const AssetHealth: React.FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>('TF-04');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadHealthData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [healthRes, incidentsRes] = await Promise.all([
-          fetchAssetHealth(),
-          fetchHistoricalIncidents(),
-        ]);
-        if (isMounted) {
-          setData(healthRes);
-          setIncidents(incidentsRes);
-          if (healthRes.assets.some((a) => a.assetId === 'TF-04')) {
-            setSelectedAssetId('TF-04');
-          } else if (healthRes.assets.length > 0) {
-            setSelectedAssetId(healthRes.assets[0].assetId);
-          }
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Error fetching asset health data:', err);
-          setError(
-            err instanceof Error ? err.message : 'Failed to retrieve asset health evaluation'
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
+  const loadHealthData = useCallback(async () => {
+    const currentRequestId = ++requestId.current;
+    try {
+      setLoading(true);
+      setError(null);
+      const [healthRes, incidentsRes] = await Promise.all([
+        fetchAssetHealth(),
+        fetchHistoricalIncidents(),
+      ]);
+      if (currentRequestId === requestId.current) {
+        setData(healthRes);
+        setIncidents(incidentsRes);
+        if (healthRes.assets.some((a) => a.assetId === 'TF-04')) {
+          setSelectedAssetId('TF-04');
+        } else if (healthRes.assets.length > 0) {
+          setSelectedAssetId(healthRes.assets[0].assetId);
         }
       }
-    };
-
-    loadHealthData();
-
-    return () => {
-      isMounted = false;
-    };
+    } catch (err) {
+      if (currentRequestId === requestId.current) {
+        console.error('Error fetching asset health data:', err);
+        setError(
+          getUserFacingErrorMessage(err, 'Asset health data could not be loaded. Try again.')
+        );
+      }
+    } finally {
+      if (currentRequestId === requestId.current) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadHealthData();
+    return () => {
+      requestId.current += 1;
+    };
+  }, [loadHealthData]);
 
   const selectedAsset =
     data?.assets.find((a) => a.assetId === selectedAssetId) || data?.assets[0];
@@ -87,18 +86,12 @@ export const AssetHealth: React.FC = () => {
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-[#450a0a]/80 border border-[#dc2626] rounded p-4 text-xs font-mono text-red-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-red-400">HEALTH ASSESSMENT ERROR:</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-3 py-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
+        <RetryableError
+          title="Health data unavailable"
+          message={error}
+          retrying={loading}
+          onRetry={() => void loadHealthData()}
+        />
       )}
 
       {/* Loading State */}
@@ -112,7 +105,13 @@ export const AssetHealth: React.FC = () => {
       )}
 
       {/* Main Content */}
-      {(!loading || data) && data && (
+      {(!loading || data) && data && data.assets.length === 0 && !error && (
+        <p className="rounded border border-[#233140] bg-[#121820] p-6 text-center text-xs text-[#94a3b8]">
+          No asset health assessments are available.
+        </p>
+      )}
+
+      {(!loading || data) && data && data.assets.length > 0 && (
         <>
           {/* 2. Facility Health Summary KPI Cards */}
           <AssetHealthSummaryCards summary={data.summary} />
