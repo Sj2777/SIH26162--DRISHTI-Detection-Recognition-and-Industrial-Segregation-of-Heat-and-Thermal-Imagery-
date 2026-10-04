@@ -37,7 +37,13 @@ export const ThermalObservationsTable: React.FC<ThermalObservationsTableProps> =
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1a232f]">
-            {observations.map((obs, idx) => {
+            {observations.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 px-4 text-center text-xs text-[#94a3b8]">
+                  No thermal observations are available.
+                </td>
+              </tr>
+            ) : observations.map((obs, idx) => {
               return (
                 <tr
                   key={idx}

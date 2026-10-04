@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "0.1",
+  "alertId": "ALT-2026-0891",
+  "incidentId": "ALT-2026-0891",
+  "facilityId": "Tata Motors Ltd (Pimpri Plant)",
+  "assetId": "ast-02",
+  "thermalSeverity": "HIGH",
+  "detectedAt": "2026-09-29T14:32:08Z",
+  "location": {
+    "lat": 18.6213,
+    "lon": 73.809
+  },
+  "source": "GOV_MONITORING_NETWORK",
+  "currentStatus": "ALERTED"
+}

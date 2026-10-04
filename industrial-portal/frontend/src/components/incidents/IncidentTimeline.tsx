@@ -118,19 +118,19 @@ export const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ incident }) 
         </div>
       </div>
 
-      {/* Append-only Demo Audit Trail */}
+      {/* Incident Demo Audit Section */}
       <div className="border-t border-[#1e2a38] p-4 bg-[#0e131a]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold font-mono uppercase text-slate-200">
-              APPEND-ONLY DEMO AUDIT TRAIL
+            <span className="text-xs font-bold font-mono text-slate-200">
+              Append-only Demo Audit Trail
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#151c26] text-[#7e90a5] border border-[#233140]">
               {incident.auditTrail.length} RECORDS
             </span>
           </div>
           <span className="text-[10px] font-mono text-[#64748b]">
-            Audit events are retained for the current demo session.
+            Demo session record. Entries are stored in memory and reset when the backend restarts.
           </span>
         </div>
 

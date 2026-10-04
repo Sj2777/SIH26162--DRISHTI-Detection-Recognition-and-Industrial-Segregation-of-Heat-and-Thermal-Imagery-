@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IncidentRecord } from '../../types';
+import { getUserFacingErrorMessage } from '../../utils/errorMessage';
 
 interface IncidentActionsProps {
   incident: IncidentRecord;
@@ -29,7 +30,9 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [checkedItems, setCheckedItems] = useState<{ [key: number]: boolean }>({});
+  const [retryAction, setRetryAction] = useState<(() => Promise<void>) | null>(null);
 
   const toggleChecklist = (idx: number) => {
     setCheckedItems((prev) => ({
@@ -46,36 +49,35 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
   const isResolved = incident.state === 'RESOLVED';
   const isClosed = incident.state === 'CLOSED';
 
-  const handleConfirmAcknowledge = async () => {
+  const runAction = async (operation: () => Promise<void>) => {
     try {
       setLoading(true);
-      await onAcknowledge();
+      setActionError(null);
+      await operation();
       setActiveModal(null);
+      setRetryAction(null);
+    } catch (error) {
+      setActionError(getUserFacingErrorMessage(error, 'The incident action could not be saved.'));
+      setRetryAction(() => operation);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleConfirmAcknowledge = async () => runAction(onAcknowledge);
+
   const handleConfirmAction = async (type: string) => {
-    try {
-      setLoading(true);
+    await runAction(async () => {
       await onAction(type, actionNote);
       setActionNote('');
-      setActiveModal(null);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleConfirmEscalate = async () => {
-    try {
-      setLoading(true);
+    await runAction(async () => {
       await onEscalate(actionNote || 'Cross-signal thermal and gas elevation requires district oversight.');
       setActionNote('');
-      setActiveModal(null);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
@@ -98,6 +100,21 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
       </div>
 
       <div className="p-4">
+        {actionError && (
+          <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-red-800 bg-red-950/50 p-3 text-xs text-red-200">
+            <span>{actionError}</span>
+            {retryAction && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void runAction(retryAction)}
+                className="rounded border border-red-700 px-2 py-1 font-semibold hover:bg-red-900 disabled:opacity-60"
+              >
+                {loading ? 'Retrying...' : 'Retry action'}
+              </button>
+            )}
+          </div>
+        )}
         {/* Step 1: When ALERTED */}
         {isAlerted && (
           <div className="bg-[#291316]/50 border border-[#7f1d1d] rounded p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -373,7 +390,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
           <div className="bg-[#0b1b15] border border-[#065f46] p-3 rounded text-xs font-mono text-emerald-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-bold">STATUS: INCIDENT CLOSED</span>
-              <span className="text-[#6ee7b7]">— All corrective actions documented and session audit log completed.</span>
+              <span className="text-[#6ee7b7]">— All corrective actions documented; incident workflow closed.</span>
             </div>
           </div>
         )}
@@ -486,7 +503,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
                   CONFIRM ROUTINE OPERATING CONDITION?
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  This records the facility's assessment that the observed activity is routine or planned. The original alert remains in the audit trail.
+                  This records the facility's assessment that the observed activity is routine or planned. The original alert remains in this incident's demo record.
                 </p>
                 <textarea
                   value={actionNote}
@@ -550,7 +567,7 @@ export const IncidentActions: React.FC<IncidentActionsProps> = ({
                   DISPUTE REGULATORY ALERT?
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  Submit facility evidence indicating that the alert may not represent an abnormal facility condition. Note: This action does not delete or suppress the alert from the audit log.
+                  Submit facility evidence indicating that the alert may not represent an abnormal facility condition. Note: This action does not delete or suppress the alert from the incident's demo record.
                 </p>
                 <textarea
                   value={actionNote}

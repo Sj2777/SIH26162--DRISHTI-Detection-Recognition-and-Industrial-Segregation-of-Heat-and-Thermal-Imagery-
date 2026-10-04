@@ -24,7 +24,7 @@ export const AssetTelemetryTable: React.FC<AssetTelemetryTableProps> = ({
           </span>
         </div>
         <div className="text-[11px] font-mono text-[#64748b] hidden sm:block">
-          POLLING INTERVAL: 1.0s
+          ON-DEMAND FIXTURE DATA
         </div>
       </div>
 
@@ -45,7 +45,13 @@ export const AssetTelemetryTable: React.FC<AssetTelemetryTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1a232f]">
-            {assets.map((asset) => {
+            {assets.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="py-8 px-4 text-center text-xs text-[#94a3b8]">
+                  No equipment telemetry is available.
+                </td>
+              </tr>
+            ) : assets.map((asset) => {
               const isSelected = asset.assetId === selectedAssetId;
               const isWarning = asset.status === 'WARNING';
               const isCritical = asset.status === 'CRITICAL';

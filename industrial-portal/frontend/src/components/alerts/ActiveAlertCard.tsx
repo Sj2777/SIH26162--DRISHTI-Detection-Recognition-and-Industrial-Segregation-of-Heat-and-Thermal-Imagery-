@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AlertItem } from '../../types';
 
 interface ActiveAlertCardProps {
@@ -7,13 +7,20 @@ interface ActiveAlertCardProps {
 
 export const ActiveAlertCard: React.FC<ActiveAlertCardProps> = ({ alerts }) => {
   const [investigateFeedback, setInvestigateFeedback] = useState<string | null>(null);
+  const feedbackTimeout = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (feedbackTimeout.current !== null) window.clearTimeout(feedbackTimeout.current);
+  }, []);
 
   const primaryAlert = alerts[0];
 
   const handleInvestigateClick = () => {
     setInvestigateFeedback('Investigation workflow coming in Phase 5');
-    setTimeout(() => {
+    if (feedbackTimeout.current !== null) window.clearTimeout(feedbackTimeout.current);
+    feedbackTimeout.current = window.setTimeout(() => {
       setInvestigateFeedback(null);
+      feedbackTimeout.current = null;
     }, 3500);
   };
 

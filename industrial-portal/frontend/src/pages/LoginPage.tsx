@@ -25,7 +25,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [password, setPassword] = useState('demo1234');
   const [facilityName, setFacilityName] = useState('');
   const [state, setState] = useState('Maharashtra');
-  const [municipality, setMunicipality] = useState('Pune');
+    const [municipality] = useState('Pune');
   const [sector, setSector] = useState('Chemical Manufacturing');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

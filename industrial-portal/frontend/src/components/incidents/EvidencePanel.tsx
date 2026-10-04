@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EvidenceItem } from '../../types';
+import { getUserFacingErrorMessage } from '../../utils/errorMessage';
 
 interface EvidencePanelProps {
   evidenceList: EvidenceItem[];
@@ -15,19 +16,29 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   const [description, setDescription] = useState<string>('');
   const [source, setSource] = useState<string>('FIELD_OPERATOR');
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retrySubmit, setRetrySubmit] = useState<(() => Promise<void>) | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!description.trim()) return;
-
+  const submitEvidence = async (type: string, note: string, submitter: string) => {
     try {
       setLoading(true);
-      await onSubmitEvidence(evidenceType, description, source);
+      setError(null);
+      await onSubmitEvidence(type, note, submitter);
       setDescription('');
       setShowAddForm(false);
+      setRetrySubmit(null);
+    } catch (error) {
+      setError(getUserFacingErrorMessage(error, 'Evidence could not be submitted.'));
+      setRetrySubmit(() => () => submitEvidence(type, note, submitter));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!description.trim()) return;
+    void submitEvidence(evidenceType, description, source);
   };
 
   return (
@@ -130,6 +141,21 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
         )}
 
         {/* Evidence List */}
+        {error && (
+          <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-red-800 bg-red-950/50 p-3 text-xs text-red-200">
+            <span>{error}</span>
+            {retrySubmit && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void retrySubmit()}
+                className="rounded border border-red-700 px-2 py-1 font-semibold hover:bg-red-900 disabled:opacity-60"
+              >
+                {loading ? 'Retrying...' : 'Retry submission'}
+              </button>
+            )}
+          </div>
+        )}
         {evidenceList.length === 0 ? (
           <div className="text-center py-6 text-xs font-mono text-[#64748b]">
             No evidence submitted yet. Click "ADD EVIDENCE" to append inspection photos, sniffer readings, or field notes.

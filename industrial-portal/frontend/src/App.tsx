@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FacilityData } from './types';
 import { fetchFacilityData } from './services/api';
 import { Header } from './components/layout/Header';
@@ -9,6 +9,9 @@ import { LiveTelemetry } from './pages/LiveTelemetry';
 import { AssetHealth } from './pages/AssetHealth';
 import { IncidentResponse } from './pages/IncidentResponse';
 import LoginPage from './pages/LoginPage';
+import { RetryableError } from './components/layout/RetryableError';
+import { TabErrorBoundary } from './components/layout/TabErrorBoundary';
+import { getUserFacingErrorMessage } from './utils/errorMessage';
 
 // Simple session helpers
 const SESSION_KEY = 'agni_industry_session';
@@ -26,13 +29,31 @@ export default function App() {
   const [session, setSession] = useState<object | null>(readSession);
   const [activeTab, setActiveTab] = useState<'overview' | 'thermal' | 'telemetry' | 'health' | 'incident'>('overview');
   const [facility, setFacility] = useState<FacilityData | null>(null);
+  const [facilityError, setFacilityError] = useState<string | null>(null);
+  const facilityRequestId = useRef(0);
+
+  const loadFacility = useCallback(async () => {
+    const requestId = ++facilityRequestId.current;
+    setFacilityError(null);
+    try {
+      const result = await fetchFacilityData();
+      if (requestId === facilityRequestId.current) setFacility(result);
+    } catch (err) {
+      if (requestId === facilityRequestId.current) {
+        setFacilityError(
+          getUserFacingErrorMessage(err, 'Facility details could not be loaded. Try again.')
+        );
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!session) return;
-    fetchFacilityData()
-      .then(setFacility)
-      .catch((err) => console.error('Error fetching facility metadata for Header:', err));
-  }, [session]);
+    void loadFacility();
+    return () => {
+      facilityRequestId.current += 1;
+    };
+  }, [session, loadFacility]);
 
   const handleLogin = (userData: object) => {
     writeSession(userData);
@@ -61,21 +82,22 @@ export default function App() {
       />
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-5 pb-8">
-        {activeTab === 'overview' && (
-          <Overview facility={facility} hideLayout={true} />
+        {facilityError && (
+          <div className="mb-5">
+            <RetryableError
+              title="Facility details unavailable"
+              message={facilityError}
+              onRetry={() => void loadFacility()}
+            />
+          </div>
         )}
-        {activeTab === 'thermal' && (
-          <ThermalIntelligence />
-        )}
-        {activeTab === 'telemetry' && (
-          <LiveTelemetry />
-        )}
-        {activeTab === 'health' && (
-          <AssetHealth />
-        )}
-        {activeTab === 'incident' && (
-          <IncidentResponse />
-        )}
+        <TabErrorBoundary key={activeTab}>
+          {activeTab === 'overview' && <Overview facility={facility} hideLayout={true} />}
+          {activeTab === 'thermal' && <ThermalIntelligence />}
+          {activeTab === 'telemetry' && <LiveTelemetry />}
+          {activeTab === 'health' && <AssetHealth />}
+          {activeTab === 'incident' && <IncidentResponse />}
+        </TabErrorBoundary>
       </main>
 
       <Footer />

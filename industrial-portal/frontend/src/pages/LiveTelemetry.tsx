@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { TelemetryData } from '../types';
 import { fetchTelemetry } from '../services/api';
 import { TelemetrySummaryCards } from '../components/telemetry/TelemetrySummaryCards';
@@ -7,50 +7,48 @@ import { SelectedAssetMetrics } from '../components/telemetry/SelectedAssetMetri
 import { TelemetryTrendChart } from '../components/telemetry/TelemetryTrendChart';
 import { EquipmentStatePanel } from '../components/telemetry/EquipmentStatePanel';
 import { OperatorInterpretationCard } from '../components/telemetry/OperatorInterpretationCard';
+import { RetryableError } from '../components/layout/RetryableError';
+import { getUserFacingErrorMessage } from '../utils/errorMessage';
 
 export const LiveTelemetry: React.FC = () => {
   const [data, setData] = useState<TelemetryData | null>(null);
   const [selectedAssetId, setSelectedAssetId] = useState<string>('TF-04');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadTelemetryData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetchTelemetry();
-        if (isMounted) {
-          setData(res);
-          // Default selection to Tank Farm 04 if present
-          if (res.assets.some((a) => a.assetId === 'TF-04')) {
-            setSelectedAssetId('TF-04');
-          } else if (res.assets.length > 0) {
-            setSelectedAssetId(res.assets[0].assetId);
-          }
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Error fetching live telemetry data:', err);
-          setError(
-            err instanceof Error ? err.message : 'Failed to retrieve live telemetry stream'
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
+  const loadTelemetryData = useCallback(async () => {
+    const currentRequestId = ++requestId.current;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetchTelemetry();
+      if (currentRequestId === requestId.current) {
+        setData(res);
+        if (res.assets.some((a) => a.assetId === 'TF-04')) {
+          setSelectedAssetId('TF-04');
+        } else if (res.assets.length > 0) {
+          setSelectedAssetId(res.assets[0].assetId);
         }
       }
-    };
-
-    loadTelemetryData();
-
-    return () => {
-      isMounted = false;
-    };
+    } catch (err) {
+      if (currentRequestId === requestId.current) {
+        console.error('Error fetching live telemetry data:', err);
+        setError(
+          getUserFacingErrorMessage(err, 'Telemetry data could not be loaded. Try again.')
+        );
+      }
+    } finally {
+      if (currentRequestId === requestId.current) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadTelemetryData();
+    return () => {
+      requestId.current += 1;
+    };
+  }, [loadTelemetryData]);
 
   const selectedAsset = data?.assets.find((a) => a.assetId === selectedAssetId) || data?.assets[0];
 
@@ -62,7 +60,7 @@ export const LiveTelemetry: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0284c7]"></span>
             <h2 className="text-sm font-bold tracking-wider text-slate-100 uppercase font-mono">
-              LIVE EQUIPMENT TELEMETRY
+              EQUIPMENT TELEMETRY SNAPSHOT
             </h2>
           </div>
           <p className="text-xs text-[#7e90a5] mt-0.5">
@@ -75,25 +73,19 @@ export const LiveTelemetry: React.FC = () => {
             SIMULATED TELEMETRY
           </span>
           <span className="px-2 py-0.5 rounded bg-[#0b0f15] text-[#94a3b8] border border-[#233140]">
-            LAST UPDATE: 8 sec ago
+            FIXTURE SNAPSHOT
           </span>
         </div>
       </div>
 
       {/* Error State */}
       {error && (
-        <div className="bg-[#450a0a]/80 border border-[#dc2626] rounded p-4 text-xs font-mono text-red-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-red-400">TELEMETRY ERROR:</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-3 py-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white rounded text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
+        <RetryableError
+          title="Telemetry data unavailable"
+          message={error}
+          retrying={loading}
+          onRetry={() => void loadTelemetryData()}
+        />
       )}
 
       {/* Loading State */}
@@ -107,7 +99,13 @@ export const LiveTelemetry: React.FC = () => {
       )}
 
       {/* Main Content */}
-      {(!loading || data) && data && (
+      {(!loading || data) && data && data.assets.length === 0 && !error && (
+        <p className="rounded border border-[#233140] bg-[#121820] p-6 text-center text-xs text-[#94a3b8]">
+          No equipment telemetry is available.
+        </p>
+      )}
+
+      {(!loading || data) && data && data.assets.length > 0 && (
         <>
           {/* 2. Facility Telemetry Summary (6 KPI cards) */}
           <TelemetrySummaryCards assets={data.assets} />

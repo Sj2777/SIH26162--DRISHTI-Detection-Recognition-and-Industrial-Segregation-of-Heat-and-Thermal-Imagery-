@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IncidentRecord } from '../../types';
+import { getUserFacingErrorMessage } from '../../utils/errorMessage';
 
 interface IncidentResolutionProps {
   incident: IncidentRecord;
@@ -39,40 +40,65 @@ export const IncidentResolution: React.FC<IncidentResolutionProps> = ({
   );
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryAction, setRetryAction] = useState<(() => Promise<void>) | null>(null);
 
   const isResolved = incident.state === 'RESOLVED';
   const isClosed = incident.state === 'CLOSED';
   const canResolve = incident.state === 'INSPECTION' || incident.state === 'ESCALATED';
 
-  const handleResolveSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const saveResolution = async (details: {
+    observedFinding: string;
+    rootCause: string;
+    correctiveAction: string;
+    resolution: string;
+  }) => {
     try {
       setLoading(true);
-      await onResolve({
-        observedFinding,
-        rootCause,
-        correctiveAction,
-        resolution: observedFinding,
-      });
+      setError(null);
+      await onResolve(details);
       setShowResolveModal(false);
+      setRetryAction(null);
+    } catch (failure) {
+      setError(getUserFacingErrorMessage(failure, 'The incident resolution could not be saved.'));
+      setRetryAction(() => () => saveResolution(details));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCloseSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const saveClosure = async (details: {
+    rootCause: string;
+    correctiveAction: string;
+    closureNote: string;
+  }) => {
     try {
       setLoading(true);
-      await onClose({
-        rootCause,
-        correctiveAction,
-        closureNote,
-      });
+      setError(null);
+      await onClose(details);
       setShowCloseModal(false);
+      setRetryAction(null);
+    } catch (failure) {
+      setError(getUserFacingErrorMessage(failure, 'The incident closure could not be saved.'));
+      setRetryAction(() => () => saveClosure(details));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResolveSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void saveResolution({
+      observedFinding,
+      rootCause,
+      correctiveAction,
+      resolution: observedFinding,
+    });
+  };
+
+  const handleCloseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void saveClosure({ rootCause, correctiveAction, closureNote });
   };
 
   return (
@@ -110,6 +136,21 @@ export const IncidentResolution: React.FC<IncidentResolutionProps> = ({
       </div>
 
       <div className="p-4">
+        {error && (
+          <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-red-800 bg-red-950/50 p-3 text-xs text-red-200">
+            <span>{error}</span>
+            {retryAction && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void retryAction()}
+                className="rounded border border-red-700 px-2 py-1 font-semibold hover:bg-red-900 disabled:opacity-60"
+              >
+                {loading ? 'Retrying...' : 'Retry update'}
+              </button>
+            )}
+          </div>
+        )}
         {/* If Still in Pre-Resolution States */}
         {!isResolved && !isClosed && (
           <div className="text-xs font-mono text-[#94a3b8] flex items-center justify-between p-3 bg-[#151c26] border border-[#233140] rounded">
@@ -276,7 +317,7 @@ export const IncidentResolution: React.FC<IncidentResolutionProps> = ({
               FORMALLY CLOSE INCIDENT
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed mb-3">
-              Closing this incident marks the workflow record as complete. All audit events and evidence records are retained for the current demo session.
+              Closing this incident marks the workflow record as complete. Audit events and evidence records remain available while the backend process is running.
             </p>
             <form onSubmit={handleCloseSubmit} className="space-y-3 text-xs font-mono">
               <div>

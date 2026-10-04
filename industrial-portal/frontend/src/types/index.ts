@@ -109,6 +109,38 @@ export interface ThermalData {
   recentObservations: ThermalObservation[];
 }
 
+export type SatelliteReportedIndicator =
+  | 'CONSISTENT'
+  | 'SATELLITE_ACTIVITY_NOT_REPORTED'
+  | 'REPORTED_ACTIVITY_NOT_OBSERVED'
+  | 'INSUFFICIENT_DATA';
+
+export interface SatelliteVsReportedItem {
+  assetId: string;
+  assetName: string;
+  matchingDistanceMeters: number | null;
+  satelliteObserved: {
+    count: number;
+    peakIntensity: number | null;
+    latestDetectionTime: string | null;
+  };
+  facilityReported: {
+    status: string;
+    source: string | null;
+    recordedAt: string | null;
+    telemetryContext: string | null;
+  };
+  indicator: SatelliteReportedIndicator;
+  explanation: string;
+}
+
+export interface SatelliteVsReportedData {
+  matchingRadiusMeters: number;
+  unmatchedObservationCount: number;
+  items: SatelliteVsReportedItem[];
+  limitations: string[];
+}
+
 // Phase 3: Live Telemetry Types
 export interface TelemetryMetric {
   value: number;
@@ -234,6 +266,7 @@ export interface AuditEventItem {
   isoTimestamp: string;
   actor: string;
   type: string;
+    eventType?: string;
   title: string;
   description: string;
 }
@@ -309,4 +342,89 @@ export interface IncidentRecord {
   escalationDetails: EscalationDetails | null;
   evidenceList: EvidenceItem[];
   auditTrail: AuditEventItem[];
+  ackDueAt?: string;
+  autoEscalated?: boolean;
+}
+
+export interface EscalationConfig {
+  responseWindowSeconds: number;
+}
+
+export type NotificationSeverity = 'critical' | 'warning' | 'info' | 'success';
+
+export interface PortalNotification {
+  id: string;
+  createdAt: string;
+  severity: NotificationSeverity;
+  title: string;
+  message: string;
+  incidentId: string;
+  facilityId?: string;
+  assetId?: string;
+  read: boolean;
+  channel: 'DEMO_IN_APP';
+}
+
+export interface IncidentReport {
+  incidentId: string;
+  facilityAndAsset: {
+    facilityName: string;
+    facilityType: string;
+    facilityLocation: string;
+    facilityCoordinates: string;
+    assetId: string;
+    assetName: string;
+    assetType: string;
+    assetStatus: string;
+    assetRisk: string;
+    assetCondition: string;
+    assetCoordinates: string;
+  };
+  thermalObservation: {
+    type: string;
+    severity: string;
+    intensity: string;
+    baseline: string;
+    detectedAt: string;
+    locationShift: string;
+    source: string;
+    classification: string;
+    coordinates: string;
+    recommendedAction: string;
+  };
+  telemetryEvidence: {
+    timestamp: string;
+    assetId: string;
+    assetName: string;
+    temperature: string;
+    temperatureStatus: string;
+    gas: string;
+    gasStatus: string;
+    pressure: string;
+    pressureStatus: string;
+    flow: string;
+    vibration: string;
+    vibrationStatus: string;
+    smokeFlame: string;
+    valveState: string;
+    equipmentMode: string;
+    scadaAlarm: string;
+    maintenanceState: string;
+    interpretation: string;
+  };
+  timeline: AuditEventItem[];
+  actionsTaken: string[];
+  uploadedEvidence: string[];
+  escalationStatus: {
+    status: string;
+    target: string;
+    reason: string;
+    escalatedAt: string;
+    note: string;
+  };
+  rootCause: string;
+  correctiveAction: string;
+  finalResolution: string;
+  generatedAt: string;
+  reportStatus: 'DRAFT - incident open' | 'FINAL - incident closed';
 }
